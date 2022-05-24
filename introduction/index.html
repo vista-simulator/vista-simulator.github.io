@@ -99,7 +99,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced_usage/index.html">Advanced Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Datasets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api_documentation/index.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../faq/index.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../acknowledgement/index.html">Acknowledgement</a></li>
@@ -183,12 +183,12 @@
 <li><p><strong>Research friendly API:</strong> VISTA was designed with research in-mind. All code is written in Python and is highly modular, customizable, and extensible. We highly encourage contributions to the community code.</p></li>
 <li><p><strong>Sim-to-real and real-to-sim:</strong> Ability to transfer to and from reality and the corresponding digital twins built in VISTA. Policies can be trained in VISTA for deployment in reality. Conversely, policies can be extensively stress tested and certified in VISTA prior to deployment.</p></li>
 <li><p><strong>Closed-loop (active) testing:</strong> Passive evaluation on pre-collected datasets provides a mediocre evaluation metric for control. VISTA aims to convert offline (open-loop) datasets into closed-loop testbeds, for faithful evaluations.</p></li>
-<li><p><strong>New applications and benchmarks:</strong> VISTA has enabled many new advances on the algorithmic and applicaitons side. We are excited to see even more advances brought due to photorealistic data-driven simulation including: policy learning, testing and verification, augmented reality.</p></li>
+<li><p><strong>New applications and benchmarks:</strong> VISTA has enabled many new advances on the algorithmic and applications side. We are excited to see even more advances brought to photorealistic data-driven simulation including: policy learning, testing and verification, augmented reality.</p></li>
 </ul>
 </div>
 <div class="section" id="the-simulator">
 <h2>The Simulator<a class="headerlink" href="#the-simulator" title="Permalink to this headline">¶</a></h2>
-<p>The VISTA API provides a modular framework for defining environments, spawning agents with perception sensors, and constructing task objectives for learning and evaluating. The components below provide a high-level overview of the different pieces that VISTA is built on.</p>
+<p>The VISTA API provides a modular framework for defining environments, spawning agents with perception sensors, and constructing task objectives for learning and evaluation. The components below provide a high-level overview of the different pieces that VISTA is built on.</p>
 <div class="section" id="vista-world">
 <h3><code class="docutils literal notranslate"><span class="pre">vista.World</span></code><a class="headerlink" href="#vista-world" title="Permalink to this headline">¶</a></h3>
 <p>A <code class="docutils literal notranslate"><span class="pre">World</span></code> is an object container that holds:</p>
@@ -200,7 +200,7 @@
 </div>
 <div class="section" id="vista-trace">
 <h3><code class="docutils literal notranslate"><span class="pre">vista.Trace</span></code><a class="headerlink" href="#vista-trace" title="Permalink to this headline">¶</a></h3>
-<p>A <code class="docutils literal notranslate"><span class="pre">Trace</span></code> is an object that represents a single dataset log from the real-world. Traces are stored on the hard-drive and streamed into memory as needed by VISTA. The format of a trace on disk must be compatible with VISTA to be represented as a <code class="docutils literal notranslate"><span class="pre">Trace</span></code> object.</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">Trace</span></code> is an object that represents a single dataset log from the real world. Traces are stored on the hard drive and streamed into memory as needed by VISTA. The format of a trace on disk must be compatible with VISTA to be represented as a <code class="docutils literal notranslate"><span class="pre">Trace</span></code> object.</p>
 <p>Traces can be annotated to remove segments which should not be used within VISTA (e.g., if segments contain noisy or non-stable driving behavior).</p>
 <p><code class="docutils literal notranslate"><span class="pre">vista.Entity</span></code>
 An <code class="docutils literal notranslate"><span class="pre">Entity</span></code> represents an object within the VISTA environment that can be spawned and has a specific location/orientation. Entities can be “attached” to other entities or operate independently in the environment. Examples of entities include <code class="docutils literal notranslate"><span class="pre">Agents</span></code> and <code class="docutils literal notranslate"><span class="pre">Sensors</span></code>.</p>

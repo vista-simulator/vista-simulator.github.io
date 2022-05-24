@@ -92,7 +92,7 @@
 <li class="toctree-l2"><a class="reference internal" href="testing_with_augmented_reality.html">Testing With Augmented Reality</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Datasets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api_documentation/index.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../faq/index.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../acknowledgement/index.html">Acknowledgement</a></li>
@@ -164,13 +164,13 @@
             
   <div class="section" id="imitation-learning">
 <span id="advanced-usage-imitation-learning"></span><h1>Imitation Learning<a class="headerlink" href="#imitation-learning" title="Permalink to this headline">¶</a></h1>
-<p>Here we show an example of using Vista to learn a neural-network-based policy with the most basic
+<p>Here we show an example of using VISTA to learn a neural-network-based policy with the most basic
 variant of imitation learning (i.e., behavior cloning). Since sensor data synthesis is not required
-in imitation learning, we show how to extract passive dataset upon which the data-driven simulation
-is built with Vista’s interface. The high-level idea is to construct a world containing an ego-agent
-in Vista and run the agent with human control command in the passive dataset without doing sensor
+in imitation learning, we show how to extract a passive dataset upon which the data-driven simulation
+is built with VISTA’s interface. The high-level idea is to construct a world containing an ego-agent
+in VISTA and run the agent with human control command in the passive dataset without doing sensor
 data synthesis to avoid redundant computation.</p>
-<p>First, we initialize Vista world with an agent attached with a sensor (we use RGB camera here for
+<p>First, we initialize VISTA world with an agent attached with a sensor (we use RGB camera here for
 illustration). Note that it’s often useful to implement an additional sampler since balanced training
 data distribution is often of great significance for supervised learning.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">_world</span> <span class="o">=</span> <span class="n">vista</span><span class="o">.</span><span class="n">World</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace_paths</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace_config</span><span class="p">)</span>
@@ -214,12 +214,12 @@ data distribution is often of great significance for supervised learning.</p>
 <p>The implementation is straightforward. After resetting the simulator (the pointer to the passive
 dataset is randomly initialized), we step through the dataset to get the next frame by calling
 <code class="docutils literal notranslate"><span class="pre">agent.step_dataset</span></code>, followed by a rejection sampling to balance the steering control command
-(<code class="docutils literal notranslate"><span class="pre">human_curvature</span></code>). Finally, preprocess sensor data and construct data-label pairs for training.
-Remark that we usally set a maximal snippet size to make sure that each snippet, a series of data
+(<code class="docutils literal notranslate"><span class="pre">human_curvature</span></code>). Finally, we preprocess sensor data and construct data-label pairs for training.
+Note that we usually set a maximum snippet size to make sure that each snippet, a series of data
 from the start (a reset) to the termination (another reset), won’t last indefinitely and training
-data can have sufficient diversity. Also, the data stream (<code class="docutils literal notranslate"><span class="pre">yield</span> <span class="pre">{'camera':</span> <span class="pre">img,</span> <span class="pre">'target':</span> <span class="pre">label}</span></code>
-) is connected to a buffer with shuffling to ensure i.i.d. data distribution that is required for
-stochastic gradient descent. For more details, please check <code class="docutils literal notranslate"><span class="pre">examples/advanced_usage/il_rgb_dataset.py</span></code>.</p>
+data can have sufficient diversity. Also, to ensure the i.i.d. data distribution that is required for
+stochastic gradient descent, the data stream (<code class="docutils literal notranslate"><span class="pre">yield</span> <span class="pre">{'camera':</span> <span class="pre">img,</span> <span class="pre">'target':</span> <span class="pre">label}</span></code>
+) is connected to a buffer with shuffling. For more details, please check <code class="docutils literal notranslate"><span class="pre">examples/advanced_usage/il_rgb_dataset.py</span></code>.</p>
 </div>
 
 

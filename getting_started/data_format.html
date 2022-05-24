@@ -95,7 +95,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced_usage/index.html">Advanced Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Datasets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api_documentation/index.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../faq/index.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../acknowledgement/index.html">Acknowledgement</a></li>
@@ -165,20 +165,21 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="data-format">
-<span id="getting-started-data-format"></span><h1>Data Format<a class="headerlink" href="#data-format" title="Permalink to this headline">¶</a></h1>
-<p>Vista simulation requires two sets of data: <strong>sensor data</strong> and <strong>odometry data</strong>. Sensor data
+  <p>VISTA.. _getting_started-data_format:</p>
+<div class="section" id="data-format">
+<h1>Data Format<a class="headerlink" href="#data-format" title="Permalink to this headline">¶</a></h1>
+<p>VISTA simulation requires two sets of data: <strong>sensor data</strong> and <strong>odometry data</strong>. Sensor data
 contains a timestamp file and a sensor data file, and odometry data contains minimal information
-to step vehicle dynamics. Every data file has their corresponding ROS timestamp, which allows to be
+to step vehicle dynamics. Every data file has a corresponding ROS timestamp, which allows to be
 associated across each other for data-driven simulation.</p>
 <div class="section" id="sensor-data">
 <h2>Sensor Data<a class="headerlink" href="#sensor-data" title="Permalink to this headline">¶</a></h2>
-<p>The general concept of data-driven simulation in Vista is to synthesize locally around precollected
+<p>The general concept of data-driven simulation in VISTA is to synthesize locally around precollected
 sensor data. In order to achieve that, we need to assoicate current states of the simulator to some
 point in the dataset. We use ROS timestamp as an universal identifier across different modalities of
 data. Given a vehicle state associated with some ROS timestamp, we need to retrieve from the dataset
 a piece of sensor data (e.g., a RGB frame or a LiDAR sweep) for synthesis. Thus, sensor data contains
-two types of data with file name as sensor name specified in Vista,</p>
+two types of data with file name as sensor name specified in VISTA,</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>A csv file that maps indices of the sensor (e.g., frame number for RGB camera or sweep number
@@ -189,14 +190,14 @@ across different sensors, e.g., &lt;camera-namne&gt;.avi for RGB camera and &lt;
 </div></blockquote>
 <p><a class="reference internal" href="../api_documentation/core.html#api-multi-sensor"><span class="std std-ref">MultiSensor</span></a> is a class that handles sensor data retrieval for all sensors.
 It handles the mapping between the universal (ROS) timestamp shared throughout the entire simulator
-and sensor-specific pointer to data stream of each sensor. Also note that the <code class="docutils literal notranslate"><span class="pre">master_sensor</span></code> in
-this class provide a reference timestamp for stepping vehicle dynamics.</p>
+and a sensor-specific pointer to the data stream of each sensor. Also note that the <code class="docutils literal notranslate"><span class="pre">master_sensor</span></code> in
+this class provides a reference timestamp for stepping vehicle dynamics.</p>
 </div>
 <div class="section" id="odometry-data">
 <h2>Odometry Data<a class="headerlink" href="#odometry-data" title="Permalink to this headline">¶</a></h2>
-<p>Vista depends on timestamped IMU and speed data to step vehicle dynamics. At a high level,
+<p>VISTA depends on timestamped IMU and speed data to step vehicle dynamics. At a high level,
 we extract speed feedback and IMU data (or more specifically, yaw rate) and feed
-them into vehicle dynamics model, as shown in <a class="reference internal" href="../api_documentation/core.html#api-trace"><span class="std std-ref">Trace</span></a>.</p>
+them into the vehicle dynamics model, as shown in <a class="reference internal" href="../api_documentation/core.html#api-trace"><span class="std std-ref">Trace</span></a>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
 
 <span class="k">def</span> <span class="nf">_get_states_func</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -222,9 +223,9 @@ them into vehicle dynamics model, as shown in <a class="reference internal" href
 </div>
 <p>Basically, the odometry data should contain minimal information to trace out human trajectories in
 the dataset. In our case, we are using <code class="docutils literal notranslate"><span class="pre">curvature</span></code> (equivalent information to steering command)
-and <code class="docutils literal notranslate"><span class="pre">speed</span></code>, which is required in stepping the vehicle dynamics (bicycle model). Note that we are
+and <code class="docutils literal notranslate"><span class="pre">speed</span></code>, which is required in stepping the vehicle dynamics according to the bicycle model. Note that we are
 using control command feedback instead of control command to eliminate the effect of imperfect low-
-level controller, tire slippage, and etc. Another thing to remark is that in some use cases, we have
+level controller, tire slippage, etc. Another thing to consider is that in some use cases, we have
 access to more accurate localization like differential GPS, which can provide better estimate of
 vehicle state. Overall, there are several choices that can be used as odometry data with different
 accessibility and accuracy.</p>

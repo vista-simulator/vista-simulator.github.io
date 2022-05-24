@@ -92,7 +92,7 @@
 <li class="toctree-l2"><a class="reference internal" href="testing_with_augmented_reality.html">Testing With Augmented Reality</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Datasets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api_documentation/index.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../faq/index.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../acknowledgement/index.html">Acknowledgement</a></li>
@@ -162,19 +162,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="reinforcement-learning">
-<span id="advanced-usage-reinforcement-learning"></span><h1>Reinforcement Learning<a class="headerlink" href="#reinforcement-learning" title="Permalink to this headline">¶</a></h1>
+  <p>VISTA.. _advanced_usage-reinforcement_learning:</p>
+<div class="section" id="reinforcement-learning">
+<h1>Reinforcement Learning<a class="headerlink" href="#reinforcement-learning" title="Permalink to this headline">¶</a></h1>
 <p>Based on what we discussed in the previous section for guided policy learning where we actively
-generate data with off-human-trajectory initialization and privileged controller for correction,
-we can consider the further extreme of exploiting the “activeness” of applying Vista on a passive
+generate data with off-human-trajectory initialization and a privileged controller for correction,
+we can consider the further extreme of exploiting the “activeness” of applying VISTA on a passive
 dataset. This leads to reinforcement learning (RL), where an agent is allowed to interact with the
 environment, collect training data itself, and learn to achieve good task performance. Here we show
-how to use Vista to define a RL environment for learning a policy.</p>
-<p>Implementation-wise, there are four major components to be defined, namely observations, environment
+how to use VISTA to define a RL environment for learning a policy.</p>
+<p>Implementation-wise, there are four major components to be defined, namely the observations, environment
 dynamics, reward function, and terminal condition. Observations are simply sensor data and environment
-dynamics is how the ego-car move after applying some control commands, which is already embedded in
-vehicle states update (and collision if multi-agent scenario is considered). Thus, we need to further
-define reward function and terminal condition. For example, if we consider lane-following,</p>
+dynamics is how the ego car moves after applying some control commands, which is already embedded in
+the vehicle state update (and collision if multi-agent scenario is considered). Thus, we need to further
+define the reward function and terminal conditions. For example, if we consider lane following,</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">30.</span><span class="p">):</span>
     <span class="c1"># Step agent and get observation</span>
     <span class="n">agent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="o">.</span><span class="n">agents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -202,9 +203,9 @@ define reward function and terminal condition. For example, if we consider lane-
 </pre></div>
 </div>
 <p>, where <code class="docutils literal notranslate"><span class="pre">self.config['terminal_condition']</span></code> can be defined as when the car is off the lane (too
-far away from the lane center) or car heading deviate too much from road curvature. Note that apart
-from being the terminal condition for lane following task, the above-mentioned two constraints
-should be satisfied since Vista only allow high-fidelity synthesis locally around the original
+far away from the lane center) or the car heading deviates too much from the road curvature. Note that apart
+from being the terminal condition for the lane following task, the above-mentioned two constraints
+should be satisfied since VISTA only allows for high-fidelity synthesis locally around the original
 passive dataset.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">default_terminal_condition</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="n">agent</span> <span class="o">=</span> <span class="p">[</span><span class="n">_a</span> <span class="k">for</span> <span class="n">_a</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span> <span class="k">if</span> <span class="n">_a</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">agent_id</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -229,7 +230,7 @@ passive dataset.</p>
     <span class="k">return</span> <span class="n">done</span><span class="p">,</span> <span class="n">other_info</span>
 </pre></div>
 </div>
-<p>We can define a very simple reward function that encourage survival (not going off the lane or
+<p>We can define a very simple reward function that encourages survival (not going off the lane or
 exceeding some rotation with respect to the road curvature) by simply checking whether the current
 step is terminated.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">default_reward_fn</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -240,7 +241,7 @@ step is terminated.</p>
 </pre></div>
 </div>
 <p>Please check <a class="reference internal" href="../api_documentation/tasks.html#api-lane-following"><span class="std std-ref">lane_following.py</span></a> for more details. The implementation
-rougly follow <a class="reference external" href="https://gym.openai.com/">OpenAI Gym</a> interface with <code class="docutils literal notranslate"><span class="pre">reset</span></code> and <code class="docutils literal notranslate"><span class="pre">step</span></code> functions.
+roughly follows <a class="reference external" href="https://gym.openai.com/">OpenAI Gym</a> interface with <code class="docutils literal notranslate"><span class="pre">reset</span></code> and <code class="docutils literal notranslate"><span class="pre">step</span></code> functions.
 However, there are still other attributes or functions to be implemented like <code class="docutils literal notranslate"><span class="pre">action_space</span></code>,
 <code class="docutils literal notranslate"><span class="pre">observation_space</span></code>, <code class="docutils literal notranslate"><span class="pre">render</span></code>, etc, which may require objects from <code class="docutils literal notranslate"><span class="pre">gym</span></code>.</p>
 </div>

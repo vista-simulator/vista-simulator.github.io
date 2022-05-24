@@ -88,7 +88,7 @@
 <li class="toctree-l2"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Basic Usage</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#simple-controller-with-simulator-state">Simple Controller With Simulator State</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#synthesizing-sensory-measurement">Synthesizing Sensory Measurement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synthesizing-sensory-measurements">Synthesizing Sensory Measurements</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#adding-virtual-cars">Adding Virtual Cars</a></li>
 </ul>
 </li>
@@ -96,7 +96,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../advanced_usage/index.html">Advanced Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Datasets</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api_documentation/index.html">API Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../faq/index.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../acknowledgement/index.html">Acknowledgement</a></li>
@@ -171,8 +171,8 @@
 <div class="section" id="simple-controller-with-simulator-state">
 <h2>Simple Controller With Simulator State<a class="headerlink" href="#simple-controller-with-simulator-state" title="Permalink to this headline">¶</a></h2>
 <p>We first start with simulating car motion only without synthesizing
-sensory measurement as an example of accessing vehicle state for control.
-We start with defining a world in Vista, adding a car, and attaching display
+sensory measurements, as an example of accessing vehicle state for control.
+We start with defining a world in VISTA, adding a car, and attaching display
 to the world for visualization.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">vista</span>
 
@@ -202,9 +202,9 @@ within a certain distance centered at the car.</p>
 </pre></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">state_space_controller</span></code> function defines a controller that takes simulator
-states as input and produce an action for the agent. In the following, we show several
-examples of how we can control the car to do lane stable with the access to Simulator
-states. The simplest controller is simply following how human drives in the dataset.</p>
+states as input and produces an action for the agent. In the following, we show several
+examples of how we can control the car to do lane stable control with the access to Simulator
+states. The simplest controller is simply following how humans drive in the dataset.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">follow_human_trajectory</span><span class="p">(</span><span class="n">agent</span><span class="p">):</span>
     <span class="n">action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
         <span class="n">agent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">f_curvature</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">timestamp</span><span class="p">),</span>
@@ -254,10 +254,10 @@ states. The simplest controller is simply following how human drives in the data
 controller (or other custom controller) and you will see a car doing lane following
 on the road in the dataset.</p>
 </div>
-<div class="section" id="synthesizing-sensory-measurement">
-<h2>Synthesizing Sensory Measurement<a class="headerlink" href="#synthesizing-sensory-measurement" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="synthesizing-sensory-measurements">
+<h2>Synthesizing Sensory Measurements<a class="headerlink" href="#synthesizing-sensory-measurements" title="Permalink to this headline">¶</a></h2>
 <p>Then, we show how to attach sensors to a car and synthesize sensory
-measurement at every timestmap. Currently, RGB camera, LiDAR, and event
+measurements at every timestmap. Currently, RGB camera, LiDAR, and event
 camera are supported. Following the setup above, we simply spawn sensors
 on the <code class="docutils literal notranslate"><span class="pre">car</span></code> object.</p>
 <p>Spawning a RGB camera.</p>
@@ -312,7 +312,7 @@ sensor data.</p>
 <div class="section" id="adding-virtual-cars">
 <h2>Adding Virtual Cars<a class="headerlink" href="#adding-virtual-cars" title="Permalink to this headline">¶</a></h2>
 <p>We can also add more cars (or potentially other objects) to the simulation, where
-each car can have different set of sensors. Note that currently only RGB camera
+each car can have different sets of sensors. Note that currently only RGB camera
 supports rendering for virtual objects in the scene.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">world</span> <span class="o">=</span> <span class="n">vista</span><span class="o">.</span><span class="n">World</span><span class="p">(</span><span class="n">trace_path</span><span class="p">)</span>
 <span class="n">car1</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">spawn_agent</span><span class="p">()</span>
@@ -322,8 +322,8 @@ supports rendering for virtual objects in the scene.</p>
 <span class="n">car2</span><span class="o">.</span><span class="n">spawn_lidar</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>It spawns two cars, one with RGB camera and the other with LiDAR. Note that since only
-RGB camera supports rendering of virtual object for now, <code class="docutils literal notranslate"><span class="pre">car2</span></code> cannot see <code class="docutils literal notranslate"><span class="pre">car1</span></code>
+<p>It spawns two cars, one with RGB camera and the other with LiDAR. Note that, for now, since only
+RGB camera supports rendering of virtual objects, <code class="docutils literal notranslate"><span class="pre">car2</span></code> cannot see <code class="docutils literal notranslate"><span class="pre">car1</span></code>
 with its LiDAR measurement. Note that there are still two major functions to be implemented
 to make it a reasonable simulation, including initialization of virtual objects and collision
 check/dynamics across objects. For more details, check <code class="docutils literal notranslate"><span class="pre">vista/task/multi_agent_base.py</span></code>.</p>
