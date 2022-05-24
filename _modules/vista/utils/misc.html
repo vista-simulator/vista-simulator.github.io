@@ -1,0 +1,382 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vista.utils.misc &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vista.utils.misc</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vista.utils.misc</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">box</span> <span class="k">as</span> <span class="n">Box</span>
+<span class="kn">from</span> <span class="nn">shapely</span> <span class="kn">import</span> <span class="n">affinity</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">transform</span>
+<span class="kn">from</span> <span class="nn">..entities.agents</span> <span class="kn">import</span> <span class="n">Car</span>
+<span class="kn">from</span> <span class="nn">..entities.agents.Dynamics</span> <span class="kn">import</span> <span class="n">StateDynamics</span>
+
+<span class="n">Vec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="agent2poly"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.misc.agent2poly">[docs]</a><span class="k">def</span> <span class="nf">agent2poly</span><span class="p">(</span><span class="n">agent</span><span class="p">:</span> <span class="n">Car</span><span class="p">,</span>
+               <span class="n">ref_dynamics</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StateDynamics</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Box</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Convert Agent object to polygon w.r.t. a reference dynamics.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        agent (Car): An agent with valid dynamics (pose and vehicle state).</span>
+<span class="sd">        ref_dynamics (StateDynamics):</span>
+<span class="sd">            A reference dynamics for computing the polygon representation</span>
+<span class="sd">            of the agent. Default set to None that uses human dynamics of</span>
+<span class="sd">            the agent.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Box: A polygon that describes the agent.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ref_dynamics</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">human_dynamics</span> <span class="k">if</span> <span class="n">ref_dynamics</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ref_dynamics</span>
+    <span class="n">rel_pose</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">compute_relative_latlongyaw</span><span class="p">(</span>
+        <span class="n">agent</span><span class="o">.</span><span class="n">ego_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">3</span><span class="p">],</span>
+        <span class="n">ref_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">poly</span> <span class="o">=</span> <span class="n">Box</span><span class="p">(</span><span class="n">rel_pose</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">agent</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span> <span class="n">rel_pose</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">agent</span><span class="o">.</span><span class="n">length</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span>
+               <span class="n">rel_pose</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">agent</span><span class="o">.</span><span class="n">width</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span> <span class="n">rel_pose</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">agent</span><span class="o">.</span><span class="n">length</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span>
+    <span class="n">poly</span> <span class="o">=</span> <span class="n">affinity</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">poly</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">rel_pose</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">poly</span></div>
+
+
+<div class="viewcode-block" id="merge_dict"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.misc.merge_dict">[docs]</a><span class="k">def</span> <span class="nf">merge_dict</span><span class="p">(</span><span class="n">dict1</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">dict2</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Merge two dict, where dict1 has higher priority.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dict1 (Dict): The first dictionary.</span>
+<span class="sd">        dict2 (Dict): The second dictionary.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: The merged dictionary.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">dict2</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">dict1</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="fetch_agent_info"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.misc.fetch_agent_info">[docs]</a><span class="k">def</span> <span class="nf">fetch_agent_info</span><span class="p">(</span><span class="n">agent</span><span class="p">:</span> <span class="n">Car</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot; Get info from agent class.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        agent (Car): The agent to be extracted information from.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: A dictionary contains various information of the agent.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">trace_path</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">trace_path</span><span class="p">,</span>
+        <span class="n">relative_state</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">relative_state</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span>
+        <span class="n">ego_dynamics</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">ego_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span>
+        <span class="n">human_dynamics</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">human_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+        <span class="n">wheel_base</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">,</span>
+        <span class="n">steering_ratio</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">steering_ratio</span><span class="p">,</span>
+        <span class="n">speed</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">speed</span><span class="p">,</span>
+        <span class="n">curvature</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">curvature</span><span class="p">,</span>
+        <span class="n">steering</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">steering</span><span class="p">,</span>
+        <span class="n">tire_angle</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">tire_angle</span><span class="p">,</span>
+        <span class="n">human_speed</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">human_speed</span><span class="p">,</span>
+        <span class="n">human_curvature</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">human_curvature</span><span class="p">,</span>
+        <span class="n">human_steering</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">human_steering</span><span class="p">,</span>
+        <span class="n">human_tire_angle</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">human_tire_angle</span><span class="p">,</span>
+        <span class="n">timestamp</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
+        <span class="n">frame_number</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">frame_number</span><span class="p">,</span>
+        <span class="n">trace_index</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">trace_index</span><span class="p">,</span>
+        <span class="n">segment_index</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">segment_index</span><span class="p">,</span>
+        <span class="n">frame_index</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">frame_index</span><span class="p">,</span>
+        <span class="n">trace_done</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">done</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">info</span></div>
+
+
+<div class="viewcode-block" id="img2flow"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.misc.img2flow">[docs]</a><span class="k">def</span> <span class="nf">img2flow</span><span class="p">(</span><span class="n">img</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+             <span class="n">mag_minmax</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span>
+             <span class="n">flow_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Vec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Convert HSV-encoded flow image to optical flow.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        img (np.ndarray): An image with channel order BGR.</span>
+<span class="sd">        mag_minmax (Vec): The minmum and maximum when normalizing the</span>
+<span class="sd">                          flow magnitude to [0,1].</span>
+<span class="sd">        flow_size (Vec): Size of the output flow array. If set, resize</span>
+<span class="sd">                         the image before converting to flow; default</span>
+<span class="sd">                         to ``None``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray:</span>
+<span class="sd">            A HxWx2 array with the two channels as magnitude and the angle of the flow.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">hsv</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2HSV</span><span class="p">)</span>  <span class="c1"># assume image is BGR</span>
+    <span class="k">if</span> <span class="n">flow_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">hsv</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">hsv</span><span class="p">,</span> <span class="n">flow_size</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ang</span> <span class="o">=</span> <span class="n">hsv</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">180</span>
+    <span class="n">mag</span> <span class="o">=</span> <span class="n">hsv</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mf">255.</span> <span class="o">*</span> <span class="p">(</span><span class="n">mag_minmax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">mag_minmax</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">mag_minmax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">flow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">polarToCart</span><span class="p">(</span><span class="n">mag</span><span class="p">,</span> <span class="n">ang</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">flow</span></div>
+
+
+<div class="viewcode-block" id="biinterp"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.misc.biinterp">[docs]</a><span class="k">def</span> <span class="nf">biinterp</span><span class="p">(</span><span class="n">I0</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">I1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">F_0_1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+             <span class="n">F_1_0</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ts</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t1</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Interpolate frame with bidirectional flow.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        I0 (np.ndarray): A RGB image at time `t0`.</span>
+<span class="sd">        I1 (np.ndarray): A RGB image at time `t1`.</span>
+<span class="sd">        F_0_1 (np.ndarray): The flow from time `t0` to `t1`.</span>
+<span class="sd">        F_1_0 (np.ndarray): The flow from time `t1` to `t0`.</span>
+<span class="sd">        ts (float): The timestamp to be interpolated to.</span>
+<span class="sd">        t0 (float): The timestamp of `I0`.</span>
+<span class="sd">        t1 (float): The timestamp of `I1`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: An interpolated RGB image at time `ts`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">ts</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="o">-</span><span class="n">t</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">t</span><span class="p">)</span>
+    <span class="n">fCoeff</span> <span class="o">=</span> <span class="p">[</span><span class="n">temp</span><span class="p">,</span> <span class="n">t</span> <span class="o">*</span> <span class="n">t</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">t</span><span class="p">),</span> <span class="n">temp</span><span class="p">]</span>
+    <span class="n">F_t_0</span> <span class="o">=</span> <span class="n">fCoeff</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">F_0_1</span> <span class="o">+</span> <span class="n">fCoeff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">F_1_0</span>
+    <span class="n">F_t_1</span> <span class="o">=</span> <span class="n">fCoeff</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">F_0_1</span> <span class="o">+</span> <span class="n">fCoeff</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">F_1_0</span>
+
+    <span class="n">g_I0_F_t_0</span> <span class="o">=</span> <span class="n">flow_backwarp</span><span class="p">(</span><span class="n">I0</span><span class="p">,</span> <span class="n">F_t_0</span><span class="p">)</span>
+    <span class="n">g_I1_F_t_1</span> <span class="o">=</span> <span class="n">flow_backwarp</span><span class="p">(</span><span class="n">I1</span><span class="p">,</span> <span class="n">F_t_1</span><span class="p">)</span>
+
+    <span class="n">wCoeff</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">t</span><span class="p">,</span> <span class="n">t</span><span class="p">]</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">wCoeff</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">g_I0_F_t_0</span> <span class="o">+</span> <span class="n">wCoeff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">g_I1_F_t_1</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="flow_backwarp"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.misc.flow_backwarp">[docs]</a><span class="k">def</span> <span class="nf">flow_backwarp</span><span class="p">(</span><span class="n">img</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                  <span class="n">flow</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                  <span class="n">use_pytorch</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Warp image based on optical flow.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        img (np.ndarray): An image to be warped.</span>
+<span class="sd">        flow (np.ndarray): Optical flow to warp the image.</span>
+<span class="sd">        use_pytorch (bool): Whether to use pytorch for warping; default to ``False``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: A warped image.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">H</span><span class="p">,</span> <span class="n">W</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">gridX</span><span class="p">,</span> <span class="n">gridY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">W</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">H</span><span class="p">))</span>
+
+    <span class="n">u</span> <span class="o">=</span> <span class="n">flow</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">flow</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">gridX</span> <span class="o">+</span> <span class="n">u</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">gridY</span> <span class="o">+</span> <span class="n">v</span>
+
+    <span class="k">if</span> <span class="n">use_pytorch</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">torch</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="n">W</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span> <span class="o">/</span> <span class="n">H</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">img</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">img</span> <span class="o">/</span> <span class="mf">255.</span><span class="p">)</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">grid_sample</span><span class="p">(</span><span class="n">img</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+                                              <span class="n">grid</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+                                              <span class="n">align_corners</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span> <span class="o">*</span> <span class="mf">255.</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">img</span> <span class="o">/</span> <span class="mf">255.</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">remap</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                        <span class="n">cv2</span><span class="o">.</span><span class="n">INTER_LINEAR</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">out</span> <span class="o">*</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,607 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Utils &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tasks" href="tasks.html" />
+    <link rel="prev" title="Sensors" href="entities/sensors.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="core.html">Core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entities/index.html">Entities</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks.html">Tasks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">API Documentation</a> &raquo;</li>
+        
+      <li>Utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api_documentation/utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-vista.utils.misc">
+<span id="utils"></span><span id="api-documentation-utils"></span><h1>Utils<a class="headerlink" href="#module-vista.utils.misc" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="vista.utils.misc.agent2poly">
+<code class="sig-prename descclassname">vista.utils.misc.</code><code class="sig-name descname">agent2poly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">agent</span><span class="p">:</span> <span class="n"><a class="reference internal" href="entities/agents.html#vista.entities.agents.Car.Car" title="vista.entities.agents.Car.Car">vista.entities.agents.Car.Car</a></span></em>, <em class="sig-param"><span class="n">ref_dynamics</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="entities/agents.html#vista.entities.agents.Dynamics.StateDynamics" title="vista.entities.agents.Dynamics.StateDynamics">vista.entities.agents.Dynamics.StateDynamics</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; shapely.geometry.geo.box<a class="reference internal" href="../_modules/vista/utils/misc.html#agent2poly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.misc.agent2poly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Agent object to polygon w.r.t. a reference dynamics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>agent</strong> (<a class="reference internal" href="entities/agents.html#vista.entities.agents.Car.Car" title="vista.entities.agents.Car.Car"><em>Car</em></a>) – An agent with valid dynamics (pose and vehicle state).</p></li>
+<li><p><strong>ref_dynamics</strong> (<a class="reference internal" href="entities/agents.html#vista.entities.agents.Dynamics.StateDynamics" title="vista.entities.agents.Dynamics.StateDynamics"><em>StateDynamics</em></a>) – A reference dynamics for computing the polygon representation
+of the agent. Default set to None that uses human dynamics of
+the agent.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A polygon that describes the agent.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Box</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.utils.misc.merge_dict">
+<code class="sig-prename descclassname">vista.utils.misc.</code><code class="sig-name descname">merge_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dict1</span><span class="p">:</span> <span class="n">Dict</span></em>, <em class="sig-param"><span class="n">dict2</span><span class="p">:</span> <span class="n">Dict</span></em><span class="sig-paren">)</span> &#x2192; Dict<a class="reference internal" href="../_modules/vista/utils/misc.html#merge_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.misc.merge_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge two dict, where dict1 has higher priority.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dict1</strong> (<em>Dict</em>) – The first dictionary.</p></li>
+<li><p><strong>dict2</strong> (<em>Dict</em>) – The second dictionary.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The merged dictionary.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.utils.misc.fetch_agent_info">
+<code class="sig-prename descclassname">vista.utils.misc.</code><code class="sig-name descname">fetch_agent_info</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">agent</span><span class="p">:</span> <span class="n"><a class="reference internal" href="entities/agents.html#vista.entities.agents.Car.Car" title="vista.entities.agents.Car.Car">vista.entities.agents.Car.Car</a></span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span><a class="reference internal" href="../_modules/vista/utils/misc.html#fetch_agent_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.misc.fetch_agent_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get info from agent class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>agent</strong> (<a class="reference internal" href="entities/agents.html#vista.entities.agents.Car.Car" title="vista.entities.agents.Car.Car"><em>Car</em></a>) – The agent to be extracted information from.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary contains various information of the agent.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.utils.misc.img2flow">
+<code class="sig-prename descclassname">vista.utils.misc.</code><code class="sig-name descname">img2flow</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">mag_minmax</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>List<span class="p">, </span>Tuple<span class="p">, </span>numpy.ndarray<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">flow_size</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Union<span class="p">[</span>List<span class="p">, </span>Tuple<span class="p">, </span>numpy.ndarray<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../_modules/vista/utils/misc.html#img2flow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.misc.img2flow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert HSV-encoded flow image to optical flow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>np.ndarray</em>) – An image with channel order BGR.</p></li>
+<li><p><strong>mag_minmax</strong> (<em>Vec</em>) – The minmum and maximum when normalizing the
+flow magnitude to [0,1].</p></li>
+<li><p><strong>flow_size</strong> (<em>Vec</em>) – Size of the output flow array. If set, resize
+the image before converting to flow; default
+to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A HxWx2 array with the two channels as magnitude and the angle of the flow.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.utils.misc.biinterp">
+<code class="sig-prename descclassname">vista.utils.misc.</code><code class="sig-name descname">biinterp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">I0</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">I1</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">F_0_1</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">F_1_0</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">ts</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">t0</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">t1</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../_modules/vista/utils/misc.html#biinterp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.misc.biinterp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate frame with bidirectional flow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>I0</strong> (<em>np.ndarray</em>) – A RGB image at time <cite>t0</cite>.</p></li>
+<li><p><strong>I1</strong> (<em>np.ndarray</em>) – A RGB image at time <cite>t1</cite>.</p></li>
+<li><p><strong>F_0_1</strong> (<em>np.ndarray</em>) – The flow from time <cite>t0</cite> to <cite>t1</cite>.</p></li>
+<li><p><strong>F_1_0</strong> (<em>np.ndarray</em>) – The flow from time <cite>t1</cite> to <cite>t0</cite>.</p></li>
+<li><p><strong>ts</strong> (<em>float</em>) – The timestamp to be interpolated to.</p></li>
+<li><p><strong>t0</strong> (<em>float</em>) – The timestamp of <cite>I0</cite>.</p></li>
+<li><p><strong>t1</strong> (<em>float</em>) – The timestamp of <cite>I1</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An interpolated RGB image at time <cite>ts</cite>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.utils.misc.flow_backwarp">
+<code class="sig-prename descclassname">vista.utils.misc.</code><code class="sig-name descname">flow_backwarp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">flow</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">use_pytorch</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../_modules/vista/utils/misc.html#flow_backwarp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.misc.flow_backwarp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Warp image based on optical flow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>np.ndarray</em>) – An image to be warped.</p></li>
+<li><p><strong>flow</strong> (<em>np.ndarray</em>) – Optical flow to warp the image.</p></li>
+<li><p><strong>use_pytorch</strong> (<em>bool</em>) – Whether to use pytorch for warping; default to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A warped image.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-vista.utils.transform"></span><p>Helper functions for spatial transformation. Follow right handed
+(OpenGL) coordinate system.</p>
+<dl class="py function">
+<dt id="vista.utils.transform.rot2mat">
+<code class="sig-prename descclassname">vista.utils.transform.</code><code class="sig-name descname">rot2mat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rot</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">seq</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'xyz'</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../_modules/vista/utils/transform.html#rot2mat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.transform.rot2mat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert euler vector (with sequence order) to rotation matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rot</strong> (<em>Vec</em>) – A 3-dimensional rotation vector in Euler angle.</p></li>
+<li><p><strong>seq</strong> (<em>str</em>) – The order of the rotation vector, e.g., <code class="docutils literal notranslate"><span class="pre">xzy</span></code>;
+default to <code class="docutils literal notranslate"><span class="pre">xyz</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A rotation matrix equivalent to the given rotation vector.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.utils.transform.vec2mat">
+<code class="sig-prename descclassname">vista.utils.transform.</code><code class="sig-name descname">vec2mat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trans</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">rot</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../_modules/vista/utils/transform.html#vec2mat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.transform.vec2mat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert translation and rotation vector to transformation matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trans</strong> (<em>Vec</em>) – A 3-dimensional translation vector.</p></li>
+<li><p><strong>rot</strong> (<em>Vec</em>) – A 3-dimensional rotation vector.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 4-by-4 transformation matrix in SE(3).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.utils.transform.euler2quat">
+<code class="sig-prename descclassname">vista.utils.transform.</code><code class="sig-name descname">euler2quat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">euler</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">seq</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'xyz'</span></em>, <em class="sig-param"><span class="n">degrees</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span><a class="reference internal" href="../_modules/vista/utils/transform.html#euler2quat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.transform.euler2quat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Euler rotation to quaternion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>euler</strong> (<em>Vec</em>) – A 3-dimensional rotation vector in Euler angle.</p></li>
+<li><p><strong>seq</strong> (<em>str</em>) – The order of the rotation vector, e.g., <code class="docutils literal notranslate"><span class="pre">xzy</span></code>;
+default to <code class="docutils literal notranslate"><span class="pre">xyz</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 4-dimensional vector that describes a quaternion.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Vec</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.utils.transform.quat2euler">
+<code class="sig-prename descclassname">vista.utils.transform.</code><code class="sig-name descname">quat2euler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quat</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">seq</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'xyz'</span></em>, <em class="sig-param"><span class="n">degrees</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span><a class="reference internal" href="../_modules/vista/utils/transform.html#quat2euler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.transform.quat2euler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert quaternion to Euler rotation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>quat</strong> (<em>Vec</em>) – A 4-dimensional vector that describes a quaternion.</p></li>
+<li><p><strong>seq</strong> (<em>str</em>) – The order of the output Euler rotation vector; default
+to <code class="docutils literal notranslate"><span class="pre">xyz</span></code>.</p></li>
+<li><p><strong>degrees</strong> (<em>bool</em>) – Whether to convert the output rotation to degrees
+instead of radians; default to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 3-dimensional rotation vector in Euler angle.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Vec</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.utils.transform.latlongyaw2vec">
+<code class="sig-prename descclassname">vista.utils.transform.</code><code class="sig-name descname">latlongyaw2vec</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">latlongyaw</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span><span class="p">, </span>Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span><span class="p">]</span><a class="reference internal" href="../_modules/vista/utils/transform.html#latlongyaw2vec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.transform.latlongyaw2vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert lateral, longitudinal, yaw compoenents to translational and
+rotational vectors. Note that the longitudinal component will be negated
+to follow right-handed OpenGL coordinate system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>latlongyaw</strong> (<em>Vec</em>) – A 3-dimensional vector with entries as lateral shift,
+longitudinal shift, and yaw difference.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return a tuple (<code class="docutils literal notranslate"><span class="pre">Vec_a</span></code>, <code class="docutils literal notranslate"><span class="pre">Vec_b</span></code>), where <code class="docutils literal notranslate"><span class="pre">Vec_a</span></code> is a 3-dimensional
+translation vector and <code class="docutils literal notranslate"><span class="pre">Vec_b</span></code> is a 3-dimensional rotation vector in
+Euler angle <code class="docutils literal notranslate"><span class="pre">xyz</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.utils.transform.vec2latlongyaw">
+<code class="sig-prename descclassname">vista.utils.transform.</code><code class="sig-name descname">vec2latlongyaw</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trans</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">rot</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span><a class="reference internal" href="../_modules/vista/utils/transform.html#vec2latlongyaw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.transform.vec2latlongyaw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert translational and rotational vectors to lateral,
+longitudinal, yaw compoenents. Note that the y translational
+component will be negated to follow right-handed OpenGL
+coordinate system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trans</strong> (<em>Vec</em>) – A 3-dimensional translation vector.</p></li>
+<li><p><strong>rot</strong> (<em>Vec</em>) – A 3-dimensional Euler rotation vector.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A 3-dimensional vector with entries as lateral shift,</dt><dd><p>longitudinal shift, and yaw difference.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Vec</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.utils.transform.compute_relative_latlongyaw">
+<code class="sig-prename descclassname">vista.utils.transform.</code><code class="sig-name descname">compute_relative_latlongyaw</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">latlongyaw</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">latlongyaw_ref</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span><a class="reference internal" href="../_modules/vista/utils/transform.html#compute_relative_latlongyaw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.transform.compute_relative_latlongyaw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute relative lateral, longitudinal, yaw compoenents.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>latlongyaw</strong> (<em>Vec</em>) – A 3-dimensional vector with lateral,
+longitudinal, and yaw component.</p></li>
+<li><p><strong>latlongyaw_ref</strong> (<em>Vec</em>) – A reference 3-dimensional vector with lateral,
+longitudinal, and yaw component.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A 3-dimensional vector that describe relative lateral,</dt><dd><p>longitudinal shift and yaw difference between the given
+two vectors.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Vec</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.utils.transform.SE3_inv">
+<code class="sig-prename descclassname">vista.utils.transform.</code><code class="sig-name descname">SE3_inv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T_in</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../_modules/vista/utils/transform.html#SE3_inv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.transform.SE3_inv" title="Permalink to this definition">¶</a></dt>
+<dd><p>More efficient matrix inversion for SE(3).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>T_in</strong> (<em>np.ndarray</em>) – a 4-by-4 transformation matrix in SE(3).</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The inverse of <code class="docutils literal notranslate"><span class="pre">T_in</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.utils.transform.mat2vec">
+<code class="sig-prename descclassname">vista.utils.transform.</code><code class="sig-name descname">mat2vec</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mat</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">seq</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'xyz'</span></em>, <em class="sig-param"><span class="n">degrees</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span><span class="p">, </span>Union<span class="p">[</span>numpy.ndarray<span class="p">, </span>List<span class="p">[</span>Any<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Any<span class="p">]</span><span class="p">]</span><span class="p">]</span><a class="reference internal" href="../_modules/vista/utils/transform.html#mat2vec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.transform.mat2vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert transformation matrix to translational and rotational vectors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mat</strong> (<em>np.ndarray</em>) – A 4-by-4 transformation matrix in SE(3).</p></li>
+<li><p><strong>seq</strong> (<em>str</em>) – The order of the output Euler rotation vector; default
+to <code class="docutils literal notranslate"><span class="pre">xyz</span></code>.</p></li>
+<li><p><strong>degrees</strong> (<em>bool</em>) – Whether to convert the output rotation to degrees
+instead of radians; default to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return a tuple (<code class="docutils literal notranslate"><span class="pre">Vec_a</span></code>, <code class="docutils literal notranslate"><span class="pre">Vec_b</span></code>), where <code class="docutils literal notranslate"><span class="pre">Vec_a</span></code> is a 3-dimensional
+translation vector and <code class="docutils literal notranslate"><span class="pre">Vec_b</span></code> is a 3-dimensional rotation vector in
+Euler angle <code class="docutils literal notranslate"><span class="pre">xyz</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.utils.transform.pi2pi">
+<code class="sig-prename descclassname">vista.utils.transform.</code><code class="sig-name descname">pi2pi</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">angle</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../_modules/vista/utils/transform.html#pi2pi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.transform.pi2pi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make sure angle is within -pi to pi.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>angle</strong> (<em>float</em>) – Input angle in radians.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Output angle that is within range [-pi, pi]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-vista.utils.logging"></span><p>Logging utilities of the simulator.</p>
+<dl class="py class">
+<dt id="vista.utils.logging.CustomFormatter">
+<em class="property">class </em><code class="sig-prename descclassname">vista.utils.logging.</code><code class="sig-name descname">CustomFormatter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fmt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">datefmt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">style</span><span class="o">=</span><span class="default_value">'%'</span></em>, <em class="sig-param"><span class="n">validate</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vista/utils/logging.html#CustomFormatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.logging.CustomFormatter" title="Permalink to this definition">¶</a></dt>
+<dd><p>A custom logger class inherited from python logging module. It basically
+define a custom formatting as <code class="docutils literal notranslate"><span class="pre">&lt;time&gt;::&lt;level&gt;::&lt;module&gt;::&lt;msg&gt;</span></code> with colored
+text (<code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>: cyan, <code class="docutils literal notranslate"><span class="pre">INFO</span></code>: regular, <code class="docutils literal notranslate"><span class="pre">WARNING</span></code>: yellow, <code class="docutils literal notranslate"><span class="pre">ERROR</span></code>: bold red,
+<code class="docutils literal notranslate"><span class="pre">CRITICAL</span></code>: underlined bold red). Otherwise, it can be used as if using regular
+python logging.</p>
+<p>Example Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">vista.utils</span> <span class="kn">import</span> <span class="n">logging</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logging</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;This is a debug message.&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;This is a warning message.&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="vista.utils.logging.CustomFormatter.format">
+<code class="sig-name descname">format</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">record</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vista/utils/logging.html#CustomFormatter.format"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.logging.CustomFormatter.format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format the specified record as text.</p>
+<p>The record’s attribute dictionary is used as the operand to a
+string formatting operation which yields the returned string.
+Before formatting the dictionary, a couple of preparatory steps
+are carried out. The message attribute of the record is computed
+using LogRecord.getMessage(). If the formatting string uses the
+time (as determined by a call to usesTime(), formatTime() is
+called to format the event time. If there is exception information,
+it is formatted using formatException() and appended to the message.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.utils.logging.setLevel">
+<code class="sig-prename descclassname">vista.utils.logging.</code><code class="sig-name descname">setLevel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">level</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>str<span class="p">, </span>int<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/vista/utils/logging.html#setLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.utils.logging.setLevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the logging level of this handler. Check CustomFormatter
+for example usage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>level</strong> (<em>str</em><em> or </em><em>int</em>) – Logging level.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tasks.html" class="btn btn-neutral float-right" title="Tasks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="entities/sensors.html" class="btn btn-neutral float-left" title="Sensors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

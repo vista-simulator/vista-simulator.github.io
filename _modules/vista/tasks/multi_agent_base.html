@@ -1,0 +1,533 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vista.tasks.multi_agent_base &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vista.tasks.multi_agent_base</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vista.tasks.multi_agent_base</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">box</span> <span class="k">as</span> <span class="n">Box</span>
+<span class="kn">from</span> <span class="nn">shapely</span> <span class="kn">import</span> <span class="n">affinity</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">World</span>
+<span class="kn">from</span> <span class="nn">..entities.agents.Car</span> <span class="kn">import</span> <span class="n">Car</span>
+<span class="kn">from</span> <span class="nn">..entities.agents.Dynamics</span> <span class="kn">import</span> <span class="n">StateDynamics</span>
+<span class="kn">from</span> <span class="nn">..entities.sensors.MeshLib</span> <span class="kn">import</span> <span class="n">MeshLib</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">logging</span><span class="p">,</span> <span class="n">misc</span><span class="p">,</span> <span class="n">transform</span>
+
+
+<span class="k">def</span> <span class="nf">default_terminal_condition</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; An example definition of terminal condition. &quot;&quot;&quot;</span>
+
+    <span class="n">agent</span> <span class="o">=</span> <span class="p">[</span><span class="n">_a</span> <span class="k">for</span> <span class="n">_a</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span> <span class="k">if</span> <span class="n">_a</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">agent_id</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_check_out_of_lane</span><span class="p">():</span>
+        <span class="n">road_half_width</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">road_width</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">relative_state</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">road_half_width</span>
+
+    <span class="k">def</span> <span class="nf">_check_exceed_max_rot</span><span class="p">():</span>
+        <span class="n">maximal_rotation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">10.</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">relative_state</span><span class="o">.</span><span class="n">yaw</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maximal_rotation</span>
+
+    <span class="k">def</span> <span class="nf">_check_crash</span><span class="p">():</span>
+        <span class="n">other_agents</span> <span class="o">=</span> <span class="p">[</span><span class="n">_a</span> <span class="k">for</span> <span class="n">_a</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span> <span class="k">if</span> <span class="n">_a</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="n">agent_id</span><span class="p">]</span>
+        <span class="n">agent2poly</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_x</span><span class="p">:</span> <span class="n">misc</span><span class="o">.</span><span class="n">agent2poly</span><span class="p">(</span>
+            <span class="n">_x</span><span class="p">,</span> <span class="n">ref_dynamics</span><span class="o">=</span><span class="n">agent</span><span class="o">.</span><span class="n">human_dynamics</span><span class="p">)</span>
+        <span class="n">poly</span> <span class="o">=</span> <span class="n">agent2poly</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span>
+        <span class="n">other_polys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">agent2poly</span><span class="p">,</span> <span class="n">other_agents</span><span class="p">))</span>
+        <span class="n">overlap</span> <span class="o">=</span> <span class="n">compute_overlap</span><span class="p">(</span><span class="n">poly</span><span class="p">,</span> <span class="n">other_polys</span><span class="p">)</span> <span class="o">/</span> <span class="n">poly</span><span class="o">.</span><span class="n">area</span>
+        <span class="n">crashed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">overlap</span> <span class="o">&gt;</span> <span class="n">task</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;overlap_threshold&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">crashed</span>
+
+    <span class="n">out_of_lane</span> <span class="o">=</span> <span class="n">_check_out_of_lane</span><span class="p">()</span>
+    <span class="n">exceed_max_rot</span> <span class="o">=</span> <span class="n">_check_exceed_max_rot</span><span class="p">()</span>
+    <span class="n">crashed</span> <span class="o">=</span> <span class="n">_check_crash</span><span class="p">()</span>
+    <span class="n">done</span> <span class="o">=</span> <span class="n">out_of_lane</span> <span class="ow">or</span> <span class="n">exceed_max_rot</span> <span class="ow">or</span> <span class="n">crashed</span> <span class="ow">or</span> <span class="n">agent</span><span class="o">.</span><span class="n">done</span>
+    <span class="n">other_info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;done&#39;</span><span class="p">:</span> <span class="n">done</span><span class="p">,</span>
+        <span class="s1">&#39;out_of_lane&#39;</span><span class="p">:</span> <span class="n">out_of_lane</span><span class="p">,</span>
+        <span class="s1">&#39;exceed_max_rot&#39;</span><span class="p">:</span> <span class="n">exceed_max_rot</span><span class="p">,</span>
+        <span class="s1">&#39;crashed&#39;</span><span class="p">:</span> <span class="n">crashed</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">done</span><span class="p">,</span> <span class="n">other_info</span>
+
+
+<span class="k">def</span> <span class="nf">default_reward_fn</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; An example definition of reward function. &quot;&quot;&quot;</span>
+    <span class="n">reward</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;done&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>  <span class="c1"># simply encourage survival</span>
+
+    <span class="k">return</span> <span class="n">reward</span><span class="p">,</span> <span class="p">{}</span>
+
+
+<div class="viewcode-block" id="MultiAgentBase"><a class="viewcode-back" href="../../../api_documentation/tasks.html#vista.tasks.multi_agent_base.MultiAgentBase">[docs]</a><span class="k">class</span> <span class="nc">MultiAgentBase</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; This class builds a simple environment with multiple cars in the scene, which</span>
+<span class="sd">    involves randomly initializing ado cars in the front of the ego car, checking collision</span>
+<span class="sd">    between cars, handling meshes for all virtual agents, and determining terminal condition.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        trace_paths (List[str]): A list of trace paths.</span>
+<span class="sd">        trace_config (Dict): Configuration of the trace.</span>
+<span class="sd">        car_configs (List[Dict]): Configuration of ``every`` cars.</span>
+<span class="sd">        sensors_configs (List[Dict]): Configuration of sensors on ``every`` cars.</span>
+<span class="sd">        task_config (Dict): Configuration of the task. An example (default) is,</span>
+
+<span class="sd">            &gt;&gt;&gt; DEFAULT_CONFIG = {</span>
+<span class="sd">                    &#39;n_agents&#39;: 1,</span>
+<span class="sd">                    &#39;mesh_dir&#39;: None,</span>
+<span class="sd">                    &#39;overlap_threshold&#39;: 0.05,</span>
+<span class="sd">                    &#39;max_resample_tries&#39;: 10,</span>
+<span class="sd">                    &#39;init_dist_range&#39;: [5., 10.],</span>
+<span class="sd">                    &#39;init_lat_noise_range&#39;: [-1., 1.],</span>
+<span class="sd">                    &#39;init_yaw_noise_range&#39;: [-0.0, 0.0],</span>
+<span class="sd">                    &#39;reward_fn&#39;: default_reward_fn,</span>
+<span class="sd">                    &#39;terminal_condition&#39;: default_terminal_condition</span>
+<span class="sd">                }</span>
+
+<span class="sd">            Note that both ``reward_fn`` and ``terminal_condition`` have function signature</span>
+<span class="sd">            as ``f(task, agent_id, **kwargs) -&gt; (value, dict)``. For more details, please check</span>
+<span class="sd">            the source code.</span>
+<span class="sd">        logging_level (str): Logging level (``DEBUG``, ``INFO``, ``WARNING``,</span>
+<span class="sd">                             ``ERROR``, ``CRITICAL``); default set to ``WARNING``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DEFAULT_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;n_agents&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;mesh_dir&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;overlap_threshold&#39;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+        <span class="s1">&#39;max_resample_tries&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s1">&#39;init_dist_range&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">5.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">],</span>
+        <span class="s1">&#39;init_lat_noise_range&#39;</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+        <span class="s1">&#39;init_yaw_noise_range&#39;</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+        <span class="s1">&#39;reward_fn&#39;</span><span class="p">:</span> <span class="n">default_reward_fn</span><span class="p">,</span>
+        <span class="s1">&#39;terminal_condition&#39;</span><span class="p">:</span> <span class="n">default_terminal_condition</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">trace_paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                 <span class="n">trace_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+                 <span class="n">car_configs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span>
+                 <span class="n">sensors_configs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]],</span>
+                 <span class="n">task_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(),</span>
+                 <span class="n">logging_level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;WARNING&#39;</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">logging_level</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">merge_dict</span><span class="p">(</span><span class="n">task_config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_CONFIG</span><span class="p">)</span>
+        <span class="n">n_agents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;n_agents&#39;</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="n">car_configs</span>
+        <span class="p">)</span> <span class="o">==</span> <span class="n">n_agents</span><span class="p">,</span> <span class="s1">&#39;Number of car config is not consistent with number of agents&#39;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="n">sensors_configs</span>
+        <span class="p">)</span> <span class="o">==</span> <span class="n">n_agents</span><span class="p">,</span> <span class="s1">&#39;Number of sensors config is not consistent with number of agents&#39;</span>
+        <span class="k">assert</span> <span class="n">car_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span>
+            <span class="s1">&#39;lookahead_road&#39;</span><span class="p">],</span> <span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">lookahead_road</span><span class="se">\&#39;</span><span class="s1"> in the first car config should be set to True&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="p">:</span> <span class="n">World</span> <span class="o">=</span> <span class="n">World</span><span class="p">(</span><span class="n">trace_paths</span><span class="p">,</span> <span class="n">trace_config</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_agents</span><span class="p">):</span>
+            <span class="n">agent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="o">.</span><span class="n">spawn_agent</span><span class="p">(</span><span class="n">car_configs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">sensor_config</span> <span class="ow">in</span> <span class="n">sensors_configs</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="n">sensor_type</span> <span class="o">=</span> <span class="n">sensor_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">sensor_type</span> <span class="o">==</span> <span class="s1">&#39;camera&#39;</span><span class="p">:</span>
+                    <span class="n">agent</span><span class="o">.</span><span class="n">spawn_camera</span><span class="p">(</span><span class="n">sensor_config</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;Unrecognized sensor type </span><span class="si">{</span><span class="n">sensor_type</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n_agents</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span>
+                <span class="s1">&#39;mesh_dir&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;Specify mesh_dir if n_agents &gt; 1&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_meshlib</span> <span class="o">=</span> <span class="n">MeshLib</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;mesh_dir&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MultiAgentBase.reset"><a class="viewcode-back" href="../../../api_documentation/tasks.html#vista.tasks.multi_agent_base.MultiAgentBase.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Reset the environment. This involves regular world reset, randomly</span>
+<span class="sd">        initializing ado agent in the front of the ego agent, and resetting</span>
+<span class="sd">        the mesh library for all virtual agents.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict: A dictionary with keys as agent IDs and values as observation</span>
+<span class="sd">            for each agent, which is also a dictionary with keys as sensor IDs</span>
+<span class="sd">            and values as sensory measurements.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Reset world; all agents are initialized at the same pointer to the trace</span>
+        <span class="n">new_trace_index</span><span class="p">,</span> <span class="n">new_segment_index</span><span class="p">,</span> <span class="n">new_frame_index</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">sample_new_location</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span><span class="p">:</span>
+            <span class="n">agent</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">new_trace_index</span><span class="p">,</span>
+                        <span class="n">new_segment_index</span><span class="p">,</span>
+                        <span class="n">new_frame_index</span><span class="p">,</span>
+                        <span class="n">step_sensors</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Randomly initialize ado agents in the front</span>
+        <span class="n">ref_dynamics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_agent</span><span class="o">.</span><span class="n">human_dynamics</span>
+        <span class="n">polys</span> <span class="o">=</span> <span class="p">[</span><span class="n">misc</span><span class="o">.</span><span class="n">agent2poly</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ego_agent</span><span class="p">,</span> <span class="n">ref_dynamics</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">agent</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_agent</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">collision_free</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">resample_tries</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">collision_free</span> <span class="ow">and</span> <span class="n">resample_tries</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span>
+                    <span class="s1">&#39;max_resample_tries&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_randomly_place_agent</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span>
+                <span class="n">poly</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">agent2poly</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">ref_dynamics</span><span class="p">)</span>
+                <span class="n">overlap</span> <span class="o">=</span> <span class="n">compute_overlap</span><span class="p">(</span><span class="n">poly</span><span class="p">,</span> <span class="n">polys</span><span class="p">)</span> <span class="o">/</span> <span class="n">poly</span><span class="o">.</span><span class="n">area</span>
+                <span class="n">collision_free</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span>
+                    <span class="n">overlap</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;overlap_threshold&#39;</span><span class="p">])</span>
+
+                <span class="n">resample_tries</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">polys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
+
+        <span class="c1"># Reset mesh library</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reset_meshlib</span><span class="p">()</span>
+
+        <span class="c1"># Get observation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_capture</span><span class="p">()</span>
+        <span class="n">observations</span> <span class="o">=</span> <span class="p">{</span><span class="n">_a</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="n">_a</span><span class="o">.</span><span class="n">observations</span> <span class="k">for</span> <span class="n">_a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">observations</span></div>
+
+<div class="viewcode-block" id="MultiAgentBase.step"><a class="viewcode-back" href="../../../api_documentation/tasks.html#vista.tasks.multi_agent_base.MultiAgentBase.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">30.</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Step the environment. This includes updating agents&#39; states, synthesizing</span>
+<span class="sd">        agents&#39; observations, checking terminal conditions, and computing rewards.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            actions (Dict[str, np.ndarray]):</span>
+<span class="sd">                A dictionary with keys as agent IDs and values as actions</span>
+<span class="sd">                to be executed to interact with the environment and other</span>
+<span class="sd">                agents.</span>
+<span class="sd">            dt (float): Elapsed time in second; default set to 1/30.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Return a tuple (``dict_a``, ``dict_b``, ``dict_c``, ``dict_d``),</span>
+<span class="sd">            where ``dict_a`` is the observation, ``dict_b`` is the reward,</span>
+<span class="sd">            ``dict_c`` is whether the episode terminates, ``dict_d`` is additional</span>
+<span class="sd">            informations for every agents; keys of every dictionary are agent IDs.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Update agents&#39; dynamics (state)</span>
+        <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span><span class="p">:</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="n">actions</span><span class="p">[</span><span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+            <span class="n">agent</span><span class="o">.</span><span class="n">step_dynamics</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">)</span>
+
+        <span class="c1"># Get agents&#39; sensory measurement</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_capture</span><span class="p">()</span>
+        <span class="n">observations</span> <span class="o">=</span> <span class="p">{</span><span class="n">_a</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="n">_a</span><span class="o">.</span><span class="n">observations</span> <span class="k">for</span> <span class="n">_a</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span><span class="p">}</span>
+
+        <span class="c1"># Check terminal conditions</span>
+        <span class="n">dones</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">infos_from_terminal_condition</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">terminal_condition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;terminal_condition&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span><span class="p">:</span>
+            <span class="n">dones</span><span class="p">[</span><span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">],</span> <span class="n">infos_from_terminal_condition</span><span class="p">[</span>
+                <span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">terminal_condition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+        <span class="c1"># Compute reward</span>
+        <span class="n">rewards</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">reward_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;reward_fn&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span><span class="p">:</span>
+            <span class="n">rewards</span><span class="p">[</span><span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">],</span> <span class="n">_</span> <span class="o">=</span> <span class="n">reward_fn</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span> <span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="o">**</span><span class="n">infos_from_terminal_condition</span><span class="p">[</span><span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">])</span>
+
+        <span class="c1"># Get info</span>
+        <span class="n">infos</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">observations</span><span class="p">,</span> <span class="n">rewards</span><span class="p">,</span> <span class="n">dones</span><span class="p">,</span> <span class="n">infos</span></div>
+
+<div class="viewcode-block" id="MultiAgentBase.set_seed"><a class="viewcode-back" href="../../../api_documentation/tasks.html#vista.tasks.multi_agent_base.MultiAgentBase.set_seed">[docs]</a>    <span class="k">def</span> <span class="nf">set_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Set random seed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            seed (int): Random seed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_randomly_place_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent</span><span class="p">:</span> <span class="n">Car</span><span class="p">):</span>
+        <span class="c1"># Randomly sampled a pose in the front of ego agent that is still on</span>
+        <span class="c1"># the road. This can be achieved by,</span>
+        <span class="c1"># (1) randomly sampling a distance from the ego agent</span>
+        <span class="c1"># (2) fetch the closest pointer from the road kept by the ego agent</span>
+        <span class="c1"># (3) slightly perturb the associated pose.</span>
+        <span class="n">tgt_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;init_dist_range&#39;</span><span class="p">])</span>
+
+        <span class="n">road</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ego_agent</span><span class="o">.</span><span class="n">road</span><span class="p">)</span>
+        <span class="n">dist_from_ego</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">road</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">tgt_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">tgt_dist</span> <span class="o">-</span> <span class="n">dist_from_ego</span><span class="p">))</span>
+        <span class="n">tgt_pose</span> <span class="o">=</span> <span class="n">road</span><span class="p">[</span><span class="n">tgt_idx</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">lat_noise</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;init_lat_noise_range&#39;</span><span class="p">])</span>
+        <span class="n">tgt_pose</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">lat_noise</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">tgt_pose</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">tgt_pose</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">lat_noise</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">tgt_pose</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">yaw_noise</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;init_yaw_noise_range&#39;</span><span class="p">])</span>
+        <span class="n">tgt_pose</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">yaw_noise</span>
+
+        <span class="c1"># Place agent given the randomly sampled pose</span>
+        <span class="n">agent</span><span class="o">.</span><span class="n">ego_dynamics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="n">tgt_pose</span><span class="p">)</span>
+        <span class="n">agent</span><span class="o">.</span><span class="n">step_dynamics</span><span class="p">(</span><span class="n">tgt_pose</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:],</span> <span class="n">dt</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_reset_meshlib</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_meshlib</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;n_agents&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Assign car width and length based on mesh size</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">agent</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span><span class="p">):</span>
+            <span class="n">agent</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meshlib</span><span class="o">.</span><span class="n">agents_meshes_dim</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">agent</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meshlib</span><span class="o">.</span><span class="n">agents_meshes_dim</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_sensor_capture</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Update mesh of virtual agents</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;n_agents&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">sensors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">other_agent</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">other_agent</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="c1"># compute relative pose to the ego agent</span>
+                    <span class="n">latlongyaw</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">compute_relative_latlongyaw</span><span class="p">(</span>
+                        <span class="n">other_agent</span><span class="o">.</span><span class="n">ego_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">3</span><span class="p">],</span>
+                        <span class="n">agent</span><span class="o">.</span><span class="n">human_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">3</span><span class="p">])</span>
+                    <span class="c1"># add to sensor</span>
+                    <span class="n">scene_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meshlib</span><span class="o">.</span><span class="n">agents_meshes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;agent_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="k">for</span> <span class="n">sensor</span> <span class="ow">in</span> <span class="n">agent</span><span class="o">.</span><span class="n">sensors</span><span class="p">:</span>
+                        <span class="n">sensor</span><span class="o">.</span><span class="n">update_scene_object</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">scene_object</span><span class="p">,</span>
+                                                   <span class="n">latlongyaw</span><span class="p">)</span>
+
+        <span class="c1"># Step sensors</span>
+        <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span><span class="p">:</span>
+            <span class="n">agent</span><span class="o">.</span><span class="n">step_sensors</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Configuration of this task. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ego_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Car</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Ego agent. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">world</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">World</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; :class:`World` of this task. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">seed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Random seed for the task and the associated :class:`World`. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span></div>
+
+
+<span class="k">def</span> <span class="nf">compute_overlap</span><span class="p">(</span><span class="n">poly</span><span class="p">:</span> <span class="n">Box</span><span class="p">,</span> <span class="n">polys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Box</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot; Compute overlapping area between 1 polygons and N polygons.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        poly (shapely.geometry.Box): A polygon.</span>
+<span class="sd">        poly (List): A list of polygon.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[float]: Intersecting area between polygons.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_polys</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">polys</span><span class="p">)</span>
+    <span class="n">overlap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_polys</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_polys</span><span class="p">):</span>
+        <span class="n">intersection</span> <span class="o">=</span> <span class="n">polys</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
+        <span class="n">overlap</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">intersection</span><span class="o">.</span><span class="n">area</span>
+    <span class="k">return</span> <span class="n">overlap</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

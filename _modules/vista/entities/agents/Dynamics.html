@@ -1,0 +1,494 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vista.entities.agents.Dynamics &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vista.entities.agents.Dynamics</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vista.entities.agents.Dynamics</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.integrate</span> <span class="k">as</span> <span class="nn">ode_solve</span>
+
+<span class="kn">from</span> <span class="nn">...utils</span> <span class="kn">import</span> <span class="n">logging</span>
+
+
+<span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Vehicle state without steering angle and velocity. &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">x</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">y</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">yaw</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">yaw</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">yaw</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Set values. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_yaw</span> <span class="o">=</span> <span class="n">yaw</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Reset to zeros. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Convert to numpy. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yaw</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Position of the car in x-axis. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">y</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Position of the car in y-axis. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">yaw</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Heading/yaw of the car. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yaw</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: &#39;</span> <span class="o">+</span> \
+               <span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">yaw</span><span class="si">}</span><span class="s1">]&gt;&#39;</span>
+
+
+<div class="viewcode-block" id="StateDynamics"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Dynamics.StateDynamics">[docs]</a><span class="k">class</span> <span class="nc">StateDynamics</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Simple continuous kinematic (bicycle) model of a rear-wheel driven vehicle.</span>
+<span class="sd">    Check out Eq.3 in https://www.autonomousrobots.nl/docs/17-schwartig-autonomy-icra.pdf</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (float): Position of the car in x-axis.</span>
+<span class="sd">        y (float): Position of the car in y-axis.</span>
+<span class="sd">        yaw (float): Heading/yaw of the car.</span>
+<span class="sd">        steering (float): Steering angle of tires instead of steering wheel.</span>
+<span class="sd">        speed (float): Forward speed.</span>
+<span class="sd">        steering_bound (list): Upper and lower bound of steering angle.</span>
+<span class="sd">        speed_bound (list): Upper and lower bound of speed.</span>
+<span class="sd">        wheel_base(float): Wheel base.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">x</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">y</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">yaw</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">steering</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">speed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span>
+                 <span class="n">steering_bound</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">],</span>
+                 <span class="n">speed_bound</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">15.</span><span class="p">],</span>
+                 <span class="n">wheel_base</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.8</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_yaw</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_steering</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_speed</span> <span class="o">=</span> <span class="mf">0.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">yaw</span><span class="p">,</span> <span class="n">steering</span><span class="p">,</span> <span class="n">speed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_steering_bound</span> <span class="o">=</span> <span class="n">steering_bound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_speed_bound</span> <span class="o">=</span> <span class="n">speed_bound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wheel_base</span> <span class="o">=</span> <span class="n">wheel_base</span>
+
+<div class="viewcode-block" id="StateDynamics.step"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Dynamics.StateDynamics.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">steering_velocity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+             <span class="n">acceleration</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+             <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+             <span class="n">max_steps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Step the vehicle state by solving ODE of the continuous kinematic (bicycle) model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            steering_velocity (float): Steering velocity (of tire angle).</span>
+<span class="sd">            acceleration (float): Acceleration.</span>
+<span class="sd">            dt (float): Elapsed time.</span>
+<span class="sd">            max_steps (int): Maximal step to run the ODE solver; default to 100.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: The updated state (x, y, yaw, tire angle, speed).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Define dynamics</span>
+        <span class="k">def</span> <span class="nf">_ode_func</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+            <span class="n">_x</span><span class="p">,</span> <span class="n">_y</span><span class="p">,</span> <span class="n">_phi</span><span class="p">,</span> <span class="n">_delta</span><span class="p">,</span> <span class="n">_v</span> <span class="o">=</span> <span class="n">z</span>
+            <span class="n">u_delta</span> <span class="o">=</span> <span class="n">steering_velocity</span>
+            <span class="n">u_a</span> <span class="o">=</span> <span class="n">acceleration</span>
+            <span class="n">new_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                <span class="o">-</span><span class="n">_v</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">_phi</span><span class="p">),</span>  <span class="c1"># swap x-y axis with sign change</span>
+                <span class="n">_v</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">_phi</span><span class="p">),</span>
+                <span class="n">_v</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wheel_base</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">_delta</span><span class="p">),</span>
+                <span class="n">u_delta</span><span class="p">,</span>
+                <span class="n">u_a</span>
+            <span class="p">])</span>
+            <span class="k">return</span> <span class="n">new_z</span>
+
+        <span class="c1"># Solve ODE</span>
+        <span class="n">z_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yaw</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steering</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_speed</span><span class="p">])</span>
+        <span class="n">solver</span> <span class="o">=</span> <span class="n">ode_solve</span><span class="o">.</span><span class="n">RK45</span><span class="p">(</span><span class="n">_ode_func</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">z_0</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">solver</span><span class="o">.</span><span class="n">status</span> <span class="ow">is</span> <span class="s1">&#39;running&#39;</span> <span class="ow">and</span> <span class="n">steps</span> <span class="o">&lt;=</span> <span class="n">max_steps</span><span class="p">:</span>
+            <span class="n">solver</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+            <span class="n">steps</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">dt</span> <span class="o">-</span> <span class="n">solver</span><span class="o">.</span><span class="n">t</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Reach max steps </span><span class="si">{}</span><span class="s1"> without reaching t_bound (</span><span class="si">{}</span><span class="s1"> &lt; </span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> \
+                <span class="n">max_steps</span><span class="p">,</span> <span class="n">solver</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">solver</span><span class="o">.</span><span class="n">t_bound</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yaw</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steering</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_speed</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">y</span>
+
+        <span class="c1"># Clip by value bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_steering</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_steering</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_steering_bound</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_speed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_speed</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_speed_bound</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="StateDynamics.numpy"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Dynamics.StateDynamics.numpy">[docs]</a>    <span class="k">def</span> <span class="nf">numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Return a numpy array of vehicle state.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Vehicle state.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yaw</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steering</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_speed</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="StateDynamics.copy"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Dynamics.StateDynamics.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create a copy. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">StateDynamics</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span>
+                             <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">,</span>
+                             <span class="n">yaw</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_yaw</span><span class="p">,</span>
+                             <span class="n">steering</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_steering</span><span class="p">,</span>
+                             <span class="n">speed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_speed</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="StateDynamics.update"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Dynamics.StateDynamics.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">yaw</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">steering</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+               <span class="n">speed</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Set state.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            x (float): Position of the car in x-axis.</span>
+<span class="sd">            y (float): Position of the car in y-axis.</span>
+<span class="sd">            yaw (float): Heading/yaw of the car.</span>
+<span class="sd">            steering (float): Steering angle of tires instead of steering wheel.</span>
+<span class="sd">            speed (float): Forward speed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_yaw</span> <span class="o">=</span> <span class="n">yaw</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_steering</span> <span class="o">=</span> <span class="n">steering</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_speed</span> <span class="o">=</span> <span class="n">speed</span></div>
+
+<div class="viewcode-block" id="StateDynamics.reset"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Dynamics.StateDynamics.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Reset all state to zeros. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Position of the car in x-axis. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">y</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Position of the car in y-axis. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">yaw</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Heading/yaw of the car. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yaw</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">steering</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Steering (tire) angle. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steering</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">steering_bound</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Lower and upper bound of steering (tire) angle. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steering_bound</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">speed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Speed. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_speed</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">speed_bound</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Lower and upper bound of speed. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_speed_bound</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: &#39;</span> <span class="o">+</span> \
+            <span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">steering</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">speed</span><span class="si">}</span><span class="s1">]&gt;&#39;</span></div>
+
+
+<div class="viewcode-block" id="curvature2tireangle"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Dynamics.curvature2tireangle">[docs]</a><span class="k">def</span> <span class="nf">curvature2tireangle</span><span class="p">(</span><span class="n">curvature</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">wheel_base</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Convert curvature to tire angle.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        curvature (float): Curvature.</span>
+<span class="sd">        wheel_base (float): Wheel base.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Tire angle.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">wheel_base</span> <span class="o">*</span> <span class="n">curvature</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="tireangle2curvature"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Dynamics.tireangle2curvature">[docs]</a><span class="k">def</span> <span class="nf">tireangle2curvature</span><span class="p">(</span><span class="n">tire_angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">wheel_base</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Convert tire angel to curvature.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tire_angle (float): Tire angle.</span>
+<span class="sd">        wheel_base (float): Wheel base.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Curvature.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">tire_angle</span><span class="p">)</span> <span class="o">/</span> <span class="n">wheel_base</span></div>
+
+
+<div class="viewcode-block" id="curvature2steering"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Dynamics.curvature2steering">[docs]</a><span class="k">def</span> <span class="nf">curvature2steering</span><span class="p">(</span><span class="n">curvature</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">wheel_base</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                       <span class="n">steering_ratio</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Convert curvature to steering angle.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        curvature (float): Curvature.</span>
+<span class="sd">        wheel_base (float): Wheel base.</span>
+<span class="sd">        steering_ratio (float): Steering ratio.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Steering (wheel) angle.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tire_angle</span> <span class="o">=</span> <span class="n">curvature2tireangle</span><span class="p">(</span><span class="n">curvature</span><span class="p">,</span> <span class="n">wheel_base</span><span class="p">)</span>
+    <span class="n">steering</span> <span class="o">=</span> <span class="n">tire_angle</span> <span class="o">*</span> <span class="n">steering_ratio</span> <span class="o">*</span> <span class="mf">180.</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+    <span class="k">return</span> <span class="n">steering</span></div>
+
+
+<div class="viewcode-block" id="steering2curvature"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Dynamics.steering2curvature">[docs]</a><span class="k">def</span> <span class="nf">steering2curvature</span><span class="p">(</span><span class="n">steering</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">wheel_base</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                       <span class="n">steering_ratio</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Convert steering angle to curvature.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        steering (float): Steering (wheel) angle.</span>
+<span class="sd">        wheel_base (float): Wheel base.</span>
+<span class="sd">        steering_ratio (float): Steering ratio.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Curvature.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tire_angle</span> <span class="o">=</span> <span class="n">steering</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.</span><span class="p">)</span> <span class="o">/</span> <span class="n">steering_ratio</span>
+    <span class="n">curvature</span> <span class="o">=</span> <span class="n">tireangle2curvature</span><span class="p">(</span><span class="n">tire_angle</span><span class="p">,</span> <span class="n">wheel_base</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">curvature</span></div>
+
+
+<div class="viewcode-block" id="update_with_perfect_controller"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Dynamics.update_with_perfect_controller">[docs]</a><span class="k">def</span> <span class="nf">update_with_perfect_controller</span><span class="p">(</span><span class="n">desired_state</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                   <span class="n">dynamics</span><span class="p">:</span> <span class="n">StateDynamics</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Update vehicle state assuming a perfect low-level controller. This</span>
+<span class="sd">    basically simulate that the low-level controller can &quot;instantaneously&quot;</span>
+<span class="sd">    achieve the desired state (e.g., steering (tire) angle and speed) with control</span>
+<span class="sd">    command (steering velocity and accleration) in vehicle dynamics.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        desired_state (List[float]): A list of desired vehicle state.</span>
+<span class="sd">        dt (float): Elapsed time.</span>
+<span class="sd">        dynamics (StateDynamics): Vehicle state.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># simulate condition when the desired state can be instantaneously achieved</span>
+    <span class="n">new_dyn</span> <span class="o">=</span> <span class="n">dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+    <span class="n">new_dyn</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">=</span> <span class="n">desired_state</span>
+    <span class="n">dynamics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="n">new_dyn</span><span class="p">)</span>
+    <span class="n">dynamics</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

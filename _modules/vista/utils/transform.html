@@ -1,0 +1,393 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vista.utils.transform &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vista.utils.transform</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vista.utils.transform</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Helper functions for spatial transformation. Follow right handed</span>
+<span class="sd">    (OpenGL) coordinate system. &quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial.transform</span> <span class="kn">import</span> <span class="n">Rotation</span>
+
+<span class="n">Vec</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+
+
+<div class="viewcode-block" id="rot2mat"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.transform.rot2mat">[docs]</a><span class="k">def</span> <span class="nf">rot2mat</span><span class="p">(</span><span class="n">rot</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;xyz&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Convert euler vector (with sequence order) to rotation matrix.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        rot (Vec): A 3-dimensional rotation vector in Euler angle.</span>
+<span class="sd">        seq (str): The order of the rotation vector, e.g., ``xzy``;</span>
+<span class="sd">                   default to ``xyz``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: A rotation matrix equivalent to the given rotation vector.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">Rotation</span><span class="o">.</span><span class="n">from_euler</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">rot</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">R</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="vec2mat"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.transform.vec2mat">[docs]</a><span class="k">def</span> <span class="nf">vec2mat</span><span class="p">(</span><span class="n">trans</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">rot</span><span class="p">:</span> <span class="n">Vec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Convert translation and rotation vector to transformation matrix.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        trans (Vec): A 3-dimensional translation vector.</span>
+<span class="sd">        rot (Vec): A 3-dimensional rotation vector.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: A 4-by-4 transformation matrix in SE(3).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">mat</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">trans</span>
+    <span class="n">mat</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">rot2mat</span><span class="p">(</span><span class="n">rot</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mat</span></div>
+
+
+<div class="viewcode-block" id="euler2quat"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.transform.euler2quat">[docs]</a><span class="k">def</span> <span class="nf">euler2quat</span><span class="p">(</span><span class="n">euler</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span>
+               <span class="n">seq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;xyz&#39;</span><span class="p">,</span>
+               <span class="n">degrees</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Vec</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Convert Euler rotation to quaternion.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        euler (Vec): A 3-dimensional rotation vector in Euler angle.</span>
+<span class="sd">        seq (str): The order of the rotation vector, e.g., ``xzy``;</span>
+<span class="sd">                   default to ``xyz``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Vec: A 4-dimensional vector that describes a quaternion.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">Rotation</span><span class="o">.</span><span class="n">from_euler</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">euler</span><span class="p">,</span> <span class="n">degrees</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">R</span><span class="o">.</span><span class="n">as_quat</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="quat2euler"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.transform.quat2euler">[docs]</a><span class="k">def</span> <span class="nf">quat2euler</span><span class="p">(</span><span class="n">quat</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span>
+               <span class="n">seq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;xyz&#39;</span><span class="p">,</span>
+               <span class="n">degrees</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Vec</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Convert quaternion to Euler rotation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        quat (Vec): A 4-dimensional vector that describes a quaternion.</span>
+<span class="sd">        seq (str): The order of the output Euler rotation vector; default</span>
+<span class="sd">                   to ``xyz``.</span>
+<span class="sd">        degrees (bool): Whether to convert the output rotation to degrees</span>
+<span class="sd">                        instead of radians; default to ``False``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Vec: A 3-dimensional rotation vector in Euler angle.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">Rotation</span><span class="o">.</span><span class="n">from_quat</span><span class="p">(</span><span class="n">quat</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">R</span><span class="o">.</span><span class="n">as_euler</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">degrees</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="latlongyaw2vec"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.transform.latlongyaw2vec">[docs]</a><span class="k">def</span> <span class="nf">latlongyaw2vec</span><span class="p">(</span><span class="n">latlongyaw</span><span class="p">:</span> <span class="n">Vec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Vec</span><span class="p">,</span> <span class="n">Vec</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot; Convert lateral, longitudinal, yaw compoenents to translational and</span>
+<span class="sd">    rotational vectors. Note that the longitudinal component will be negated</span>
+<span class="sd">    to follow right-handed OpenGL coordinate system.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        latlongyaw (Vec): A 3-dimensional vector with entries as lateral shift,</span>
+<span class="sd">                          longitudinal shift, and yaw difference.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Return a tuple (``Vec_a``, ``Vec_b``), where ``Vec_a`` is a 3-dimensional</span>
+<span class="sd">        translation vector and ``Vec_b`` is a 3-dimensional rotation vector in</span>
+<span class="sd">        Euler angle ``xyz``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lat</span><span class="p">,</span> <span class="n">long</span><span class="p">,</span> <span class="n">yaw</span> <span class="o">=</span> <span class="n">latlongyaw</span>
+    <span class="n">trans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lat</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">long</span><span class="p">])</span>
+    <span class="n">rot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="n">yaw</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">trans</span><span class="p">,</span> <span class="n">rot</span></div>
+
+
+<div class="viewcode-block" id="vec2latlongyaw"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.transform.vec2latlongyaw">[docs]</a><span class="k">def</span> <span class="nf">vec2latlongyaw</span><span class="p">(</span><span class="n">trans</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">rot</span><span class="p">:</span> <span class="n">Vec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Vec</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Convert translational and rotational vectors to lateral,</span>
+<span class="sd">    longitudinal, yaw compoenents. Note that the y translational</span>
+<span class="sd">    component will be negated to follow right-handed OpenGL</span>
+<span class="sd">    coordinate system.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        trans (Vec): A 3-dimensional translation vector.</span>
+<span class="sd">        rot (Vec): A 3-dimensional Euler rotation vector.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Vec: A 3-dimensional vector with entries as lateral shift,</span>
+<span class="sd">             longitudinal shift, and yaw difference.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">trans</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">trans</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">rot</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span></div>
+
+
+<div class="viewcode-block" id="compute_relative_latlongyaw"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.transform.compute_relative_latlongyaw">[docs]</a><span class="k">def</span> <span class="nf">compute_relative_latlongyaw</span><span class="p">(</span><span class="n">latlongyaw</span><span class="p">:</span> <span class="n">Vec</span><span class="p">,</span> <span class="n">latlongyaw_ref</span><span class="p">:</span> <span class="n">Vec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Vec</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Compute relative lateral, longitudinal, yaw compoenents.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        latlongyaw (Vec): A 3-dimensional vector with lateral,</span>
+<span class="sd">                          longitudinal, and yaw component.</span>
+<span class="sd">        latlongyaw_ref (Vec): A reference 3-dimensional vector with lateral,</span>
+<span class="sd">                              longitudinal, and yaw component.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Vec: A 3-dimensional vector that describe relative lateral,</span>
+<span class="sd">             longitudinal shift and yaw difference between the given</span>
+<span class="sd">             two vectors.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mat</span> <span class="o">=</span> <span class="n">vec2mat</span><span class="p">(</span><span class="o">*</span><span class="n">latlongyaw2vec</span><span class="p">(</span><span class="n">latlongyaw</span><span class="p">))</span>
+    <span class="n">mat_ref</span> <span class="o">=</span> <span class="n">vec2mat</span><span class="p">(</span><span class="o">*</span><span class="n">latlongyaw2vec</span><span class="p">(</span><span class="n">latlongyaw_ref</span><span class="p">))</span>
+    <span class="n">rel_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">SE3_inv</span><span class="p">(</span><span class="n">mat_ref</span><span class="p">),</span> <span class="n">mat</span><span class="p">)</span>
+    <span class="n">rel_trans</span><span class="p">,</span> <span class="n">rel_rot</span> <span class="o">=</span> <span class="n">mat2vec</span><span class="p">(</span><span class="n">rel_mat</span><span class="p">)</span>
+    <span class="n">rel_xyyaw</span> <span class="o">=</span> <span class="n">vec2latlongyaw</span><span class="p">(</span><span class="n">rel_trans</span><span class="p">,</span> <span class="n">rel_rot</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rel_xyyaw</span></div>
+
+
+<div class="viewcode-block" id="SE3_inv"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.transform.SE3_inv">[docs]</a><span class="k">def</span> <span class="nf">SE3_inv</span><span class="p">(</span><span class="n">T_in</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; More efficient matrix inversion for SE(3).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        T_in (np.ndarray): a 4-by-4 transformation matrix in SE(3).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: The inverse of ``T_in``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">R_in</span> <span class="o">=</span> <span class="n">T_in</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">t_in</span> <span class="o">=</span> <span class="n">T_in</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="n">R_out</span> <span class="o">=</span> <span class="n">R_in</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">t_out</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">R_out</span><span class="p">,</span> <span class="n">t_in</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">R_out</span><span class="p">,</span> <span class="n">t_out</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])))</span></div>
+
+
+<div class="viewcode-block" id="mat2vec"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.transform.mat2vec">[docs]</a><span class="k">def</span> <span class="nf">mat2vec</span><span class="p">(</span><span class="n">mat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+            <span class="n">seq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;xyz&#39;</span><span class="p">,</span>
+            <span class="n">degrees</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Vec</span><span class="p">,</span> <span class="n">Vec</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot; Convert transformation matrix to translational and rotational vectors.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mat (np.ndarray): A 4-by-4 transformation matrix in SE(3).</span>
+<span class="sd">        seq (str): The order of the output Euler rotation vector; default</span>
+<span class="sd">                   to ``xyz``.</span>
+<span class="sd">        degrees (bool): Whether to convert the output rotation to degrees</span>
+<span class="sd">                        instead of radians; default to ``False``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Return a tuple (``Vec_a``, ``Vec_b``), where ``Vec_a`` is a 3-dimensional</span>
+<span class="sd">        translation vector and ``Vec_b`` is a 3-dimensional rotation vector in</span>
+<span class="sd">        Euler angle ``xyz``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">trans</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">Rotation</span><span class="o">.</span><span class="n">from_matrix</span><span class="p">(</span><span class="n">mat</span><span class="p">[:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">rot</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">as_euler</span><span class="p">(</span><span class="n">seq</span><span class="p">,</span> <span class="n">degrees</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">trans</span><span class="p">,</span> <span class="n">rot</span></div>
+
+
+<div class="viewcode-block" id="pi2pi"><a class="viewcode-back" href="../../../api_documentation/utils.html#vista.utils.transform.pi2pi">[docs]</a><span class="k">def</span> <span class="nf">pi2pi</span><span class="p">(</span><span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Make sure angle is within -pi to pi.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        angle (float): Input angle in radians.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Output angle that is within range [-pi, pi]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">angle</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">:</span>
+        <span class="n">angle</span> <span class="o">-=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="k">if</span> <span class="n">angle</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">:</span>
+        <span class="n">angle</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="k">return</span> <span class="n">angle</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

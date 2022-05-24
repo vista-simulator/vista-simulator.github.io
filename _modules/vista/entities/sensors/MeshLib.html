@@ -1,0 +1,484 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vista.entities.sensors.MeshLib &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vista.entities.sensors.MeshLib</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vista.entities.sensors.MeshLib</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">import</span> <span class="nn">trimesh</span>
+<span class="kn">import</span> <span class="nn">pyrender</span>
+<span class="kn">from</span> <span class="nn">vista.utils</span> <span class="kn">import</span> <span class="n">transform</span>
+
+
+<div class="viewcode-block" id="MeshLib"><a class="viewcode-back" href="../../../../api_documentation/entities/sensors.html#vista.entities.sensors.MeshLib.MeshLib">[docs]</a><span class="k">class</span> <span class="nc">MeshLib</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Handle all meshes of actors (as opposed to scene/background itself) in the scene.</span>
+<span class="sd">    It basically reads in all meshes with .obj extension, calibrates the meshes such that</span>
+<span class="sd">    they are centered at the origin, and convert them to ``pyrender.Mesh`` for later usage.</span>
+<span class="sd">    Note that this class is written specifically for a set of meshes (`carpack01`) and thus</span>
+<span class="sd">    if there is a custom set of meshes, you would need to change how to read from the root</span>
+<span class="sd">    directory and to calibrate the mesh.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        root_dirs (List[str]): A list of root directories that contains meshes.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        AttributeError: If there is no mesh in the directory.</span>
+
+<span class="sd">    In the source code, there is a ``main`` function that uses this class independently that</span>
+<span class="sd">    performs rendering on meshes in pyrender.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">FORMATS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;.obj&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_dirs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="n">root_dirs</span> <span class="o">=</span> <span class="p">[</span><span class="n">root_dirs</span>
+                     <span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">root_dirs</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">root_dirs</span>
+        <span class="n">fpaths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">root_dir</span> <span class="ow">in</span> <span class="n">root_dirs</span><span class="p">:</span>
+            <span class="n">root_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">root_dir</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">sdir</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">root_dir</span><span class="p">):</span>
+                <span class="n">sdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_dir</span><span class="p">,</span> <span class="n">sdir</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">sdir</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">sdir</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">fm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">FORMATS</span><span class="p">:</span>  <span class="c1"># elements in the front has higher priority</span>
+                    <span class="n">fp</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">_fp</span> <span class="k">for</span> <span class="n">_fp</span> <span class="ow">in</span> <span class="n">fpath</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">_fp</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">fm</span>
+                    <span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">fpath</span> <span class="o">=</span> <span class="n">fp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">break</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot find mesh with supported format in </span><span class="si">{</span><span class="n">sdir</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sdir</span><span class="p">,</span> <span class="n">fpath</span><span class="p">)</span>
+                <span class="n">fpaths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fpath</span><span class="p">)</span>
+
+        <span class="n">tmeshes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">fpath</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fpaths</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">tm</span> <span class="o">=</span> <span class="n">trimesh</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fpath</span><span class="p">)</span>
+                <span class="n">tm</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="n">tm</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>  <span class="c1"># convert from scene to trimesh</span>
+                <span class="n">tm</span><span class="p">,</span> <span class="n">mesh_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calibrate_tm</span><span class="p">(</span><span class="n">tm</span><span class="p">)</span>
+                <span class="n">source</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">fpath</span><span class="p">)))</span>
+                <span class="n">body_images</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">color</span> <span class="ow">in</span> <span class="p">[</span>
+                        <span class="s1">&#39;Black&#39;</span><span class="p">,</span> <span class="s1">&#39;Blue&#39;</span><span class="p">,</span> <span class="s1">&#39;Green&#39;</span><span class="p">,</span> <span class="s1">&#39;Red&#39;</span><span class="p">,</span> <span class="s1">&#39;White&#39;</span><span class="p">,</span> <span class="s1">&#39;Yellow&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Grey&#39;</span>
+                <span class="p">]:</span>
+                    <span class="n">img_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fpath</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">color</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">img_path</span><span class="p">):</span>
+                        <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">img_path</span><span class="p">)</span>
+                        <span class="n">body_images</span><span class="p">[</span><span class="n">color</span><span class="p">]</span> <span class="o">=</span> <span class="n">img</span>
+                <span class="n">extra</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;body_images&#39;</span><span class="p">:</span> <span class="n">body_images</span><span class="p">}</span>
+                <span class="n">tmeshes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;fpath&#39;</span><span class="p">:</span> <span class="n">fpath</span><span class="p">,</span>
+                    <span class="s1">&#39;tmesh&#39;</span><span class="p">:</span> <span class="n">tm</span><span class="p">,</span>
+                    <span class="s1">&#39;mesh_dim&#39;</span><span class="p">:</span> <span class="n">mesh_dim</span><span class="p">,</span>
+                    <span class="s1">&#39;source&#39;</span><span class="p">:</span> <span class="n">source</span><span class="p">,</span>
+                    <span class="s1">&#39;extra&#39;</span><span class="p">:</span> <span class="n">extra</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Failed to load/process mesh </span><span class="si">{</span><span class="n">fpath</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmeshes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;No mesh in the directory&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fpaths</span> <span class="o">=</span> <span class="n">fpaths</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tmeshes</span> <span class="o">=</span> <span class="n">tmeshes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_agents_meshes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_agents_meshes_dim</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mesh_node</span> <span class="o">=</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">Node</span><span class="p">()</span>
+
+<div class="viewcode-block" id="MeshLib.reset"><a class="viewcode-back" href="../../../../api_documentation/entities/sensors.html#vista.entities.sensors.MeshLib.MeshLib.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_agents</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">random</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Reset agents meshes by sampling ``n_agents`` meshes from the mesh library.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n_agents (int): Number of agents.</span>
+<span class="sd">            random (bool): Whether to randomly sample ``n_agents`` meshes from</span>
+<span class="sd">                the entire mesh library; default is set to ``True``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">idcs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_tmeshes</span><span class="p">,</span> <span class="n">n_agents</span><span class="p">)</span> <span class="k">if</span> <span class="n">random</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_tmeshes</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_agents_meshes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_agents_meshes_dim</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">idcs</span><span class="p">:</span>
+            <span class="n">mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tmesh2mesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tmeshes</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_agents_meshes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_agents_meshes_dim</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tmeshes</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="s1">&#39;mesh_dim&#39;</span><span class="p">])</span></div>
+
+    <span class="k">def</span> <span class="nf">_tmesh2mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tm</span><span class="p">):</span>
+        <span class="c1"># NOTE:cannot make a copy to keep the original tmesh intact otherwise will cause memory leak</span>
+        <span class="n">tm_list</span> <span class="o">=</span> <span class="n">tm</span><span class="p">[</span><span class="s1">&#39;tmesh&#39;</span><span class="p">]</span>
+
+        <span class="c1"># randomization in tmesh object</span>
+        <span class="c1"># wheel, glass, optic, body = range(len(tm_list))</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">([</span><span class="n">v</span><span class="o">.</span><span class="n">triangles</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">tm_list</span>
+                          <span class="p">])</span>  <span class="c1"># NOTE: hacky way to get body mesh</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">tm</span><span class="p">[</span><span class="s1">&#39;extra&#39;</span><span class="p">][</span><span class="s1">&#39;body_images&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+        <span class="n">tm_list</span><span class="p">[</span><span class="n">body</span><span class="p">]</span><span class="o">.</span><span class="n">visual</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">tm</span><span class="p">[</span><span class="s1">&#39;extra&#39;</span><span class="p">][</span><span class="s1">&#39;body_images&#39;</span><span class="p">][</span><span class="n">color</span><span class="p">]</span>
+        <span class="n">Ns</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>  <span class="c1"># specular highlight (0-1000)</span>
+        <span class="n">tm_list</span><span class="p">[</span><span class="n">body</span><span class="p">]</span><span class="o">.</span><span class="n">visual</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">Ns</span><span class="o">=</span><span class="n">Ns</span><span class="p">)</span>
+
+        <span class="c1"># convert mesh color from rgb to bgr</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tm_list</span><span class="p">)):</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">tm_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">visual</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">image</span>
+            <span class="k">if</span> <span class="n">img</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tm_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">visual</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                    <span class="s1">&#39;RGB&#39;</span><span class="p">,</span>
+                    <span class="n">img</span><span class="o">.</span><span class="n">split</span><span class="p">()[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># randomization in mesh object</span>
+        <span class="n">mesh</span> <span class="o">=</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">Mesh</span><span class="o">.</span><span class="n">from_trimesh</span><span class="p">(</span><span class="n">tm_list</span><span class="p">)</span>
+        <span class="n">intensity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span>
+            <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>  <span class="c1"># don&#39;t change base color; only change intensity</span>
+
+        <span class="n">mesh</span><span class="o">.</span><span class="n">primitives</span><span class="p">[</span><span class="n">body</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">baseColorFactor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">intensity</span><span class="p">]</span> <span class="o">*</span>
+                                                                  <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="mf">1.</span><span class="p">])</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">primitives</span><span class="p">[</span><span class="n">body</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">metallicFactor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span>
+            <span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">primitives</span><span class="p">[</span><span class="n">body</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="o">.</span><span class="n">roughnessFactor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span>
+            <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mesh</span>
+
+    <span class="k">def</span> <span class="nf">_calibrate_tm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tm</span><span class="p">):</span>
+        <span class="c1"># calibrate mesh; shift and scale assuming car dimension (width, length) is roughly (2, 4)</span>
+        <span class="n">all_pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">_tm</span><span class="o">.</span><span class="n">vertices</span><span class="p">)</span> <span class="k">for</span> <span class="n">_tm</span> <span class="ow">in</span> <span class="n">tm</span><span class="p">],</span>
+                                 <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">pts_min</span> <span class="o">=</span> <span class="n">all_pts</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">pts_max</span> <span class="o">=</span> <span class="n">all_pts</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">pts_range</span> <span class="o">=</span> <span class="n">pts_max</span> <span class="o">-</span> <span class="n">pts_min</span>
+        <span class="n">pts_midpoint</span> <span class="o">=</span> <span class="p">(</span><span class="n">pts_min</span> <span class="o">+</span> <span class="n">pts_max</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="n">xzy_shift</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">pts_midpoint</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">pts_min</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                     <span class="o">-</span><span class="n">pts_midpoint</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>  <span class="c1"># on the ground</span>
+        <span class="n">rot</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]</span>  <span class="c1"># calibrate heading</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">pts_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># assume all car width = 2</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tm</span><span class="p">)):</span>
+            <span class="n">tr</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">vec2mat</span><span class="p">(</span><span class="n">xzy_shift</span><span class="p">,</span> <span class="n">rot</span><span class="p">)</span>
+            <span class="n">tm</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">apply_transform</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span>
+            <span class="n">tm</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">apply_scale</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">mesh_dim</span> <span class="o">=</span> <span class="p">[</span><span class="n">pts_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span> <span class="n">pts_range</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">tm</span><span class="p">,</span> <span class="n">mesh_dim</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fpaths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Paths to all meshes. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fpaths</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tmeshes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; A list of trimesh objects. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tmeshes</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_tmeshes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Number of trimeshes. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tmeshes</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">agents_meshes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">pyrender</span><span class="o">.</span><span class="n">Mesh</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; A list of meshes for all agents. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agents_meshes</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">agents_meshes_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot; The dimensions (width, length) of agents&#39; meshes. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agents_meshes_dim</span></div>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;PYOPENGL_PLATFORM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;egl&#39;</span>
+    <span class="kn">import</span> <span class="nn">cv2</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+    <span class="kn">import</span> <span class="nn">pdb</span>
+    <span class="kn">from</span> <span class="nn">vista.entities.sensors.camera_utils</span> <span class="kn">import</span> <span class="n">CameraParams</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Run meshlib test.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--mesh-dir&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Directory to meshes.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--out-dir&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Directory to rendered outputs.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--rig-path&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Path to the rig file.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--repeat&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Number of repeat to render the same mesh.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--show&#39;</span><span class="p">,</span>
+                        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Show image.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--dump-single&#39;</span><span class="p">,</span>
+                        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Dump every single image.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--dump-merged&#39;</span><span class="p">,</span>
+                        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Dump merged image.&#39;</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">out_dir</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">dump_single</span>
+                                            <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">dump_merged</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">out_dir</span><span class="p">)</span>
+
+    <span class="n">mesh_lib</span> <span class="o">=</span> <span class="n">MeshLib</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">mesh_dir</span><span class="p">)</span>
+
+    <span class="n">scene</span> <span class="o">=</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">Scene</span><span class="p">(</span><span class="n">ambient_light</span><span class="o">=</span><span class="p">[</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="o">.</span><span class="mi">5</span><span class="p">],</span>
+                           <span class="n">bg_color</span><span class="o">=</span><span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">])</span>
+    <span class="n">light</span> <span class="o">=</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">DirectionalLight</span><span class="p">([</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">],</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">scene</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">light</span><span class="p">)</span>
+
+    <span class="n">camera</span> <span class="o">=</span> <span class="n">CameraParams</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">rig_path</span><span class="p">,</span> <span class="s1">&#39;camera_front&#39;</span><span class="p">)</span>
+    <span class="n">camera</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">320</span><span class="p">)</span>
+    <span class="n">render_camera</span> <span class="o">=</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">IntrinsicsCamera</span><span class="p">(</span><span class="n">fx</span><span class="o">=</span><span class="n">camera</span><span class="o">.</span><span class="n">_fx</span><span class="p">,</span>
+                                              <span class="n">fy</span><span class="o">=</span><span class="n">camera</span><span class="o">.</span><span class="n">_fy</span><span class="p">,</span>
+                                              <span class="n">cx</span><span class="o">=</span><span class="n">camera</span><span class="o">.</span><span class="n">_cx</span><span class="p">,</span>
+                                              <span class="n">cy</span><span class="o">=</span><span class="n">camera</span><span class="o">.</span><span class="n">_cy</span><span class="p">,</span>
+                                              <span class="n">znear</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+                                              <span class="n">zfar</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span>
+    <span class="n">scene</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">render_camera</span><span class="p">)</span>
+
+    <span class="n">renderer</span> <span class="o">=</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">OffscreenRenderer</span><span class="p">(</span><span class="n">camera</span><span class="o">.</span><span class="n">get_width</span><span class="p">(),</span>
+                                          <span class="n">camera</span><span class="o">.</span><span class="n">get_height</span><span class="p">())</span>
+
+    <span class="n">all_colors</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">repeat</span><span class="p">):</span>
+        <span class="n">mesh_lib</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">mesh_lib</span><span class="o">.</span><span class="n">n_meshes</span><span class="p">,</span> <span class="n">random</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">all_colors</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mesh_lib</span><span class="o">.</span><span class="n">n_meshes</span><span class="p">):</span>
+            <span class="n">trans</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">]</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+            <span class="n">rot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)])</span>
+            <span class="n">mesh_node</span> <span class="o">=</span> <span class="n">mesh_lib</span><span class="o">.</span><span class="n">get_mesh_node</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">trans</span><span class="p">,</span> <span class="n">rot</span><span class="p">)</span>
+            <span class="n">scene</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">mesh_node</span><span class="p">)</span>
+
+            <span class="n">color</span><span class="p">,</span> <span class="n">depth</span> <span class="o">=</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">scene</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">show</span><span class="p">:</span>
+                <span class="n">cv2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s1">&#39;rendered RGB&#39;</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
+                <span class="n">cv2</span><span class="o">.</span><span class="n">waitKey</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">all_colors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">dump_single</span><span class="p">:</span>
+                <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span>
+                    <span class="n">mesh_lib</span><span class="o">.</span><span class="n">fpaths</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;_</span><span class="si">{</span><span class="n">r</span><span class="si">:</span><span class="s1">02d</span><span class="si">}</span><span class="s1">.png&#39;</span>
+                <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">fpath</span><span class="p">)</span>
+                <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
+
+            <span class="n">scene</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">mesh_node</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>  <span class="c1"># row image</span>
+        <span class="n">row_imgs</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">vl</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">vl</span> <span class="ow">in</span> <span class="n">all_colors</span><span class="p">]</span>
+        <span class="n">merged_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">row_imgs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">row_imgs</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">vl</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">vl</span> <span class="ow">in</span> <span class="n">all_colors</span><span class="p">]</span>
+        <span class="n">merged_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">row_imgs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">dump_merged</span><span class="p">:</span>
+        <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">out_dir</span><span class="p">,</span> <span class="s1">&#39;merged.png&#39;</span><span class="p">)</span>
+        <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span> <span class="n">merged_img</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

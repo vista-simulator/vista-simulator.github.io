@@ -1,0 +1,764 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Core &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Entities" href="entities/index.html" />
+    <link rel="prev" title="API Documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entities/index.html">Entities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">Utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tasks.html">Tasks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">API Documentation</a> &raquo;</li>
+        
+      <li>Core</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api_documentation/core.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="core">
+<span id="api-documentation-core"></span><h1>Core<a class="headerlink" href="#core" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="api-world"></span><dl class="py class">
+<dt id="vista.core.World.World">
+<em class="property">class </em><code class="sig-prename descclassname">vista.core.World.</code><code class="sig-name descname">World</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trace_paths</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">trace_config</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vista/core/World.html#World"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.World.World" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class specifies the <a class="reference internal" href="#vista.core.World.World" title="vista.core.World.World"><code class="xref py py-class docutils literal notranslate"><span class="pre">World</span></code></a> where all entities (i.e., agents and sensors)
+in VISTA lives in. The is built upon one or multiple traces pre-collected from the real world.
+Users can spawn agents (<code class="xref py py-class docutils literal notranslate"><span class="pre">Car</span></code>) in the <a class="reference internal" href="#vista.core.World.World" title="vista.core.World.World"><code class="xref py py-class docutils literal notranslate"><span class="pre">World</span></code></a>, where all agents will be visible
+while rendering sensory measurement. At reset, the <a class="reference internal" href="#vista.core.World.World" title="vista.core.World.World"><code class="xref py py-class docutils literal notranslate"><span class="pre">World</span></code></a> randomly sample an pointer
+in the dataset (conceptually retrieving a frame within a trace) as the initial condition for
+the simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trace_paths</strong> (<em>List</em><em>(</em><em>str</em><em>)</em>) – A list of paths to traces</p></li>
+<li><p><strong>trace_config</strong> (<em>Dict</em>) – Configuration of traces</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">world</span> <span class="o">=</span> <span class="n">vista</span><span class="o">.</span><span class="n">World</span><span class="p">(</span><span class="n">trace_paths</span><span class="p">,</span> <span class="n">trace_config</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">agent</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">spawn_agent</span><span class="p">(</span><span class="n">agent_config</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">world</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="vista.core.World.World.spawn_agent">
+<code class="sig-name descname">spawn_agent</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="entities/agents.html#vista.entities.agents.Car.Car" title="vista.entities.agents.Car.Car">vista.entities.agents.Car.Car</a><a class="reference internal" href="../_modules/vista/core/World.html#World.spawn_agent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.World.World.spawn_agent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spawn an agent in this world.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>Dict</em>) – Configuration of the agent.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The agent being spawned.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="entities/agents.html#vista.entities.agents.Car.Car" title="vista.entities.agents.Car.Car">Car</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.World.World.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">initial_dynamics_fn</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">[</span>str<span class="p">, </span>Callable<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">{}</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/vista/core/World.html#World.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.World.World.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the world. This includes (1) sample a new anchor point from the real-world
+dataset to be simulated from and (2) reset states for all agents.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>initial_dynamics_fn</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Callable</em><em>]</em>) – A dict mapping agent names to a function that initialize agents poses.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.World.World.sample_new_location">
+<code class="sig-name descname">sample_new_location</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">]</span><a class="reference internal" href="../_modules/vista/core/World.html#World.sample_new_location"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.World.World.sample_new_location" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample a pointer to the dataset for simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Return a tuple (<code class="docutils literal notranslate"><span class="pre">int_a</span></code>, <code class="docutils literal notranslate"><span class="pre">int_b</span></code>, <code class="docutils literal notranslate"><span class="pre">int_c</span></code>), where <code class="docutils literal notranslate"><span class="pre">int_a</span></code> is trace index,
+<code class="docutils literal notranslate"><span class="pre">int_b</span></code> is segment index, and <code class="docutils literal notranslate"><span class="pre">int_c</span></code> is frame index.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.World.World.sample_new_trace_index">
+<code class="sig-name descname">sample_new_trace_index</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="../_modules/vista/core/World.html#World.sample_new_trace_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.World.World.sample_new_trace_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample a new trace index based on number of frames in a trace.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An index to specify which trace to be simulated from.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.World.World.set_seed">
+<code class="sig-name descname">set_seed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">seed</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/vista/core/World.html#World.set_seed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.World.World.set_seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set random seed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>seed</strong> (<em>int</em>) – Random seed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.World.World.seed">
+<em class="property">property </em><code class="sig-name descname">seed</code><a class="headerlink" href="#vista.core.World.World.seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random seed for sampling pointer to the dataset during <a class="reference internal" href="#vista.core.World.World.reset" title="vista.core.World.World.reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reset()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.World.World.traces">
+<em class="property">property </em><code class="sig-name descname">traces</code><a class="headerlink" href="#vista.core.World.World.traces" title="Permalink to this definition">¶</a></dt>
+<dd><p>All trace attached to the <a class="reference internal" href="#vista.core.World.World" title="vista.core.World.World"><code class="xref py py-class docutils literal notranslate"><span class="pre">World</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.World.World.agents">
+<em class="property">property </em><code class="sig-name descname">agents</code><a class="headerlink" href="#vista.core.World.World.agents" title="Permalink to this definition">¶</a></dt>
+<dd><p>All agents that live in the <a class="reference internal" href="#vista.core.World.World" title="vista.core.World.World"><code class="xref py py-class docutils literal notranslate"><span class="pre">World</span></code></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="api-trace"></span><dl class="py class">
+<dt id="vista.core.Trace.Trace">
+<em class="property">class </em><code class="sig-prename descclassname">vista.core.Trace.</code><code class="sig-name descname">Trace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trace_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">trace_config</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vista/core/Trace.html#Trace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.Trace.Trace" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a helper class for handling a trace in the dataset. It allows straightforward
+access to any pointer in the trace. A trace is separated into several segments based on
+timestamps (split to segments if the difference of two consecutive timestamps is larger than
+a value). Each segment contains frames that can be accessed through specifying frame index.
+Note that frame index used in VISTA is not necessarily the same as frame number in the dataset.
+Overall, we use <code class="docutils literal notranslate"><span class="pre">segment_index</span></code>, <code class="docutils literal notranslate"><span class="pre">frame_index</span></code>, <code class="docutils literal notranslate"><span class="pre">frame_number</span></code>, <code class="docutils literal notranslate"><span class="pre">timestamp</span></code> in this
+class and there are several functions for conversion among them.
+The <a class="reference internal" href="#vista.core.Trace.Trace" title="vista.core.Trace.Trace"><code class="xref py py-class docutils literal notranslate"><span class="pre">Trace</span></code></a> also performs filtering including,</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Filter frames based on annotation label (<cite>video_label.csv</cite>) if there is any.</p></li>
+<li><p>Filter by end-of-trace and time difference across consecutive frames.</p></li>
+</ul>
+</div></blockquote>
+<p>This class also handles sampling of pointer to the trace, i.e., sampling segment and frame
+index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trace_path</strong> (<em>str</em>) – Path to a trace.</p></li>
+<li><p><strong>trace_config</strong> (<em>dict</em>) – Configuration of the trace object.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.find_segment_reset">
+<code class="sig-name descname">find_segment_reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="../_modules/vista/core/Trace.html#Trace.find_segment_reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.Trace.Trace.find_segment_reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample a segment index based on number of frames in each segment. Segments with more
+frames will be sampled with a higher probability.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Index of a segment.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.find_frame_reset">
+<code class="sig-name descname">find_frame_reset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">segment_index</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="../_modules/vista/core/Trace.html#Trace.find_frame_reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.Trace.Trace.find_frame_reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample a frame index in a segment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>segment_index</strong> (<em>int</em>) – Index of the segment to be sampled from.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Frame index.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>NotImplementedError</strong> – Unrecognized trace reset mode.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.get_master_timestamp">
+<code class="sig-name descname">get_master_timestamp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">segment_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">frame_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">check_end</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Union<span class="p">[</span>float<span class="p">, </span>Tuple<span class="p">[</span>bool<span class="p">, </span>float<span class="p">]</span><span class="p">]</span><a class="reference internal" href="../_modules/vista/core/Trace.html#Trace.get_master_timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.Trace.Trace.get_master_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get timestamp from the master sensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>segment_index</strong> (<em>int</em>) – Segment index.</p></li>
+<li><p><strong>frame_index</strong> (<em>int</em>) – Frame index.</p></li>
+<li><p><strong>check_end</strong> (<em>bool</em>) – Whether to check if the given segment and frame index
+exceed the end of the trace; default to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return a tuple (<code class="docutils literal notranslate"><span class="pre">bool_a</span></code>, <code class="docutils literal notranslate"><span class="pre">float_a</span></code>), where <code class="docutils literal notranslate"><span class="pre">bool_a</span></code> is whether the given segment
+and frame index exceed the end of the trace and <code class="docutils literal notranslate"><span class="pre">float_a</span></code> is timestamp; otherwise
+timestamp (float).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.get_master_frame_number">
+<code class="sig-name descname">get_master_frame_number</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">segment_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">frame_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">check_end</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Union<span class="p">[</span>int<span class="p">, </span>Tuple<span class="p">[</span>bool<span class="p">, </span>int<span class="p">]</span><span class="p">]</span><a class="reference internal" href="../_modules/vista/core/Trace.html#Trace.get_master_frame_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.Trace.Trace.get_master_frame_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get frame number from the master sensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>segment_index</strong> (<em>int</em>) – Segment index.</p></li>
+<li><p><strong>frame_index</strong> (<em>int</em>) – Frame index.</p></li>
+<li><p><strong>check_end</strong> (<em>bool</em>) – Whether to check if the given segment and frame index
+exceed the end of the trace; default to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return a tuple (<code class="docutils literal notranslate"><span class="pre">bool_a</span></code>, <code class="docutils literal notranslate"><span class="pre">int_a</span></code>), where <code class="docutils literal notranslate"><span class="pre">bool_a</span></code> is whether the given segment
+and frame index exceed the end of the trace and <code class="docutils literal notranslate"><span class="pre">int_a</span></code> is frame number; otherwise
+frame number (int).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.set_seed">
+<code class="sig-name descname">set_seed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">seed</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/vista/core/Trace.html#Trace.set_seed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.Trace.Trace.set_seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set random seed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>seed</strong> (<em>int</em>) – Random seed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.seed">
+<em class="property">property </em><code class="sig-name descname">seed</code><a class="headerlink" href="#vista.core.Trace.Trace.seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random seed for sampling pointer in <a class="reference internal" href="#vista.core.Trace.Trace.find_segment_reset" title="vista.core.Trace.Trace.find_segment_reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">find_segment_reset()</span></code></a>
+and <a class="reference internal" href="#vista.core.Trace.Trace.find_frame_reset" title="vista.core.Trace.Trace.find_frame_reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">find_frame_reset()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.trace_path">
+<em class="property">property </em><code class="sig-name descname">trace_path</code><a class="headerlink" href="#vista.core.Trace.Trace.trace_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path to the directory that contains all data of this trace.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.multi_sensor">
+<em class="property">property </em><code class="sig-name descname">multi_sensor</code><a class="headerlink" href="#vista.core.Trace.Trace.multi_sensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>MultiSensor object. Please check the definition of this class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.good_frames">
+<em class="property">property </em><code class="sig-name descname">good_frames</code><a class="headerlink" href="#vista.core.Trace.Trace.good_frames" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of good frame numbers, where keys are sensor names and
+values are lists of frame numbers (int).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.good_timestamps">
+<em class="property">property </em><code class="sig-name descname">good_timestamps</code><a class="headerlink" href="#vista.core.Trace.Trace.good_timestamps" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of good timestamps, where keys are sensor names and
+values are a list of timestamps (float).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.num_of_frames">
+<em class="property">property </em><code class="sig-name descname">num_of_frames</code><a class="headerlink" href="#vista.core.Trace.Trace.num_of_frames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of good frames.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.f_curvature">
+<em class="property">property </em><code class="sig-name descname">f_curvature</code><a class="headerlink" href="#vista.core.Trace.Trace.f_curvature" title="Permalink to this definition">¶</a></dt>
+<dd><p>A 1D interpolation function for curvature of the ego-car.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.f_speed">
+<em class="property">property </em><code class="sig-name descname">f_speed</code><a class="headerlink" href="#vista.core.Trace.Trace.f_speed" title="Permalink to this definition">¶</a></dt>
+<dd><p>A 1D interpolation function for speed of the ego-car.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.reset_mode">
+<em class="property">property </em><code class="sig-name descname">reset_mode</code><a class="headerlink" href="#vista.core.Trace.Trace.reset_mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trace reset mode.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.road_width">
+<em class="property">property </em><code class="sig-name descname">road_width</code><a class="headerlink" href="#vista.core.Trace.Trace.road_width" title="Permalink to this definition">¶</a></dt>
+<dd><p>Road width.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Trace.Trace.param_file">
+<em class="property">property </em><code class="sig-name descname">param_file</code><a class="headerlink" href="#vista.core.Trace.Trace.param_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path to the sensor parameters file for this trace.</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="api-display"></span><dl class="py class">
+<dt id="vista.core.Display.Display">
+<em class="property">class </em><code class="sig-prename descclassname">vista.core.Display.</code><code class="sig-name descname">Display</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">world</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#vista.core.World.World" title="vista.core.World.World">vista.core.World.World</a></span></em>, <em class="sig-param"><span class="n">fps</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">30</span></em>, <em class="sig-param"><span class="n">display_config</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vista/core/Display.html#Display"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.Display.Display" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a visualizer of VISTA simulator. It renders an image that contains visualization
+of all sensors from all agents and a top-down view that depicts road and all cars in the scene
+within a predefined range based on the state of the simulator (<code class="xref py py-class docutils literal notranslate"><span class="pre">World</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>world</strong> (<em>vista.core.World</em>) – World to be visualized.</p></li>
+<li><p><strong>fps</strong> (<em>int</em>) – Frame per second.</p></li>
+<li><p><strong>display_config</strong> (<em>Dict</em>) – Configuration for the display (visualization).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>AssertionError</strong> – Grid spec is inconsistent with maximal number of sensors across agents.</p>
+</dd>
+</dl>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">display_config</span> <span class="o">=</span> <span class="p">{</span>
+<span class="go">    &#39;road_buffer_size&#39;: 200,</span>
+<span class="go">    &#39;birdseye_map_size&#39;: (30, 20), # size of bev map in vertical and horizontal directions</span>
+<span class="go">    &#39;gs_bev_w&#39;: 2, # grid spec width for the birdseye view block</span>
+<span class="go">    &#39;gs_agent_w&#39;: 4, # grid spec width for an agent&#39;s block</span>
+<span class="go">    &#39;gs_h&#39;: 6, # grid spec height</span>
+<span class="go">    &#39;gui_scale&#39;: 1.0, # a global scale that determines the size of the figure</span>
+<span class="go">    &#39;vis_full_frame&#39;: False, # if Display should not crop/resize camera for visualization purposes</span>
+<span class="go">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">display</span> <span class="o">=</span> <span class="n">Display</span><span class="p">(</span><span class="n">world</span><span class="p">,</span> <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="vista.core.Display.Display.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/vista/core/Display.html#Display.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.Display.Display.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the visualizer. This should be called every time after
+<code class="xref py py-class docutils literal notranslate"><span class="pre">World</span></code> reset. It basically reset the cache of road data
+used in the top-down view visualization.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Display.Display.render">
+<code class="sig-name descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vista/core/Display.html#Display.render"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.Display.Display.render" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render an image that visualizes the simulator. This includes visualization
+of all sensors of every agent and a top-down view that depicts the road and all
+cars in the scene within a certain range. Note that it render visualization based
+on the current status of the world and should be called every time when there is
+any update to the simulator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An image of visualization for the simulator.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.Display.Display.ref_agent">
+<em class="property">property </em><code class="sig-name descname">ref_agent</code><a class="headerlink" href="#vista.core.Display.Display.ref_agent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Agent as a reference to compute poses of objects (e.g., cars, road)
+in visualization.</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="api-multi-sensor"></span><dl class="py class">
+<dt id="vista.core.core_utils.MultiSensor">
+<em class="property">class </em><code class="sig-prename descclassname">vista.core.core_utils.</code><code class="sig-name descname">MultiSensor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trace_dir</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">master_sensor</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'camera_front'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vista/core/core_utils/MultiSensor.html#MultiSensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.core_utils.MultiSensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class handles synchronization across multiple sensors in a trace. It basically
+reads timestamps files associated with every sensors existing in the trace and construct
+several helper functions for conversion between an unified timestamp used in the simulator
+and timestamp (or frame number, etc) of different sensors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trace_dir</strong> (<em>str</em>) – Directory to a trace.</p></li>
+<li><p><strong>master_sensor</strong> (<em>str</em>) – Name of the master sensor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>AssertionError</strong> – <ol class="arabic simple">
+<li><p>The name of the master sensor not included in a predefined</p></li>
+</ol>
+</p></li>
+<li><p><strong>set of topic names specified in</strong><strong>  (</strong><strong>2</strong><strong>) </strong><strong>No timestamp data for the master sensor.</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="vista.core.core_utils.MultiSensor.get_time_from_frame_num">
+<code class="sig-name descname">get_time_from_frame_num</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sensor</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">frame_num</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../_modules/vista/core/core_utils/MultiSensor.html#MultiSensor.get_time_from_frame_num"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.core_utils.MultiSensor.get_time_from_frame_num" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the timestamp associated to a frame in a video return
+None if we dont have information about that frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sensor</strong> (<em>str</em>) – Sensor name.</p></li>
+<li><p><strong>frame_num</strong> (<em>int</em>) – Frame number.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Timestamp associated with the given sensor and frame number.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.core_utils.MultiSensor.get_frames_from_times">
+<code class="sig-name descname">get_frames_from_times</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timestamps</span><span class="p">:</span> <span class="n">List<span class="p">[</span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">fetch_smaller</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; Dict<span class="p">[</span>str<span class="p">, </span>List<span class="p">[</span>int<span class="p">]</span><span class="p">]</span><a class="reference internal" href="../_modules/vista/core/core_utils/MultiSensor.html#MultiSensor.get_frames_from_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.core_utils.MultiSensor.get_frames_from_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes in a list of timestamps and returns corresponding frame
+numbers for each sensor. Note that since sensors are not necessarily
+sync’ed, the returned frame numbers are the one with the closest
+(smaller) timestamps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestamps</strong> (<em>list</em>) – A list of timestamps.</p></li>
+<li><p><strong>fetch_smaller</strong> (<em>bool</em>) – Whether to fetch the closes and smaller timestamps.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Corresponding frame numbers for all sensors.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.core_utils.MultiSensor.get_master_timestamps">
+<code class="sig-name descname">get_master_timestamps</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>float<span class="p">]</span><a class="reference internal" href="../_modules/vista/core/core_utils/MultiSensor.html#MultiSensor.get_master_timestamps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.core_utils.MultiSensor.get_master_timestamps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all timestamps of the main sensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list of timestamp.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.core_utils.MultiSensor.set_main_sensor">
+<code class="sig-name descname">set_main_sensor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sensor_type</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">sensor_name</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/vista/core/core_utils/MultiSensor.html#MultiSensor.set_main_sensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.core_utils.MultiSensor.set_main_sensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set main sensor based on sensor’s type and name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sensor_type</strong> (<em>str</em>) – Type of the sensor to be set (camera, lidar, or event camera).</p></li>
+<li><p><strong>sensor_name</strong> (<em>str</em>) – Name of the sensor to be set.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.core_utils.MultiSensor.sensor_names">
+<em class="property">property </em><code class="sig-name descname">sensor_names</code><a class="headerlink" href="#vista.core.core_utils.MultiSensor.sensor_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of all sensors’ names.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.core_utils.MultiSensor.camera_names">
+<em class="property">property </em><code class="sig-name descname">camera_names</code><a class="headerlink" href="#vista.core.core_utils.MultiSensor.camera_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of RGB cameras’ names.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.core_utils.MultiSensor.main_camera">
+<em class="property">property </em><code class="sig-name descname">main_camera</code><a class="headerlink" href="#vista.core.core_utils.MultiSensor.main_camera" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main RGB camera object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.core_utils.MultiSensor.lidar_names">
+<em class="property">property </em><code class="sig-name descname">lidar_names</code><a class="headerlink" href="#vista.core.core_utils.MultiSensor.lidar_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of LiDARs’ names.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.core_utils.MultiSensor.main_lidar">
+<em class="property">property </em><code class="sig-name descname">main_lidar</code><a class="headerlink" href="#vista.core.core_utils.MultiSensor.main_lidar" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main LiDAR object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.core_utils.MultiSensor.main_event_camera">
+<em class="property">property </em><code class="sig-name descname">main_event_camera</code><a class="headerlink" href="#vista.core.core_utils.MultiSensor.main_event_camera" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main event camera object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.core.core_utils.MultiSensor.master_sensor">
+<em class="property">property </em><code class="sig-name descname">master_sensor</code><a class="headerlink" href="#vista.core.core_utils.MultiSensor.master_sensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the master sensor.</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="api-label-search"></span><dl class="py class">
+<dt id="vista.core.core_utils.LabelSearch">
+<em class="property">class </em><code class="sig-prename descclassname">vista.core.core_utils.</code><code class="sig-name descname">LabelSearch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">time_of_day</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">weather</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">road_type</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">maneuver</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">direction</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">tag</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vista/core/core_utils/LabelSearch.html#LabelSearch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.core_utils.LabelSearch" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class handles annotations of the collected traces and filter out
+frames that are not good based on several fields including <code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">of</span> <span class="pre">day</span></code>,
+<code class="docutils literal notranslate"><span class="pre">weather</span></code>, <code class="docutils literal notranslate"><span class="pre">road</span> <span class="pre">type</span></code>, <code class="docutils literal notranslate"><span class="pre">maneuver</span></code>, <code class="docutils literal notranslate"><span class="pre">direction</span></code>, <code class="docutils literal notranslate"><span class="pre">tag</span></code>. Please
+check data annotation process for more details on each field.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_of_day</strong> (<em>str</em>) – Time of day to be considered as good frames.</p></li>
+<li><p><strong>weather</strong> (<em>str</em>) – Weather condition to be considered as good frames.</p></li>
+<li><p><strong>road_type</strong> (<em>str</em>) – Road type to be considered as good frames.</p></li>
+<li><p><strong>maneuver</strong> (<em>str</em>) – Human maneuver to be considered as good frames.</p></li>
+<li><p><strong>direction</strong> (<em>str</em>) – Direction to be considered as good frames.</p></li>
+<li><p><strong>tag</strong> (<em>str</em>) – Other tags to be considered as good frames.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="vista.core.core_utils.LabelSearch.find_good_labeled_frames">
+<code class="sig-name descname">find_good_labeled_frames</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trace_path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>numpy.ndarray<span class="p">, </span>numpy.ndarray<span class="p">]</span><a class="reference internal" href="../_modules/vista/core/core_utils/LabelSearch.html#LabelSearch.find_good_labeled_frames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.core_utils.LabelSearch.find_good_labeled_frames" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Find good frames based on video labels. Assume video labels have</dt><dd><p>consistent timestampswith the specified master sensor/topic.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>trace_path</strong> (<em>str</em>) – path to a trace</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return a tuple (<code class="docutils literal notranslate"><span class="pre">arr_1</span></code>, <code class="docutils literal notranslate"><span class="pre">arr_2</span></code>), where <code class="docutils literal notranslate"><span class="pre">arr_1</span></code> is a boolean
+mask of good frames, and <cite>arr_2</cite> is timestamps of all good frames.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="api-topic-names"></span><dl class="py class">
+<dt id="vista.core.core_utils.TopicNames">
+<em class="property">class </em><code class="sig-prename descclassname">vista.core.core_utils.</code><code class="sig-name descname">TopicNames</code><a class="reference internal" href="../_modules/vista/core/core_utils/TopicNames.html#TopicNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.core.core_utils.TopicNames" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class specifies (ROS) topic names of each sensors.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="entities/index.html" class="btn btn-neutral float-right" title="Entities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="API Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

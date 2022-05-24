@@ -1,0 +1,720 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vista.entities.sensors.EventCamera &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vista.entities.sensors.EventCamera</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vista.entities.sensors.EventCamera</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">ffio</span> <span class="kn">import</span> <span class="n">FFReader</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">from</span> <span class="nn">.camera_utils</span> <span class="kn">import</span> <span class="n">CameraParams</span><span class="p">,</span> <span class="n">ViewSynthesis</span>
+<span class="kn">from</span> <span class="nn">.BaseSensor</span> <span class="kn">import</span> <span class="n">BaseSensor</span>
+<span class="kn">from</span> <span class="nn">.Camera</span> <span class="kn">import</span> <span class="n">Camera</span>
+<span class="kn">from</span> <span class="nn">..Entity</span> <span class="kn">import</span> <span class="n">Entity</span>
+<span class="kn">from</span> <span class="nn">...utils</span> <span class="kn">import</span> <span class="n">logging</span><span class="p">,</span> <span class="n">misc</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">metavision_core.event_io.raw_reader</span> <span class="kn">import</span> <span class="n">RawReader</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+        <span class="s1">&#39;Fail to import module for event camera. Remember to do &#39;</span> <span class="o">+</span>
+        <span class="s1">&#39;source &lt;some-dir&gt;/openeb/build/utils/scripts/setup_env.sh&#39;</span> <span class="o">+</span>
+        <span class="s1">&#39;Can ignore this if not using it&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="EventCamera"><a class="viewcode-back" href="../../../../api_documentation/entities/sensors.html#vista.entities.sensors.EventCamera.EventCamera">[docs]</a><span class="k">class</span> <span class="nc">EventCamera</span><span class="p">(</span><span class="n">BaseSensor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; A event camera sensor object that synthesizes event data locally around the RGB</span>
+<span class="sd">    dataset given a viewpoint (potentially different from the dataset) and timestamp with</span>
+<span class="sd">    video interpolation and an event emission model.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        attach_to (Entity): A parent object (car) to be attached to.</span>
+<span class="sd">        config (Dict): Configuration of the sensor. An example (default) config is,</span>
+
+<span class="sd">            &gt;&gt;&gt; DEFAULT_CONFIG = {</span>
+<span class="sd">                &#39;rig_path&#39;: None,</span>
+<span class="sd">                # Event camera</span>
+<span class="sd">                &#39;name&#39;: &#39;event_camera_front&#39;,</span>
+<span class="sd">                &#39;original_size&#39;: (480, 640),</span>
+<span class="sd">                &#39;size&#39;: (240, 320),</span>
+<span class="sd">                &#39;optical_flow_root&#39;: &#39;../data_prep/Super-SloMo&#39;,</span>
+<span class="sd">                &#39;checkpoint&#39;: &#39;../data_prep/Super-SloMo/ckpt/SuperSloMo.ckpt&#39;,</span>
+<span class="sd">                &#39;lambda_flow&#39;: 0.5,</span>
+<span class="sd">                &#39;max_sf&#39;: 16,</span>
+<span class="sd">                &#39;use_gpu&#39;: True,</span>
+<span class="sd">                &#39;positive_threshold&#39;: 0.1,</span>
+<span class="sd">                &#39;sigma_positive_threshold&#39;: 0.02,</span>
+<span class="sd">                &#39;negative_threshold&#39;: -0.1,</span>
+<span class="sd">                &#39;sigma_negative_threshold&#39;: 0.02,</span>
+<span class="sd">                &#39;reproject_pixel&#39;: False,</span>
+<span class="sd">                &#39;subsampling_ratio&#39;: 0.5,</span>
+<span class="sd">                # RGB rendering</span>
+<span class="sd">                &#39;base_camera_name&#39;: &#39;camera_front&#39;,</span>
+<span class="sd">                &#39;base_size&#39;: (600, 960),</span>
+<span class="sd">                &#39;depth_mode&#39;: &#39;FIXED_PLANE&#39;,</span>
+<span class="sd">                &#39;use_lighting&#39;: False,</span>
+<span class="sd">            }</span>
+
+<span class="sd">    Note that event camera simulation requires third-party dependence and pretrained</span>
+<span class="sd">    checkpoint for video interpolation.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DEFAULT_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;rig_path&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># Event camera</span>
+        <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;event_camera_front&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;original_size&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">480</span><span class="p">,</span> <span class="mi">640</span><span class="p">),</span>
+        <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">240</span><span class="p">,</span> <span class="mi">320</span><span class="p">),</span>
+        <span class="s1">&#39;optical_flow_root&#39;</span><span class="p">:</span> <span class="s1">&#39;../data_prep/Super-SloMo&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;checkpoint&#39;</span><span class="p">:</span> <span class="s1">&#39;../data_prep/Super-SloMo/ckpt/SuperSloMo.ckpt&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;lambda_flow&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="s1">&#39;max_sf&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+        <span class="s1">&#39;use_gpu&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;positive_threshold&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="s1">&#39;sigma_positive_threshold&#39;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span>
+        <span class="s1">&#39;negative_threshold&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="s1">&#39;sigma_negative_threshold&#39;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span>
+        <span class="s1">&#39;reproject_pixel&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;subsampling_ratio&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="c1"># RGB rendering</span>
+        <span class="s1">&#39;base_camera_name&#39;</span><span class="p">:</span> <span class="s1">&#39;camera_front&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;base_size&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">600</span><span class="p">,</span> <span class="mi">960</span><span class="p">),</span>
+        <span class="s1">&#39;depth_mode&#39;</span><span class="p">:</span> <span class="s1">&#39;FIXED_PLANE&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;use_lighting&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attach_to</span><span class="p">:</span> <span class="n">Entity</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">EventCamera</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">attach_to</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;rig_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;rig_path&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_camera_param</span><span class="p">:</span> <span class="n">CameraParams</span> <span class="o">=</span> <span class="n">CameraParams</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;rig_path&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_camera_param</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_base_camera_param</span><span class="p">:</span> <span class="n">CameraParams</span> <span class="o">=</span> <span class="n">CameraParams</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;rig_path&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;base_camera_name&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_base_camera_param</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;base_size&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;use_synthesizer&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s1">&#39;use_synthesizer&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;use_synthesizer&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FFReader</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">vs_cam_param</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_camera_param</span> <span class="k">if</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;reproject_pixel&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camera_param</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_view_synthesis</span><span class="p">:</span> <span class="n">ViewSynthesis</span> <span class="o">=</span> <span class="n">ViewSynthesis</span><span class="p">(</span>
+                <span class="n">vs_cam_param</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">,</span> <span class="n">init_with_bg_mesh</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="c1"># load video interpolation model</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;optical_flow_root&#39;</span><span class="p">]))</span>
+            <span class="kn">from</span> <span class="nn">slowmo_warp</span> <span class="kn">import</span> <span class="n">SlowMoWarp</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;checkpoint&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;checkpoint&#39;</span><span class="p">])</span>
+            <span class="n">height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;base_size&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;reproject_pixel&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;base_size&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;reproject_pixel&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interp</span> <span class="o">=</span> <span class="n">SlowMoWarp</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+                                      <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+                                      <span class="n">checkpoint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;checkpoint&#39;</span><span class="p">],</span>
+                                      <span class="n">lambda_flow</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;lambda_flow&#39;</span><span class="p">],</span>
+                                      <span class="n">cuda</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;use_gpu&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prev_frame</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prev_timestamp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">RawReader</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prev_timestamp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="EventCamera.reset"><a class="viewcode-back" href="../../../../api_documentation/entities/sensors.html#vista.entities.sensors.EventCamera.EventCamera.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Reset Event camera sensor by initiating RGB data stream (as it&#39;s simulated</span>
+<span class="sd">        using RGB data) based on current reference pointer to the dataset.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Event camera (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">) reset&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;use_synthesizer&#39;</span><span class="p">]:</span>
+            <span class="c1"># Close stream already open</span>
+            <span class="k">for</span> <span class="n">stream</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">stream</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="c1"># Fetch video stream from the associated trace. This is mostly the same as how we handle</span>
+            <span class="c1"># video stream in Camera object. The difference and the reason of not sharing with</span>
+            <span class="c1"># Camera is (1) EventCamera can be a standalone object to be initiated and more</span>
+            <span class="c1"># importantly (2) TODO</span>
+            <span class="n">multi_sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">multi_sensor</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">multi_sensor</span><span class="o">.</span><span class="n">main_event_camera</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">camera_name</span> <span class="ow">in</span> <span class="n">multi_sensor</span><span class="o">.</span><span class="n">camera_names</span><span class="p">:</span>  <span class="c1"># base cameras are regular cameras</span>
+                    <span class="c1"># get video stream</span>
+                    <span class="n">video_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">trace_path</span><span class="p">,</span>
+                                              <span class="n">camera_name</span> <span class="o">+</span> <span class="s1">&#39;.avi&#39;</span><span class="p">)</span>
+                    <span class="n">cam_h</span><span class="p">,</span> <span class="n">cam_w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_camera_param</span><span class="o">.</span><span class="n">get_height</span><span class="p">(</span>
+                    <span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_camera_param</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span>
+                    <span class="n">stream</span> <span class="o">=</span> <span class="n">FFReader</span><span class="p">(</span><span class="n">video_path</span><span class="p">,</span>
+                                      <span class="n">custom_size</span><span class="o">=</span><span class="p">(</span><span class="n">cam_h</span><span class="p">,</span> <span class="n">cam_w</span><span class="p">),</span>
+                                      <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="p">[</span><span class="n">camera_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">stream</span>
+
+                    <span class="c1"># seek based on timestamp</span>
+                    <span class="n">frame_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">good_frames</span><span class="p">[</span><span class="n">camera_name</span><span class="p">][</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">segment_index</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">frame_index</span><span class="p">]</span>
+                    <span class="n">seek_sec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="p">[</span><span class="n">camera_name</span><span class="p">]</span><span class="o">.</span><span class="n">frame_to_secs</span><span class="p">(</span>
+                        <span class="n">frame_num</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="p">[</span><span class="n">camera_name</span><span class="p">]</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_sec</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># use shared streams from the main camera</span>
+                <span class="n">main_name</span> <span class="o">=</span> <span class="n">multi_sensor</span><span class="o">.</span><span class="n">main_event_camera</span>
+                <span class="n">main_sensor</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">_s</span> <span class="k">for</span> <span class="n">_s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sensors</span> <span class="k">if</span> <span class="n">_s</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">main_name</span>
+                <span class="p">]</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span>
+                    <span class="n">main_sensor</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Cannot find main sensor </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">main_name</span><span class="p">)</span>
+                <span class="n">main_sensor</span> <span class="o">=</span> <span class="n">main_sensor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">main_sensor</span><span class="p">,</span>
+                                  <span class="n">Camera</span><span class="p">),</span> <span class="s1">&#39;Main sensor is not Camera object&#39;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span> <span class="o">=</span> <span class="n">main_sensor</span><span class="o">.</span><span class="n">streams</span>
+
+            <span class="c1"># Add background mesh for all video stream in view synthesis. Note that we use camera</span>
+            <span class="c1"># parameters from the base camera since 2D-to-3D part is determined by the regular RGB</span>
+            <span class="c1"># video streams. Reprojecting back to 2D is then be handled by event camera</span>
+            <span class="c1"># configuration</span>
+            <span class="n">parent_sensor_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">_s</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">_s</span> <span class="k">for</span> <span class="n">_s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">sensors</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">camera_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">camera_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">view_synthesis</span><span class="o">.</span><span class="n">bg_mesh_names</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">camera_name</span> <span class="ow">in</span> <span class="n">parent_sensor_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">camera_param</span> <span class="o">=</span> <span class="n">parent_sensor_dict</span><span class="p">[</span>
+                            <span class="n">camera_name</span><span class="p">]</span><span class="o">.</span><span class="n">camera_param</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">camera_param</span> <span class="o">=</span> <span class="n">CameraParams</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;rig_path&#39;</span><span class="p">],</span>
+                                                    <span class="n">camera_name</span><span class="p">)</span>
+                        <span class="n">camera_param</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;base_size&#39;</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">view_synthesis</span><span class="o">.</span><span class="n">add_bg_mesh</span><span class="p">(</span><span class="n">camera_param</span><span class="p">)</span>
+
+            <span class="c1"># Reset previous frame</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prev_frame</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;reproject_pixel&#39;</span><span class="p">]:</span>
+                <span class="n">cam_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_param</span><span class="o">.</span><span class="n">get_height</span><span class="p">()</span>
+                <span class="n">cam_w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_param</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span>
+                <span class="n">world_rays</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view_synthesis</span><span class="o">.</span><span class="n">_world_rays</span><span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">base_camera_param</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                <span class="n">K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_param</span><span class="o">.</span><span class="n">get_K</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_uv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">world_rays</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">][:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># TODO: check if we need to close event data stream</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s1">&#39;Not sure if it is ok to not close the event data stream&#39;</span><span class="p">)</span>
+
+            <span class="n">raw_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">trace_path</span><span class="p">,</span>
+                                    <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">.raw&#39;</span><span class="p">)</span>
+            <span class="n">stream</span> <span class="o">=</span> <span class="n">RawReader</span><span class="p">(</span><span class="n">raw_path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">stream</span>
+
+            <span class="c1"># Reset previous timestamp</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prev_timestamp</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="EventCamera.capture"><a class="viewcode-back" href="../../../../api_documentation/entities/sensors.html#vista.entities.sensors.EventCamera.EventCamera.capture">[docs]</a>    <span class="k">def</span> <span class="nf">capture</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">timestamp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="n">update_rgb_frame_only</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Synthesize event data based on current timestamp and transformation</span>
+<span class="sd">        between the novel viewpoint to be simulated and the nominal viewpoint from</span>
+<span class="sd">        the pre-collected RGB dataset. In a very high level, it basically performs</span>
+<span class="sd">        video interpolation across consecutive RGB frames, extract events with an</span>
+<span class="sd">        event emission model, projects the events to the event camera space. Note</span>
+<span class="sd">        that the simulation is running a deep network (SuperSloMo) for video interpolation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            timestamp (float): Timestamp that allows to retrieve a pointer to</span>
+<span class="sd">                the dataset for data-driven simulation (synthesizing RGB image</span>
+<span class="sd">                from real RGB video).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: A synthesized event data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Event camera (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">) capture&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;use_synthesizer&#39;</span><span class="p">]:</span>
+            <span class="c1"># Get frame at the closest smaller timestamp from dataset. In event camera simulation,</span>
+            <span class="c1"># we don&#39;t use flow interpolation since event generation is already continuous-time.</span>
+            <span class="n">multi_sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">multi_sensor</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">multi_sensor</span><span class="o">.</span><span class="n">main_event_camera</span><span class="p">:</span>
+                <span class="n">all_frame_nums</span> <span class="o">=</span> <span class="n">multi_sensor</span><span class="o">.</span><span class="n">get_frames_from_times</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">timestamp</span><span class="p">],</span> <span class="n">fetch_smaller</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">camera_name</span> <span class="ow">in</span> <span class="n">multi_sensor</span><span class="o">.</span><span class="n">camera_names</span><span class="p">:</span>
+                    <span class="c1"># rgb camera stream</span>
+                    <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">streams</span><span class="p">[</span><span class="n">camera_name</span><span class="p">]</span>
+                    <span class="n">frame_num</span> <span class="o">=</span> <span class="n">all_frame_nums</span><span class="p">[</span><span class="n">camera_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">frame_num</span> <span class="o">&lt;</span> <span class="n">stream</span><span class="o">.</span><span class="n">frame_num</span><span class="p">:</span>
+                        <span class="n">seek_sec</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">frame_to_secs</span><span class="p">(</span><span class="n">frame_num</span><span class="p">)</span>
+                        <span class="n">stream</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_sec</span><span class="p">)</span>
+
+                    <span class="k">while</span> <span class="n">stream</span><span class="o">.</span><span class="n">frame_num</span> <span class="o">!=</span> <span class="n">frame_num</span><span class="p">:</span>
+                        <span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+            <span class="n">frames</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">camera_name</span> <span class="ow">in</span> <span class="n">multi_sensor</span><span class="o">.</span><span class="n">camera_names</span><span class="p">:</span>
+                <span class="n">frames</span><span class="p">[</span><span class="n">camera_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">streams</span><span class="p">[</span><span class="n">camera_name</span><span class="p">]</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="c1"># Synthesis by rendering with compensation of relative pose between event camera</span>
+            <span class="c1"># parameters and the base (RGB) camera parameters since we set the view synthesizer</span>
+            <span class="c1"># with event camera parameters and project frame to 3D meshes using base camera</span>
+            <span class="c1"># parameters</span>
+            <span class="n">lat</span><span class="p">,</span> <span class="n">long</span><span class="p">,</span> <span class="n">yaw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">relative_state</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">trans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lat</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="n">long</span><span class="p">])</span>
+            <span class="n">rot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="n">yaw</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+            <span class="n">rendered_frame</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">view_synthesis</span><span class="o">.</span><span class="n">synthesize</span><span class="p">(</span>
+                <span class="n">trans</span><span class="p">,</span> <span class="n">rot</span><span class="p">,</span> <span class="n">frames</span><span class="p">)</span>
+
+            <span class="c1"># work with RGB instead of BGR; need copy otherwise fail at converting to tensor</span>
+            <span class="n">rendered_frame</span> <span class="o">=</span> <span class="n">rendered_frame</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">update_rgb_frame_only</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_prev_frame</span> <span class="o">=</span> <span class="n">rendered_frame</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_prev_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">events</span> <span class="o">=</span> <span class="p">[[],</span> <span class="p">[]]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prev_frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+                        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interp</span><span class="o">.</span><span class="n">forward_warp</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">prev_frame</span><span class="p">,</span>
+                            <span class="n">rendered_frame</span><span class="p">,</span>
+                            <span class="n">max_sf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;max_sf&#39;</span><span class="p">],</span>
+                            <span class="n">use_max_flow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                    <span class="n">flow</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                        <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">_x</span><span class="p">:</span> <span class="n">_x</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                            <span class="n">out</span><span class="p">[</span><span class="s1">&#39;flow&#39;</span><span class="p">]))</span>
+
+                    <span class="n">interp</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prev_frame</span><span class="p">]</span> <span class="o">+</span> <span class="n">out</span><span class="p">[</span><span class="s1">&#39;interpolated&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">interp</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">last_interp_frame</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span>
+                            <span class="n">interp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_RGB2GRAY</span><span class="p">)</span>
+                        <span class="n">dt</span> <span class="o">=</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">prev_timestamp</span><span class="p">)</span> <span class="o">/</span> <span class="n">out</span><span class="p">[</span><span class="s1">&#39;sf&#39;</span><span class="p">]</span>
+                        <span class="n">event_timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prev_timestamp</span>
+                        <span class="k">for</span> <span class="n">interp_frame</span> <span class="ow">in</span> <span class="n">interp</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                            <span class="n">interp_frame</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span>
+                                <span class="n">interp_frame</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_RGB2GRAY</span><span class="p">)</span>
+                            <span class="n">log_d_interp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">interp_frame</span> <span class="o">/</span> <span class="mf">255.</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span> <span class="o">-</span> \
+                                        <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">last_interp_frame</span> <span class="o">/</span> <span class="mf">255.</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+                            <span class="n">sample_fn</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sig</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sig</span><span class="p">),</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+                            <span class="n">positive_C</span> <span class="o">=</span> <span class="n">sample_fn</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;positive_threshold&#39;</span><span class="p">],</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;sigma_positive_threshold&#39;</span><span class="p">])</span>
+                            <span class="n">negative_C</span> <span class="o">=</span> <span class="o">-</span><span class="n">sample_fn</span><span class="p">(</span>
+                                <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;negative_threshold&#39;</span><span class="p">],</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;sigma_negative_threshold&#39;</span><span class="p">])</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;reproject_pixel&#39;</span><span class="p">]:</span>
+                                <span class="n">cam_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_param</span><span class="o">.</span><span class="n">get_height</span><span class="p">()</span>
+                                <span class="n">cam_w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_param</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span>
+
+                                <span class="k">def</span> <span class="nf">extract_uv</span><span class="p">(</span><span class="n">_mask</span><span class="p">):</span>
+                                    <span class="n">_fl_mask</span> <span class="o">=</span> <span class="n">_mask</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                                    <span class="n">_uv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uv</span><span class="p">[</span><span class="n">_fl_mask</span><span class="p">]</span>
+
+                                    <span class="n">_mode</span> <span class="o">=</span> <span class="mi">1</span>
+                                    <span class="k">if</span> <span class="n">_mode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                        <span class="n">_uv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">_uv</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+                                    <span class="k">elif</span> <span class="n">_mode</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                                        <span class="n">_uv_floor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">_uv</span><span class="p">)</span>
+                                        <span class="n">_uv_ceil</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">_uv</span><span class="p">)</span>
+                                        <span class="n">diff_floor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">_uv</span> <span class="o">-</span> <span class="n">_uv_floor</span><span class="p">)</span>
+                                        <span class="n">diff_ceil</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">_uv</span> <span class="o">-</span> <span class="n">_uv_ceil</span><span class="p">)</span>
+
+                                        <span class="n">n_uv</span> <span class="o">=</span> <span class="n">_uv</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                                        <span class="n">zeros</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_uv</span><span class="p">,</span> <span class="p">))</span>
+                                        <span class="n">_uv_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+                                            <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span>
+                                                <span class="n">_uv_floor</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+                                                <span class="n">_uv_floor</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">zeros</span>
+                                            <span class="p">],</span>
+                                                     <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                                            <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span>
+                                                <span class="n">_uv_floor</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+                                                <span class="n">_uv_ceil</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">zeros</span>
+                                            <span class="p">],</span>
+                                                     <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                                            <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span>
+                                                <span class="n">_uv_ceil</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+                                                <span class="n">_uv_floor</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">zeros</span>
+                                            <span class="p">],</span>
+                                                     <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                                            <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span>
+                                                <span class="n">_uv_ceil</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">_uv_ceil</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+                                                <span class="n">zeros</span>
+                                            <span class="p">],</span>
+                                                     <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                                        <span class="p">],</span>
+                                                                   <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+                                        <span class="n">_uv_score</span><span class="p">[:</span><span class="n">n_uv</span><span class="p">,</span>
+                                                  <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">diff_ceil</span><span class="p">[:,</span>
+                                                                 <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">diff_ceil</span><span class="p">[:,</span>
+                                                                                <span class="mi">1</span><span class="p">]</span>
+                                        <span class="n">_uv_score</span><span class="p">[</span>
+                                            <span class="n">n_uv</span><span class="p">:</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n_uv</span><span class="p">,</span>
+                                            <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">diff_ceil</span><span class="p">[:,</span>
+                                                           <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">diff_floor</span><span class="p">[:,</span>
+                                                                           <span class="mi">1</span><span class="p">]</span>
+                                        <span class="n">_uv_score</span><span class="p">[</span>
+                                            <span class="mi">2</span> <span class="o">*</span> <span class="n">n_uv</span><span class="p">:</span><span class="mi">3</span> <span class="o">*</span> <span class="n">n_uv</span><span class="p">,</span>
+                                            <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">diff_floor</span><span class="p">[:,</span>
+                                                            <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">diff_ceil</span><span class="p">[:,</span>
+                                                                           <span class="mi">1</span><span class="p">]</span>
+                                        <span class="n">_uv_score</span><span class="p">[</span>
+                                            <span class="mi">3</span> <span class="o">*</span> <span class="n">n_uv</span><span class="p">:,</span>
+                                            <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">diff_floor</span><span class="p">[:,</span>
+                                                            <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">diff_floor</span><span class="p">[:,</span>
+                                                                            <span class="mi">1</span><span class="p">]</span>
+
+                                        <span class="n">_uv</span> <span class="o">=</span> <span class="n">_uv_score</span><span class="p">[</span>
+                                            <span class="n">_uv_score</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.2</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                                                <span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">_uv_floor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">_uv</span><span class="p">)</span>
+                                        <span class="n">_uv_ceil</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">_uv</span><span class="p">)</span>
+                                        <span class="n">_uv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+                                            <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span>
+                                                <span class="n">_uv_floor</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">_uv_floor</span><span class="p">[:,</span>
+                                                                           <span class="mi">1</span><span class="p">]</span>
+                                            <span class="p">],</span>
+                                                     <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                                            <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span>
+                                                <span class="n">_uv_floor</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">_uv_ceil</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+                                            <span class="p">],</span>
+                                                     <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                                            <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span>
+                                                <span class="n">_uv_ceil</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">_uv_floor</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+                                            <span class="p">],</span>
+                                                     <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                                            <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span>
+                                                <span class="n">_uv_ceil</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">_uv_ceil</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+                                            <span class="p">],</span>
+                                                     <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                                        <span class="p">],</span>
+                                                             <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                                        <span class="n">_uv</span> <span class="o">=</span> <span class="n">_uv</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+                                    <span class="n">_valid_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">_uv</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">_uv</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">cam_h</span><span class="p">)</span> <span class="o">&amp;</span> \
+                                                <span class="p">(</span><span class="n">_uv</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">_uv</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">cam_w</span><span class="p">)</span>
+                                    <span class="n">_uv</span> <span class="o">=</span> <span class="n">_uv</span><span class="p">[</span><span class="n">_valid_mask</span><span class="p">]</span>
+                                    <span class="k">return</span> <span class="n">_uv</span>
+
+                                <span class="n">positive_uv</span> <span class="o">=</span> <span class="n">extract_uv</span><span class="p">(</span>
+                                    <span class="n">log_d_interp</span> <span class="o">&gt;=</span> <span class="n">positive_C</span><span class="p">)</span>
+                                <span class="n">negative_uv</span> <span class="o">=</span> <span class="n">extract_uv</span><span class="p">(</span>
+                                    <span class="n">log_d_interp</span> <span class="o">&lt;=</span> <span class="n">negative_C</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">positive_uv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span>
+                                    <span class="n">log_d_interp</span> <span class="o">&gt;=</span> <span class="n">positive_C</span><span class="p">)</span>
+                                <span class="n">negative_uv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span>
+                                    <span class="n">log_d_interp</span> <span class="o">&lt;=</span> <span class="n">negative_C</span><span class="p">)</span>
+                            <span class="n">event_timestamp</span> <span class="o">+=</span> <span class="n">dt</span>
+                            <span class="n">event_timestamp_us</span> <span class="o">=</span> <span class="p">(</span><span class="n">event_timestamp</span> <span class="o">*</span>
+                                                  <span class="mf">1e6</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+                            <span class="n">positive_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+                                <span class="n">positive_uv</span><span class="p">,</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">([</span><span class="n">event_timestamp_us</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                        <span class="p">(</span><span class="n">positive_uv</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+                            <span class="p">],</span>
+                                                             <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="n">negative_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+                                <span class="n">negative_uv</span><span class="p">,</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">([</span><span class="n">event_timestamp_us</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                        <span class="p">(</span><span class="n">negative_uv</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">))</span>
+                            <span class="p">],</span>
+                                                             <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="n">events</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">positive_events</span><span class="p">)</span>
+                            <span class="n">events</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">negative_events</span><span class="p">)</span>
+                            <span class="n">last_interp_frame</span> <span class="o">=</span> <span class="n">interp_frame</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_prev_frame</span> <span class="o">=</span> <span class="n">rendered_frame</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_prev_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+
+                <span class="k">return</span> <span class="n">events</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_timestamp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">streams</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+
+                <span class="n">multi_sensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">multi_sensor</span>
+                <span class="n">ref_sensor</span> <span class="o">=</span> <span class="n">multi_sensor</span><span class="o">.</span><span class="n">master_sensor</span>
+                <span class="c1"># TODO: didn&#39;t do dedicated alignment between ros clock and event camera clock</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="s1">&#39;No dedicated alignment between ros and event camera clocks&#39;</span>
+                <span class="p">)</span>
+                <span class="n">offset_timestamp</span> <span class="o">=</span> <span class="n">multi_sensor</span><span class="o">.</span><span class="n">get_time_from_frame_num</span><span class="p">(</span>
+                    <span class="n">ref_sensor</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+                <span class="n">event_timestamp_us</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_prev_timestamp</span> <span class="o">-</span> <span class="n">offset_timestamp</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e6</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">event_timestamp_us</span> <span class="o">&lt;</span> <span class="n">stream</span><span class="o">.</span><span class="n">current_time</span><span class="p">:</span>
+                    <span class="n">stream</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>  <span class="c1"># cannot seek backward</span>
+                <span class="n">stream</span><span class="o">.</span><span class="n">seek_time</span><span class="p">(</span><span class="n">event_timestamp_us</span><span class="p">)</span>
+
+                <span class="n">dt_us</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">timestamp</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_timestamp</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e6</span><span class="p">)</span>
+                <span class="n">events</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">load_delta_t</span><span class="p">(</span><span class="n">dt_us</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">stream</span><span class="o">.</span><span class="n">is_done</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">_done</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="n">ori_cam_h</span><span class="p">,</span> <span class="n">ori_cam_w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;original_size&#39;</span><span class="p">]</span>
+                <span class="n">cam_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_param</span><span class="o">.</span><span class="n">get_height</span><span class="p">()</span>
+                <span class="n">cam_w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">camera_param</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span>
+
+                <span class="c1"># NOTE: do subsampling otherwise too many events left</span>
+                <span class="n">subsample_factor</span> <span class="o">=</span> <span class="p">(</span><span class="n">cam_h</span> <span class="o">*</span> <span class="n">cam_w</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span>
+                    <span class="n">ori_cam_h</span> <span class="o">*</span> <span class="n">ori_cam_w</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;subsampling_ratio&#39;</span><span class="p">]</span>
+                <span class="n">n_events</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">subsample_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_events</span><span class="p">),</span>
+                                                  <span class="n">size</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n_events</span> <span class="o">*</span>
+                                                           <span class="n">subsample_factor</span><span class="p">),</span>
+                                                  <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">events_x</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="n">subsample_mask</span><span class="p">]</span>
+                <span class="n">events_y</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">][</span><span class="n">subsample_mask</span><span class="p">]</span>
+                <span class="n">events_p</span> <span class="o">=</span> <span class="n">events</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">][</span><span class="n">subsample_mask</span><span class="p">]</span>
+
+                <span class="n">mul_x</span> <span class="o">=</span> <span class="n">cam_w</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">ori_cam_w</span><span class="p">)</span>
+                <span class="n">mul_y</span> <span class="o">=</span> <span class="n">cam_h</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">ori_cam_h</span><span class="p">)</span>
+                <span class="n">events_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">events_x</span> <span class="o">*</span> <span class="n">mul_x</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+                <span class="n">events_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">events_y</span> <span class="o">*</span> <span class="n">mul_y</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+                <span class="n">positive_mask</span> <span class="o">=</span> <span class="n">events_p</span> <span class="o">==</span> <span class="mi">1</span>
+                <span class="n">negative_mask</span> <span class="o">=</span> <span class="n">events_p</span> <span class="o">==</span> <span class="mi">0</span>
+                <span class="n">positive_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">events_y</span><span class="p">[</span><span class="n">positive_mask</span><span class="p">],</span> <span class="n">events_x</span><span class="p">[</span><span class="n">positive_mask</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+                <span class="n">negative_events</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">events_y</span><span class="p">[</span><span class="n">negative_mask</span><span class="p">],</span> <span class="n">events_x</span><span class="p">[</span><span class="n">negative_mask</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+
+                <span class="n">events</span> <span class="o">=</span> <span class="p">[[</span><span class="n">positive_events</span><span class="p">],</span> <span class="p">[</span><span class="n">negative_events</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">events</span> <span class="o">=</span> <span class="p">[[],</span> <span class="p">[]]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prev_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+
+            <span class="k">return</span> <span class="n">events</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Configuration of this sensor. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">streams</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FFReader</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Data stream of RGB image/video dataset to be simulated from. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_streams</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">camera_param</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CameraParams</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Camera parameters of the virtual event camera. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camera_param</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">base_camera_param</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CameraParams</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Camera parameters of the RGB camera. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_camera_param</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">view_synthesis</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ViewSynthesis</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; View synthesizer object. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_view_synthesis</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">prev_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Previous RGB frame. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_frame</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">prev_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Previous timestamp. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_timestamp</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

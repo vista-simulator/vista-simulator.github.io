@@ -1,0 +1,275 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vista.core.core_utils.LabelSearch &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vista.core.core_utils.LabelSearch</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vista.core.core_utils.LabelSearch</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="LabelSearch"><a class="viewcode-back" href="../../../../api_documentation/core.html#vista.core.core_utils.LabelSearch">[docs]</a><span class="k">class</span> <span class="nc">LabelSearch</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; This class handles annotations of the collected traces and filter out</span>
+<span class="sd">    frames that are not good based on several fields including ``time of day``,</span>
+<span class="sd">    ``weather``, ``road type``, ``maneuver``, ``direction``, ``tag``. Please</span>
+<span class="sd">    check data annotation process for more details on each field.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        time_of_day (str): Time of day to be considered as good frames.</span>
+<span class="sd">        weather (str): Weather condition to be considered as good frames.</span>
+<span class="sd">        road_type (str): Road type to be considered as good frames.</span>
+<span class="sd">        maneuver (str): Human maneuver to be considered as good frames.</span>
+<span class="sd">        direction (str): Direction to be considered as good frames.</span>
+<span class="sd">        tag (str): Other tags to be considered as good frames.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">FIELDS</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;time_of_day&#39;</span><span class="p">,</span> <span class="s1">&#39;weather&#39;</span><span class="p">,</span> <span class="s1">&#39;road_type&#39;</span><span class="p">,</span> <span class="s1">&#39;maneuver&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;direction&#39;</span><span class="p">,</span> <span class="s1">&#39;tag&#39;</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_of_day</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">weather</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">road_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">maneuver</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">direction</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_time_of_day</span> <span class="o">=</span> <span class="n">time_of_day</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_weather</span> <span class="o">=</span> <span class="n">weather</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_road_type</span> <span class="o">=</span> <span class="n">road_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_maneuver</span> <span class="o">=</span> <span class="n">maneuver</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_direction</span> <span class="o">=</span> <span class="n">direction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tag</span> <span class="o">=</span> <span class="n">tag</span>
+
+<div class="viewcode-block" id="LabelSearch.find_good_labeled_frames"><a class="viewcode-back" href="../../../../api_documentation/core.html#vista.core.core_utils.LabelSearch.find_good_labeled_frames">[docs]</a>    <span class="k">def</span> <span class="nf">find_good_labeled_frames</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">trace_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Find good frames based on video labels. Assume video labels have</span>
+<span class="sd">            consistent timestampswith the specified master sensor/topic.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            trace_path (str): path to a trace</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Return a tuple (``arr_1``, ``arr_2``), where ``arr_1`` is a boolean</span>
+<span class="sd">            mask of good frames, and `arr_2` is timestamps of all good frames.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">trace_path</span><span class="p">,</span> <span class="s1">&#39;video_labels.csv&#39;</span><span class="p">)</span>
+        <span class="n">has_video_label</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fpath</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">has_video_label</span><span class="p">:</span>
+            <span class="n">is_good_frames</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">good_timestamps</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">f</span><span class="p">,</span>
+                                        <span class="n">fieldnames</span><span class="o">=</span><span class="n">LabelSearch</span><span class="o">.</span><span class="n">FIELDS</span><span class="p">,</span>
+                                        <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>  <span class="c1"># for each line</span>
+                    <span class="c1"># assume consistency between master sensor and video labels</span>
+                    <span class="n">good_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)))</span>
+
+                    <span class="n">match</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">regex</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                        <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">field</span><span class="p">)</span>  <span class="c1"># get the search regex</span>
+                        <span class="n">res</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="n">field</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">res</span><span class="p">:</span>
+                            <span class="n">match</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">break</span>
+                    <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                        <span class="n">is_good_frames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">is_good_frames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">is_good_frames</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">is_good_frames</span><span class="p">)</span>
+            <span class="n">good_timestamps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">good_timestamps</span><span class="p">)[</span><span class="n">is_good_frames</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">is_good_frames</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">good_timestamps</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">is_good_frames</span><span class="p">,</span> <span class="n">good_timestamps</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

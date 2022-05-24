@@ -1,0 +1,373 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vista.core.core_utils.MultiSensor &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vista.core.core_utils.MultiSensor</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vista.core.core_utils.MultiSensor</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">TopicNames</span>
+<span class="kn">from</span> <span class="nn">...utils</span> <span class="kn">import</span> <span class="n">logging</span>
+
+
+<div class="viewcode-block" id="MultiSensor"><a class="viewcode-back" href="../../../../api_documentation/core.html#vista.core.core_utils.MultiSensor">[docs]</a><span class="k">class</span> <span class="nc">MultiSensor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; This class handles synchronization across multiple sensors in a trace. It basically</span>
+<span class="sd">    reads timestamps files associated with every sensors existing in the trace and construct</span>
+<span class="sd">    several helper functions for conversion between an unified timestamp used in the simulator</span>
+<span class="sd">    and timestamp (or frame number, etc) of different sensors.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        trace_dir (str): Directory to a trace.</span>
+<span class="sd">        master_sensor (str): Name of the master sensor.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        AssertionError: (1) The name of the master sensor not included in a predefined</span>
+<span class="sd">        set of topic names specified in  (2) No timestamp data for the master sensor.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">trace_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">master_sensor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">TopicNames</span><span class="o">.</span><span class="n">master_topic</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trace_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">trace_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_master_sensor</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">master_sensor</span>
+
+        <span class="c1"># Get frame-to-timestamp mapping for every sensors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_frame_to_time</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">sensor_topic_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">TopicNames</span><span class="o">.</span><span class="n">lidar_3d</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">TopicNames</span><span class="o">.</span><span class="n">cameras</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">master_sensor</span> <span class="ow">in</span> <span class="n">sensor_topic_names</span><span class="p">,</span> \
+            <span class="sa">f</span><span class="s1">&#39;Master sensor </span><span class="si">{</span><span class="n">master_sensor</span><span class="si">}</span><span class="s1"> not in topic names&#39;</span> <span class="o">+</span> \
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sensor_topic_names</span><span class="si">}</span><span class="s1">. Please check camera config or TopicNames.py&#39;</span>
+        <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trace_dir</span><span class="p">):</span>
+            <span class="n">sensor_name</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sensor_name</span> <span class="ow">in</span> <span class="n">sensor_topic_names</span><span class="p">:</span>
+                <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trace_dir</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.csv&#39;</span><span class="p">:</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span>
+                                         <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span>
+                                         <span class="n">skip_header</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                         <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                    <span class="n">frames</span><span class="p">,</span> <span class="n">times</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">ext</span> <span class="o">==</span> <span class="s2">&quot;.h5&quot;</span><span class="p">:</span>
+                    <span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">fpath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+                    <span class="n">times</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">]</span>
+                    <span class="n">frames</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">continue</span>  <span class="c1"># Not implemented yet...</span>
+
+                <span class="n">frame_to_time</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">)):</span>
+                    <span class="n">frame_to_time</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">frames</span><span class="p">[</span><span class="n">i</span><span class="p">])]</span> <span class="o">=</span> <span class="n">times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_frame_to_time</span><span class="p">[</span><span class="n">sensor_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame_to_time</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sensor_frame_to_time</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">assert</span> <span class="n">master_sensor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_names</span><span class="p">,</span> \
+            <span class="sa">f</span><span class="s1">&#39;No timestamp data for the master sensor </span><span class="si">{</span><span class="n">master_sensor</span><span class="si">}</span><span class="s1">&#39;</span>
+
+<div class="viewcode-block" id="MultiSensor.get_time_from_frame_num"><a class="viewcode-back" href="../../../../api_documentation/core.html#vista.core.core_utils.MultiSensor.get_time_from_frame_num">[docs]</a>    <span class="k">def</span> <span class="nf">get_time_from_frame_num</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sensor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">frame_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Compute the timestamp associated to a frame in a video return</span>
+<span class="sd">        None if we dont have information about that frame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sensor (str): Sensor name.</span>
+<span class="sd">            frame_num (int): Frame number.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Timestamp associated with the given sensor and frame number.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_frame_to_time</span><span class="p">[</span><span class="n">sensor</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">frame_num</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MultiSensor.get_frames_from_times"><a class="viewcode-back" href="../../../../api_documentation/core.html#vista.core.core_utils.MultiSensor.get_frames_from_times">[docs]</a>    <span class="k">def</span> <span class="nf">get_frames_from_times</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">timestamps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+            <span class="n">fetch_smaller</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot; Takes in a list of timestamps and returns corresponding frame</span>
+<span class="sd">        numbers for each sensor. Note that since sensors are not necessarily</span>
+<span class="sd">        sync&#39;ed, the returned frame numbers are the one with the closest</span>
+<span class="sd">        (smaller) timestamps.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            timestamps (list): A list of timestamps.</span>
+<span class="sd">            fetch_smaller (bool): Whether to fetch the closes and smaller timestamps.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Corresponding frame numbers for all sensors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">frames</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">timestamps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sensor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensor_names</span><span class="p">:</span>
+            <span class="n">frame_to_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_frame_to_time</span><span class="p">[</span><span class="n">sensor</span><span class="p">]</span>
+
+            <span class="n">frames</span><span class="p">[</span><span class="n">sensor</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">pointer</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">timestamps</span><span class="p">:</span>
+                <span class="k">while</span> <span class="n">pointer</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame_to_time</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">ts</span> <span class="o">&gt;=</span> <span class="n">frame_to_time</span><span class="p">[</span><span class="n">pointer</span><span class="p">]</span> <span class="ow">and</span> <span class="n">ts</span> <span class="o">&lt;</span> <span class="n">frame_to_time</span><span class="p">[</span>
+                            <span class="n">pointer</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">fetch_smaller</span><span class="p">:</span>
+                            <span class="n">frames</span><span class="p">[</span><span class="n">sensor</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointer</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">frame_to_time</span><span class="p">[</span><span class="n">pointer</span><span class="p">]</span> <span class="o">-</span> <span class="n">ts</span><span class="p">)</span> <span class="o">&gt;=</span> \
+                                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ts</span> <span class="o">-</span> <span class="n">frame_to_time</span><span class="p">[</span><span class="n">pointer</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]):</span>
+                                <span class="n">frames</span><span class="p">[</span><span class="n">sensor</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointer</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">frames</span><span class="p">[</span><span class="n">sensor</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pointer</span><span class="p">)</span>
+                        <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">pointer</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">frames</span></div>
+
+<div class="viewcode-block" id="MultiSensor.get_master_timestamps"><a class="viewcode-back" href="../../../../api_documentation/core.html#vista.core.core_utils.MultiSensor.get_master_timestamps">[docs]</a>    <span class="k">def</span> <span class="nf">get_master_timestamps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Get all timestamps of the main sensor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of timestamp.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># using values() works since it&#39;s an ordered dict</span>
+        <span class="n">timestamps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_frame_to_time</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_master_sensor</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">timestamps</span></div>
+
+<div class="viewcode-block" id="MultiSensor.set_main_sensor"><a class="viewcode-back" href="../../../../api_documentation/core.html#vista.core.core_utils.MultiSensor.set_main_sensor">[docs]</a>    <span class="k">def</span> <span class="nf">set_main_sensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sensor_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sensor_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Set main sensor based on sensor&#39;s type and name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sensor_type (str): Type of the sensor to be set (camera, lidar, or event camera).</span>
+<span class="sd">            sensor_name (str): Name of the sensor to be set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">sensor_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;camera&#39;</span><span class="p">,</span> <span class="s1">&#39;lidar&#39;</span><span class="p">,</span> <span class="s1">&#39;event_camera&#39;</span><span class="p">]</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_main_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sensor_type</span><span class="p">),</span> <span class="n">sensor_name</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sensor_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; A list of all sensors&#39; names. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_names</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">camera_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; A list of RGB cameras&#39; names. &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Hacky way to include RGB camera with name front_center&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">_x</span> <span class="k">for</span> <span class="n">_x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_names</span>
+            <span class="k">if</span> <span class="s1">&#39;camera&#39;</span> <span class="ow">in</span> <span class="n">_x</span> <span class="ow">or</span> <span class="n">_x</span> <span class="o">==</span> <span class="s1">&#39;front_center&#39;</span>
+        <span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">main_camera</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; The main RGB camera object. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main_camera</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_main_camera&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lidar_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; A list of LiDARs&#39; names. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_x</span> <span class="k">for</span> <span class="n">_x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_names</span> <span class="k">if</span> <span class="s1">&#39;lidar&#39;</span> <span class="ow">in</span> <span class="n">_x</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">main_lidar</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; The main LiDAR object &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main_lidar</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_main_lidar&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">main_event_camera</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; The main event camera object. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_main_event_camera</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_main_event_camera&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">master_sensor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; The name of the master sensor. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_master_sensor</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

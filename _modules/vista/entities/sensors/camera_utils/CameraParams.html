@@ -1,0 +1,507 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vista.entities.sensors.camera_utils.CameraParams &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vista.entities.sensors.camera_utils.CameraParams</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vista.entities.sensors.camera_utils.CameraParams</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ET</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">from</span> <span class="nn">....utils.parse_params</span> <span class="kn">import</span> <span class="n">ParamsFile</span>
+
+
+<div class="viewcode-block" id="CameraParams"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams">[docs]</a><span class="k">class</span> <span class="nc">CameraParams</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; The **CameraParams** object stores information pertaining to a single physical</span>
+<span class="sd">    camera mounted on the car. It is useful for encapsulating the relevant calibration</span>
+<span class="sd">    information for easy access in other modules.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        rig_path (str): Path to RIG.xml that specifies camera parameters.</span>
+<span class="sd">        name (str): Name of the camera identifier to initialize. Must be</span>
+<span class="sd">                    a valid TopicName and present inside the RIG.xml file.</span>
+<span class="sd">                    Can also specify `None` to auto grab the first named camera</span>
+<span class="sd">                    in the RIG.xml file.</span>
+<span class="sd">        params (dict): Dictionary camera parameters to instantiate with. If</span>
+<span class="sd">                       not provided then the rig_path is used</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if `name` is provided but not found in the rig file.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">rig_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="k">assert</span> <span class="p">(</span><span class="n">rig_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="o">^</span> <span class="p">(</span><span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rig_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pfile</span> <span class="o">=</span> <span class="n">ParamsFile</span><span class="p">(</span><span class="n">rig_path</span><span class="p">)</span>
+            <span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">pfile</span><span class="o">.</span><span class="n">parse_camera</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fx</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;fx&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fy</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;fy&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cx</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;cx&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cy</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;cy&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distortion</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;distortion&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_quaternion</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;quaternion&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_position</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_yaw</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;yaw&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;yaw&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_roi</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;roi&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_roi_angle</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;roi_angle&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">180.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__compute_other_forms</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CameraParams.resize"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams.resize">[docs]</a>    <span class="k">def</span> <span class="nf">resize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Scales the camera object and adjusts the internal parameters such</span>
+<span class="sd">        that it projects images of a certain size.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            height (int): New height of the camera images in pixels.</span>
+<span class="sd">            width (int): New width of the camera images in pixels.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">scale_y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">height</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span>
+        <span class="n">scale_x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span>
+
+        <span class="c1"># Update height and width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+
+        <span class="c1"># Scale focal length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fx</span> <span class="o">*=</span> <span class="n">scale_x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fy</span> <span class="o">*=</span> <span class="n">scale_y</span>
+
+        <span class="c1"># Scale optical center</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cx</span> <span class="o">*=</span> <span class="n">scale_x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cy</span> <span class="o">*=</span> <span class="n">scale_y</span>
+
+        <span class="c1"># ROI</span>
+        <span class="n">roi</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roi</span><span class="p">]</span>
+        <span class="n">roi</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">roi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale_y</span><span class="p">,</span> <span class="n">roi</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale_x</span><span class="p">,</span> <span class="n">roi</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale_y</span><span class="p">,</span>
+            <span class="n">roi</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale_x</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_roi</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">roi</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__compute_other_forms</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CameraParams.crop"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams.crop">[docs]</a>    <span class="k">def</span> <span class="nf">crop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">j1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">i2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">j2</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Crops a camera object to a given region of interest specified by</span>
+<span class="sd">        the coordinates of the top left (i1,j1) and bottom right (i2,j2) corner.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            i1 (int): Top row of ROI.</span>
+<span class="sd">            j1 (int): Left column of ROI.</span>
+<span class="sd">            i2 (int): Bottom row of ROI.</span>
+<span class="sd">            j2 (int): Right column of ROI.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Focal length stays the same</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fy</span>
+
+        <span class="c1"># Height, width adjusted to ROI</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">j2</span> <span class="o">-</span> <span class="n">j1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i2</span> <span class="o">-</span> <span class="n">i1</span><span class="p">)</span>
+
+        <span class="c1"># Translate optical center to new frame of reference</span>
+        <span class="c1"># NOTE: optical center (_cx,_cy) is measured from the bottom-right</span>
+        <span class="c1">#   corner of the image.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cx</span> <span class="o">-=</span> <span class="n">j1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cy</span> <span class="o">-=</span> <span class="n">i2</span>
+
+        <span class="c1"># ROI</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_roi</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_roi</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">i1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roi</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">j1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roi</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">i2</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_roi</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">j2</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_roi</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roi</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__compute_other_forms</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CameraParams.get_height"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams.get_height">[docs]</a>    <span class="k">def</span> <span class="nf">get_height</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Get the raw pixel height of images captured by the camera.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Height in pixels.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span></div>
+
+<div class="viewcode-block" id="CameraParams.get_width"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams.get_width">[docs]</a>    <span class="k">def</span> <span class="nf">get_width</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Get the raw pixel width of images captured by the camera.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Width in pixels.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span></div>
+
+<div class="viewcode-block" id="CameraParams.get_K"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams.get_K">[docs]</a>    <span class="k">def</span> <span class="nf">get_K</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Get intrinsic calibration matrix.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.array: Intrinsic matrix (3,3).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_K</span></div>
+
+<div class="viewcode-block" id="CameraParams.get_K_inv"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams.get_K_inv">[docs]</a>    <span class="k">def</span> <span class="nf">get_K_inv</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Get inverse intrinsic calibration matrix.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.array: Inverse intrinsic matrix (3,3).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_K_inv</span></div>
+
+<div class="viewcode-block" id="CameraParams.get_distortion"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams.get_distortion">[docs]</a>    <span class="k">def</span> <span class="nf">get_distortion</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Get the distortion coefficients of the camera.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.array: Distortion coefficients (-1,).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distortion</span></div>
+
+<div class="viewcode-block" id="CameraParams.get_position"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams.get_position">[docs]</a>    <span class="k">def</span> <span class="nf">get_position</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Get the 3D position of camera.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.array: 3D position of camera.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_position</span></div>
+
+<div class="viewcode-block" id="CameraParams.get_quaternion"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams.get_quaternion">[docs]</a>    <span class="k">def</span> <span class="nf">get_quaternion</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Get the rotation in quaternion of camera.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.array: Rotation in quaternion of camera.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quaternion</span></div>
+
+<div class="viewcode-block" id="CameraParams.get_yaw"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams.get_yaw">[docs]</a>    <span class="k">def</span> <span class="nf">get_yaw</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Get the yaw of the camera relative the frame of reference.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Yaw of the camera [rads].</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yaw</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;camera </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">, does not have a yaw in the rig file&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yaw</span></div>
+
+<div class="viewcode-block" id="CameraParams.get_ground_plane"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams.get_ground_plane">[docs]</a>    <span class="k">def</span> <span class="nf">get_ground_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Get the equation of the ground plane.</span>
+
+<span class="sd">        The equation of the ground plane is given by: ``Ax + By + Cz = D``</span>
+<span class="sd">        and is computed from the position and orientation of the camera.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[float]: Parameterization of the ground plane: [A,B,C,D].</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ground_plane</span></div>
+
+<div class="viewcode-block" id="CameraParams.get_roi"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams.get_roi">[docs]</a>    <span class="k">def</span> <span class="nf">get_roi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;ij&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Get the region of interest of the images captured by the camera.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axis (str): Axis order to return the coordinates in (default &#39;ij&#39;,</span>
+<span class="sd">            can also be &#39;xy&#39;).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[int]: Coordinates of the ROI box.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If `axis` is not valid.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;ij&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roi</span>
+        <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;xy&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_roi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid axis: &quot;</span> <span class="o">+</span> <span class="n">axis</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CameraParams.get_roi_angle"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams.get_roi_angle">[docs]</a>    <span class="k">def</span> <span class="nf">get_roi_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Get the angle of the region of interest.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The rotation of the ROI box.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roi_angle</span></div>
+
+<div class="viewcode-block" id="CameraParams.get_roi_points"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams.get_roi_points">[docs]</a>    <span class="k">def</span> <span class="nf">get_roi_points</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Get the points of the region of interest.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List: the list of points surrounding the ROI box</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roi_points</span></div>
+
+<div class="viewcode-block" id="CameraParams.get_roi_dims"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.CameraParams.CameraParams.get_roi_dims">[docs]</a>    <span class="k">def</span> <span class="nf">get_roi_dims</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Get the dimensions of the region of interest.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple: Height and width of ROI.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dims</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_roi_height</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_roi_width</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">dims</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roi_angle</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">4.</span> <span class="k">else</span> <span class="n">dims</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">__compute_other_forms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__compute_intrinsic_matrix</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__compute_ground_plane</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__compute_roi</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__compute_intrinsic_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_K</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="bp">self</span><span class="o">.</span><span class="n">_fx</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cx</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cy</span><span class="p">],</span>
+                            <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_K_inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_K</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__compute_ground_plane</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quaternion</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_position</span>
+
+        <span class="n">normal</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="mf">2.</span> <span class="o">*</span> <span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="mi">1</span> <span class="o">-</span> <span class="mf">2.</span> <span class="o">*</span> <span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+            <span class="mf">2.</span> <span class="o">*</span> <span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+        <span class="p">]</span>
+        <span class="n">intercept</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">normal</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ground_plane</span> <span class="o">=</span> <span class="p">[</span><span class="n">normal</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">normal</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">normal</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">intercept</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+    <span class="k">def</span> <span class="nf">__compute_roi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roi_angle</span>
+        <span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">j2</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roi</span>
+        <span class="n">W</span> <span class="o">=</span> <span class="n">j2</span> <span class="o">-</span> <span class="n">j1</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="n">i2</span> <span class="o">-</span> <span class="n">i1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_roi_width</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">W</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">H</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_roi_height</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="o">-</span><span class="n">W</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="o">+</span> <span class="n">H</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1">#reverse persective</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_roi_points</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_roi_height</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">)),</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_roi_width</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">))),</span>
+                <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_roi_width</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)),</span> <span class="n">W</span><span class="p">),</span>
+                <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_roi_height</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">))),</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_roi_points</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_roi_width</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">)),</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_roi_height</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">))),</span>
+                <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_roi_height</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">)),</span> <span class="n">W</span><span class="p">),</span>
+                <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_roi_width</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">))),</span>
+            <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_roi_points</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span> <span class="o">+</span> <span class="n">i1</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="n">j1</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roi_points</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_roi_points</span> <span class="o">=</span> <span class="p">[(</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roi_points</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_roi_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_roi_points</span><span class="p">])</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,570 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vista.core.Trace &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vista.core.Trace</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vista.core.Trace</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+
+<span class="kn">from</span> <span class="nn">.core_utils</span> <span class="kn">import</span> <span class="n">MultiSensor</span><span class="p">,</span> <span class="n">LabelSearch</span><span class="p">,</span> <span class="n">TopicNames</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">logging</span><span class="p">,</span> <span class="n">misc</span>
+
+
+<div class="viewcode-block" id="Trace"><a class="viewcode-back" href="../../../api_documentation/core.html#vista.core.Trace.Trace">[docs]</a><span class="k">class</span> <span class="nc">Trace</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; This is a helper class for handling a trace in the dataset. It allows straightforward</span>
+<span class="sd">    access to any pointer in the trace. A trace is separated into several segments based on</span>
+<span class="sd">    timestamps (split to segments if the difference of two consecutive timestamps is larger than</span>
+<span class="sd">    a value). Each segment contains frames that can be accessed through specifying frame index.</span>
+<span class="sd">    Note that frame index used in VISTA is not necessarily the same as frame number in the dataset.</span>
+<span class="sd">    Overall, we use ``segment_index``, ``frame_index``, ``frame_number``, ``timestamp`` in this</span>
+<span class="sd">    class and there are several functions for conversion among them.</span>
+<span class="sd">    The :class:`Trace` also performs filtering including,</span>
+
+<span class="sd">        * Filter frames based on annotation label (`video_label.csv`) if there is any.</span>
+<span class="sd">        * Filter by end-of-trace and time difference across consecutive frames.</span>
+
+<span class="sd">    This class also handles sampling of pointer to the trace, i.e., sampling segment and frame</span>
+<span class="sd">    index.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        trace_path (str): Path to a trace.</span>
+<span class="sd">        trace_config (dict): Configuration of the trace object.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DEFAULT_LABELS</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;day|night&#39;</span><span class="p">,</span> <span class="s1">&#39;dry|rain|snow&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;local|residential|highway|unpaved|indoor&#39;</span><span class="p">,</span> <span class="s1">&#39;stable&#39;</span><span class="p">,</span> <span class="s1">&#39;.*&#39;</span><span class="p">,</span> <span class="s1">&#39;.*&#39;</span>
+    <span class="p">]</span>
+    <span class="n">RESET_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;n_bins&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+            <span class="s1">&#39;smoothing_factor&#39;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
+            <span class="s1">&#39;hist_power&#39;</span><span class="p">:</span> <span class="mf">2.</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;segment_start&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;first_n_percent&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+    <span class="n">DEFAULT_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;reset_mode&#39;</span><span class="p">:</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;master_sensor&#39;</span><span class="p">:</span> <span class="n">TopicNames</span><span class="o">.</span><span class="n">master_topic</span><span class="p">,</span>
+        <span class="s1">&#39;labels&#39;</span><span class="p">:</span> <span class="n">DEFAULT_LABELS</span><span class="p">,</span>
+        <span class="s1">&#39;max_timestamp_diff_across_frames&#39;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+        <span class="s1">&#39;road_width&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">trace_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">trace_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trace_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">trace_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">merge_dict</span><span class="p">(</span><span class="n">trace_config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_CONFIG</span><span class="p">)</span>
+
+        <span class="c1"># Get function representation of state information</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_f_speed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_f_curvature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_states_func</span><span class="p">()</span>
+
+        <span class="c1"># Divide trace to good segments based on video labels and timestamps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_multi_sensor</span><span class="p">:</span> <span class="n">MultiSensor</span> <span class="o">=</span> <span class="n">MultiSensor</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trace_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;master_sensor&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="p">:</span> <span class="n">LabelSearch</span> <span class="o">=</span> <span class="n">LabelSearch</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;labels&#39;</span><span class="p">])</span>
+
+        <span class="n">good_frames</span><span class="p">,</span> <span class="n">good_timestamps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_divide_to_good_segments</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_good_frames</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="n">good_frames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_good_timestamps</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">good_timestamps</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_of_frames</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">_v</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">_v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_good_frames</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_multi_sensor</span><span class="o">.</span><span class="n">master_sensor</span><span class="p">]</span>
+        <span class="p">])</span>
+
+<div class="viewcode-block" id="Trace.find_segment_reset"><a class="viewcode-back" href="../../../api_documentation/core.html#vista.core.Trace.Trace.find_segment_reset">[docs]</a>    <span class="k">def</span> <span class="nf">find_segment_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Sample a segment index based on number of frames in each segment. Segments with more</span>
+<span class="sd">        frames will be sampled with a higher probability.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Index of a segment.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">segment_reset_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_good_frames</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_multi_sensor</span><span class="o">.</span><span class="n">master_sensor</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">segment_reset_probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">segment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_good_frames</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_multi_sensor</span><span class="o">.</span><span class="n">master_sensor</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">segment_reset_probs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+        <span class="n">segment_reset_probs</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">segment_reset_probs</span><span class="p">)</span>
+        <span class="n">new_segment_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">segment_reset_probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                             <span class="n">p</span><span class="o">=</span><span class="n">segment_reset_probs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_segment_index</span></div>
+
+<div class="viewcode-block" id="Trace.find_frame_reset"><a class="viewcode-back" href="../../../api_documentation/core.html#vista.core.Trace.Trace.find_frame_reset">[docs]</a>    <span class="k">def</span> <span class="nf">find_frame_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segment_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Sample a frame index in a segment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            segment_index (int): Index of the segment to be sampled from.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Frame index.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            NotImplementedError: Unrecognized trace reset mode.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Compute sample probability</span>
+        <span class="n">timestamps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">good_timestamps</span><span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_multi_sensor</span><span class="o">.</span><span class="n">master_sensor</span><span class="p">][</span><span class="n">segment_index</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;reset_mode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
+            <span class="c1"># bias toward large road curvature</span>
+            <span class="n">n_bins</span> <span class="o">=</span> <span class="n">Trace</span><span class="o">.</span><span class="n">RESET_CONFIG</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">][</span><span class="s1">&#39;n_bins&#39;</span><span class="p">]</span>
+            <span class="n">smoothing_factor</span> <span class="o">=</span> <span class="n">Trace</span><span class="o">.</span><span class="n">RESET_CONFIG</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">][</span>
+                <span class="s1">&#39;smoothing_factor&#39;</span><span class="p">]</span>
+            <span class="n">hist_power</span> <span class="o">=</span> <span class="n">Trace</span><span class="o">.</span><span class="n">RESET_CONFIG</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">][</span><span class="s1">&#39;hist_power&#39;</span><span class="p">]</span>
+
+            <span class="n">curvatures</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f_curvature</span><span class="p">(</span><span class="n">timestamps</span><span class="p">))</span>
+            <span class="n">curvatures</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">curvatures</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">3.</span><span class="p">)</span>
+            <span class="n">hist</span><span class="p">,</span> <span class="n">bin_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">curvatures</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span><span class="n">curvatures</span><span class="p">,</span> <span class="n">bin_edges</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">hist_density</span> <span class="o">=</span> <span class="n">hist</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">hist</span><span class="p">))</span>
+            <span class="n">probs</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">hist_density</span><span class="p">[</span><span class="n">bins</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">smoothing_factor</span><span class="p">)</span><span class="o">**</span><span class="n">hist_power</span><span class="p">)</span>
+            <span class="n">probs</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">probs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;reset_mode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;uniform&#39;</span><span class="p">:</span>  <span class="c1"># uniform sampling</span>
+            <span class="n">n_timestamps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)</span>
+            <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">n_timestamps</span><span class="p">,</span> <span class="p">))</span> <span class="o">/</span> <span class="n">n_timestamps</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span>
+                <span class="s1">&#39;reset_mode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;segment_start&#39;</span><span class="p">:</span>  <span class="c1"># bias toward the start of a segment</span>
+            <span class="n">first_n_percent</span> <span class="o">=</span> <span class="n">Trace</span><span class="o">.</span><span class="n">RESET_CONFIG</span><span class="p">[</span><span class="s1">&#39;segment_start&#39;</span><span class="p">][</span>
+                <span class="s1">&#39;first_n_percent&#39;</span><span class="p">]</span>
+
+            <span class="n">n_timestamps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)</span>
+            <span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_timestamps</span><span class="p">,</span> <span class="p">))</span>
+            <span class="n">to_idx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">first_n_percent</span> <span class="o">*</span> <span class="n">n_timestamps</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">probs</span><span class="p">[:</span><span class="n">to_idx</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span>
+            <span class="n">probs</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">probs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Unrecognized trace reset mode </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_reset_mode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Sample frame index</span>
+        <span class="n">frame_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="o">=</span><span class="n">probs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">frame_index</span></div>
+
+<div class="viewcode-block" id="Trace.get_master_timestamp"><a class="viewcode-back" href="../../../api_documentation/core.html#vista.core.Trace.Trace.get_master_timestamp">[docs]</a>    <span class="k">def</span> <span class="nf">get_master_timestamp</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">segment_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">frame_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">check_end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot; Get timestamp from the master sensor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            segment_index (int): Segment index.</span>
+<span class="sd">            frame_index (int): Frame index.</span>
+<span class="sd">            check_end (bool): Whether to check if the given segment and frame index</span>
+<span class="sd">                              exceed the end of the trace; default to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Return a tuple (``bool_a``, ``float_a``), where ``bool_a`` is whether the given segment</span>
+<span class="sd">            and frame index exceed the end of the trace and ``float_a`` is timestamp; otherwise</span>
+<span class="sd">            timestamp (float).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">master_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_sensor</span><span class="o">.</span><span class="n">master_sensor</span>
+        <span class="k">if</span> <span class="n">check_end</span><span class="p">:</span>
+            <span class="n">exceed_end</span> <span class="o">=</span> <span class="n">frame_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">good_timestamps</span><span class="p">[</span><span class="n">master_name</span><span class="p">][</span><span class="n">segment_index</span><span class="p">])</span>
+            <span class="n">frame_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">exceed_end</span> <span class="k">else</span> <span class="n">frame_index</span>
+            <span class="k">return</span> <span class="n">exceed_end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">good_timestamps</span><span class="p">[</span><span class="n">master_name</span><span class="p">][</span>
+                <span class="n">segment_index</span><span class="p">][</span><span class="n">frame_index</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">good_timestamps</span><span class="p">[</span><span class="n">master_name</span><span class="p">][</span><span class="n">segment_index</span><span class="p">][</span>
+                <span class="n">frame_index</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Trace.get_master_frame_number"><a class="viewcode-back" href="../../../api_documentation/core.html#vista.core.Trace.Trace.get_master_frame_number">[docs]</a>    <span class="k">def</span> <span class="nf">get_master_frame_number</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">segment_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">frame_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">check_end</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot; Get frame number from the master sensor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            segment_index (int): Segment index.</span>
+<span class="sd">            frame_index (int): Frame index.</span>
+<span class="sd">            check_end (bool): Whether to check if the given segment and frame index</span>
+<span class="sd">                              exceed the end of the trace; default to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Return a tuple (``bool_a``, ``int_a``), where ``bool_a`` is whether the given segment</span>
+<span class="sd">            and frame index exceed the end of the trace and ``int_a`` is frame number; otherwise</span>
+<span class="sd">            frame number (int).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">master_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_sensor</span><span class="o">.</span><span class="n">master_sensor</span>
+        <span class="k">if</span> <span class="n">check_end</span><span class="p">:</span>
+            <span class="n">exceed_end</span> <span class="o">=</span> <span class="n">frame_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">good_timestamps</span><span class="p">[</span><span class="n">master_name</span><span class="p">][</span><span class="n">segment_index</span><span class="p">])</span>
+            <span class="n">frame_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">exceed_end</span> <span class="k">else</span> <span class="n">frame_index</span>
+            <span class="k">return</span> <span class="n">exceed_end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">good_frames</span><span class="p">[</span><span class="n">master_name</span><span class="p">][</span><span class="n">segment_index</span><span class="p">][</span>
+                <span class="n">frame_index</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">good_frames</span><span class="p">[</span><span class="n">master_name</span><span class="p">][</span><span class="n">segment_index</span><span class="p">][</span><span class="n">frame_index</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">_divide_to_good_segments</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">min_speed</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.5</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot; Divide a trace into good segments based on video labels and time difference between</span>
+<span class="sd">        consecutive frames. Note that only master sensor is used for the time difference check</span>
+<span class="sd">        since every sensors may have triggering frequencies.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Return a tuple (``dict_a``, ``dict_b``), where</span>
+<span class="sd">            ``dict_a``: good frames for all sensors. Key is sensor name and value</span>
+<span class="sd">                        is a list with each element as frame indices of a good</span>
+<span class="sd">                        segment, i.e., a good frame number =</span>
+<span class="sd">                        dict[sensor_name][which_good_segment][i].</span>
+<span class="sd">            ``dict_b``: timestamps of good frames.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Filter by video labels</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">good_labeled_timestamps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_labels</span><span class="o">.</span><span class="n">find_good_labeled_frames</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trace_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">good_labeled_timestamps</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No video_label.csv&#39;</span><span class="p">)</span>
+            <span class="n">good_labeled_timestamps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_multi_sensor</span><span class="o">.</span><span class="n">get_master_timestamps</span><span class="p">())</span>
+
+        <span class="n">good_speed_inds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_speed</span><span class="p">(</span><span class="n">good_labeled_timestamps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">min_speed</span>
+        <span class="n">good_labeled_timestamps</span> <span class="o">=</span> <span class="n">good_labeled_timestamps</span><span class="p">[</span><span class="n">good_speed_inds</span><span class="p">]</span>
+
+        <span class="c1"># Filter by end-of-trace and time difference across consecutive frames</span>
+        <span class="n">good_frames</span> <span class="o">=</span> <span class="p">{</span><span class="n">_k</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">_k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multi_sensor</span><span class="o">.</span><span class="n">sensor_names</span><span class="p">}</span>
+        <span class="n">good_timestamps</span> <span class="o">=</span> <span class="p">{</span><span class="n">_k</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">_k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multi_sensor</span><span class="o">.</span><span class="n">sensor_names</span><span class="p">}</span>
+        <span class="n">segment_start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">good_labeled_timestamps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">trace_end</span> <span class="o">=</span> <span class="n">i</span> <span class="o">==</span> <span class="n">good_labeled_timestamps</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">trace_end</span><span class="p">:</span>
+                <span class="n">time_diff</span> <span class="o">=</span> <span class="n">good_labeled_timestamps</span><span class="p">[</span>
+                    <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">good_labeled_timestamps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">time_diff_too_large</span> <span class="o">=</span> <span class="n">time_diff</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span>
+                    <span class="s1">&#39;max_timestamp_diff_across_frames&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">time_diff_too_large</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="n">trace_end</span> <span class="ow">or</span> <span class="n">time_diff_too_large</span><span class="p">:</span>
+                <span class="n">good_segment_frames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multi_sensor</span><span class="o">.</span><span class="n">get_frames_from_times</span><span class="p">(</span>
+                    <span class="n">good_labeled_timestamps</span><span class="p">[</span><span class="n">segment_start</span><span class="p">:</span><span class="n">i</span><span class="p">])</span>
+
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">good_segment_frames</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">good_frames</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+                    <span class="n">segment_timestamps</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">frame_num</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                        <span class="n">segment_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_multi_sensor</span><span class="o">.</span><span class="n">get_time_from_frame_num</span><span class="p">(</span>
+                                <span class="n">k</span><span class="p">,</span> <span class="n">frame_num</span><span class="p">))</span>
+                    <span class="n">good_timestamps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">segment_timestamps</span><span class="p">)</span>
+
+                <span class="n">segment_start</span> <span class="o">+=</span> <span class="n">i</span>
+
+        <span class="k">return</span> <span class="n">good_frames</span><span class="p">,</span> <span class="n">good_timestamps</span>
+
+    <span class="k">def</span> <span class="nf">_get_states_func</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Read speed and IMU data from the dataset and perform 1D interpolation to convert</span>
+<span class="sd">        discrete data points to continuous functions. Curvature is computed as yaw rate (from</span>
+<span class="sd">        IMU) divided by speed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Return a tuple (``func_a``, ``func_b``), where ``func_a`` is 1D interpolation</span>
+<span class="sd">            function for speed and ``func_b`` is 1D interpolation for curvature.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Read from dataset</span>
+        <span class="n">speed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trace_path</span><span class="p">,</span>
+                                           <span class="n">TopicNames</span><span class="o">.</span><span class="n">speed</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">),</span>
+                              <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">imu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trace_path</span><span class="p">,</span>
+                                         <span class="n">TopicNames</span><span class="o">.</span><span class="n">imu</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">),</span>
+                            <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Obtain function representation of speed</span>
+        <span class="n">f_speed</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">speed</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">speed</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">fill_value</span><span class="o">=</span><span class="s1">&#39;extrapolate&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Obtain function representation of curvature</span>
+        <span class="n">timestamps</span> <span class="o">=</span> <span class="n">imu</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">yaw_rate</span> <span class="o">=</span> <span class="n">imu</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">]</span>
+        <span class="n">curvature</span> <span class="o">=</span> <span class="n">yaw_rate</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">f_speed</span><span class="p">(</span><span class="n">timestamps</span><span class="p">),</span> <span class="mf">1e-10</span><span class="p">)</span>
+        <span class="n">good_curvature_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">curvature</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">3.</span>
+        <span class="n">f_curvature</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">timestamps</span><span class="p">[</span><span class="n">good_curvature_inds</span><span class="p">],</span>
+                               <span class="n">curvature</span><span class="p">[</span><span class="n">good_curvature_inds</span><span class="p">],</span>
+                               <span class="n">fill_value</span><span class="o">=</span><span class="s1">&#39;extrapolate&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">f_speed</span><span class="p">,</span> <span class="n">f_curvature</span>
+
+<div class="viewcode-block" id="Trace.set_seed"><a class="viewcode-back" href="../../../api_documentation/core.html#vista.core.Trace.Trace.set_seed">[docs]</a>    <span class="k">def</span> <span class="nf">set_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Set random seed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            seed (int): Random seed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">seed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Random seed for sampling pointer in :meth:`find_segment_reset`</span>
+<span class="sd">            and :meth:`find_frame_reset`. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">trace_path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Path to the directory that contains all data of this trace. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trace_path</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">multi_sensor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiSensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; MultiSensor object. Please check the definition of this class. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multi_sensor</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">good_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot; A dictionary of good frame numbers, where keys are sensor names and</span>
+<span class="sd">            values are lists of frame numbers (int). &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_good_frames</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">good_timestamps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot; A dictionary of good timestamps, where keys are sensor names and</span>
+<span class="sd">            values are a list of timestamps (float). &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_good_timestamps</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">num_of_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Number of good frames. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_of_frames</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">f_curvature</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; A 1D interpolation function for curvature of the ego-car. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_f_curvature</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">f_speed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; A 1D interpolation function for speed of the ego-car. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_f_speed</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">reset_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Trace reset mode. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset_mode</span>
+
+    <span class="nd">@reset_mode</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">reset_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset_mode</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reset_mode</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_mode</span> <span class="o">=</span> <span class="n">reset_mode</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">road_width</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Road width. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;road_width&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">param_file</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Path to the sensor parameters file for this trace. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trace_path</span><span class="p">,</span> <span class="s2">&quot;params.xml&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">trace_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">trace_name</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

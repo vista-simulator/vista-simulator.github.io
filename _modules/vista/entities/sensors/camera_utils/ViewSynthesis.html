@@ -1,0 +1,495 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vista.entities.sensors.camera_utils.ViewSynthesis &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../../" src="../../../../../_static/documentation_options.js"></script>
+        <script src="../../../../../_static/jquery.js"></script>
+        <script src="../../../../../_static/underscore.js"></script>
+        <script src="../../../../../_static/doctools.js"></script>
+        <script src="../../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vista.entities.sensors.camera_utils.ViewSynthesis</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vista.entities.sensors.camera_utils.ViewSynthesis</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pyrender</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">CameraParams</span>
+<span class="kn">from</span> <span class="nn">....utils</span> <span class="kn">import</span> <span class="n">transform</span><span class="p">,</span> <span class="n">logging</span><span class="p">,</span> <span class="n">misc</span>
+
+<span class="n">ZNEAR</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">ZFAR</span> <span class="o">=</span> <span class="mi">10000</span>
+
+
+<span class="k">class</span> <span class="nc">DepthModes</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">FIXED_PLANE</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">INPUT_DISP</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">MONODEPTH</span> <span class="o">=</span> <span class="mi">3</span>
+
+
+<div class="viewcode-block" id="ViewSynthesis"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.ViewSynthesis.ViewSynthesis">[docs]</a><span class="k">class</span> <span class="nc">ViewSynthesis</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; A RGB synthesizer that simulates RGB image at novel viewpoint around a pre-collected</span>
+<span class="sd">    RGB image/video dataset. Conceptually, it (1) projects a reference 2D RGB image to 3D colored</span>
+<span class="sd">    mesh using camera projection matrices and (approximated) depth, (2) place virtual objects</span>
+<span class="sd">    in the scene, (3) render RGB image at novel viewpoint.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        camera_param (CameraParams): Camera parameter object of the virtual camera.</span>
+<span class="sd">        config (Dict): Configuration of the synthesizer.</span>
+<span class="sd">        init_with_bg_mesh (bool): Whether to initialize with background mesh; default</span>
+<span class="sd">            is set to ``True``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DEFAULT_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;depth_mode&#39;</span><span class="p">:</span> <span class="n">DepthModes</span><span class="o">.</span><span class="n">FIXED_PLANE</span><span class="p">,</span>
+        <span class="s1">&#39;znear&#39;</span><span class="p">:</span> <span class="n">ZNEAR</span><span class="p">,</span>
+        <span class="s1">&#39;zfar&#39;</span><span class="p">:</span> <span class="n">ZFAR</span><span class="p">,</span>
+        <span class="s1">&#39;use_lighting&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;recoloring_factor&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">camera_param</span><span class="p">:</span> <span class="n">CameraParams</span><span class="p">,</span>
+                 <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+                 <span class="n">init_with_bg_mesh</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Parse configuration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_camera_param</span> <span class="o">=</span> <span class="n">camera_param</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">merge_dict</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_CONFIG</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;depth_mode&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;depth_mode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">DepthModes</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;depth_mode&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Renderer and scene</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span> <span class="o">=</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">OffscreenRenderer</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_camera_param</span><span class="o">.</span><span class="n">get_width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camera_param</span><span class="o">.</span><span class="n">get_height</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span> <span class="o">=</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">Scene</span><span class="p">(</span><span class="n">ambient_light</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+                                     <span class="n">bg_color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Camera for rendering</span>
+        <span class="n">cam_w</span> <span class="o">=</span> <span class="n">camera_param</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span>
+        <span class="n">cam_h</span> <span class="o">=</span> <span class="n">camera_param</span><span class="o">.</span><span class="n">get_height</span><span class="p">()</span>
+        <span class="n">camera</span> <span class="o">=</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">IntrinsicsCamera</span><span class="p">(</span>
+            <span class="n">fx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_camera_param</span><span class="o">.</span><span class="n">_fx</span><span class="p">,</span>
+            <span class="n">fy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_camera_param</span><span class="o">.</span><span class="n">_fy</span><span class="p">,</span>
+            <span class="n">cx</span><span class="o">=</span><span class="n">cam_w</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span>  <span class="c1"># NOTE: assume calibrated camera</span>
+            <span class="n">cy</span><span class="o">=</span><span class="n">cam_h</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span>
+            <span class="n">znear</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;znear&#39;</span><span class="p">],</span>
+            <span class="n">zfar</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;zfar&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_camera_node</span> <span class="o">=</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;camera&#39;</span><span class="p">,</span>
+            <span class="n">camera</span><span class="o">=</span><span class="n">camera</span><span class="p">,</span>
+            <span class="n">translation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_camera_param</span><span class="o">.</span><span class="n">get_position</span><span class="p">()[:,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">rotation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_camera_param</span><span class="o">.</span><span class="n">get_quaternion</span><span class="p">()[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_camera_node</span><span class="p">)</span>
+
+        <span class="c1"># Mesh of background. Can add more by calling add_bg_mesh for different camera_param</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_world_rays</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;depth_mode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">DepthModes</span><span class="o">.</span><span class="n">FIXED_PLANE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bg_node</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">Node</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">init_with_bg_mesh</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_bg_mesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_camera_param</span><span class="p">)</span>
+
+        <span class="c1"># Scene for non-background objects and object nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_object_scene</span> <span class="o">=</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">Scene</span><span class="p">(</span><span class="n">ambient_light</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+                                            <span class="n">bg_color</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_object_nodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ViewSynthesis.synthesize"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.ViewSynthesis.ViewSynthesis.synthesize">[docs]</a>    <span class="k">def</span> <span class="nf">synthesize</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">trans</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">rot</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">imgs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">depth</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Synthesize RGB image at the novel viewpoint specified by ``trans`` and</span>
+<span class="sd">        ``rot`` with respect to the nominal viewpoint that corresponds to a set of</span>
+<span class="sd">        RGB images and depth maps.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            trans (np.ndarray): Translation vector.</span>
+<span class="sd">            rot (np.ndarray): Rotation vector in Euler angle.</span>
+<span class="sd">            imgs (Dict[str, np.ndarray]): A set of images (potentially from multiple camera).</span>
+<span class="sd">            depth (Dict[str, np.ndarray]): A set of depth maps corresponding to ``imgs``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Returns a tuple (``array_1``, ``array_2``), where ``array_1`` is the</span>
+<span class="sd">            synthesized RGB image and ``array_2`` is the corresponding depth image.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">imgs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Need this otherwise will cause memory leak</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PYOPENGL_PLATFORM&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;egl&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bg_node</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_bg_node</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span>
+
+            <span class="c1"># Refresh meshes in renderer; otherwise mesh vertex/color won&#39;t update</span>
+            <span class="n">mesh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bg_node</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">mesh</span>
+            <span class="k">for</span> <span class="n">prim</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">primitives</span><span class="p">:</span>
+                <span class="n">prim</span><span class="o">.</span><span class="n">_unbind</span><span class="p">()</span>
+                <span class="n">prim</span><span class="o">.</span><span class="n">_remove_from_context</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">mesh</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span><span class="o">.</span><span class="n">_renderer</span><span class="o">.</span><span class="n">_meshes</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span><span class="o">.</span><span class="n">_renderer</span><span class="o">.</span><span class="n">_meshes</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+
+            <span class="c1"># Update mesh vertex positions (this won&#39;t affect node-level translation and rotation)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;depth_mode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">DepthModes</span><span class="o">.</span><span class="n">FIXED_PLANE</span><span class="p">:</span>
+                <span class="n">depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+            <span class="n">depth</span> <span class="o">=</span> <span class="n">depth</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">world_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="o">-</span><span class="n">depth</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world_rays</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">primitives</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="n">world_coords</span><span class="o">.</span><span class="n">T</span>
+
+            <span class="c1"># Update mesh face colors</span>
+            <span class="n">colors</span> <span class="o">=</span> <span class="n">img</span><span class="p">[:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mf">255.</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">primitives</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">color_0</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+        <span class="c1"># Update camera pose based on the requested viewpoint (with camera</span>
+        <span class="c1"># relative pose to the car as offset)</span>
+        <span class="n">trans</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camera_param</span><span class="o">.</span><span class="n">get_position</span><span class="p">()[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">rot</span> <span class="o">+=</span> <span class="n">transform</span><span class="o">.</span><span class="n">quat2euler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_camera_param</span><span class="o">.</span><span class="n">get_quaternion</span><span class="p">()[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_camera_node</span><span class="o">.</span><span class="n">matrix</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">vec2mat</span><span class="p">(</span><span class="n">trans</span><span class="p">,</span> <span class="n">rot</span><span class="p">)</span>
+
+        <span class="c1"># Render background</span>
+        <span class="n">color_bg</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">pyrender</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">RenderFlags</span><span class="o">.</span><span class="n">FLAT</span><span class="p">)</span>
+
+        <span class="c1"># Render scene object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_object_scene</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="n">light</span> <span class="o">=</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">DirectionalLight</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;directional_light_intensity&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_object_scene</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">light</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_object_scene</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_camera_node</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">object_node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_object_nodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_object_scene</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">object_node</span><span class="p">)</span>
+
+        <span class="n">color_objects</span><span class="p">,</span> <span class="n">depth_objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span><span class="o">.</span><span class="n">render</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_object_scene</span><span class="p">)</span>
+        <span class="n">color_objects</span> <span class="o">=</span> <span class="n">color_objects</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">::</span>
+                                      <span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># TODO: not sure why we need this</span>
+
+        <span class="c1"># Overlay</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">depth_objects</span> <span class="o">!=</span> <span class="mf">0.</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># recoloring</span>
+            <span class="n">color_bg_mean</span> <span class="o">=</span> <span class="n">color_bg</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">color_objects_mean</span> <span class="o">=</span> <span class="p">(</span><span class="n">color_objects</span> <span class="o">*</span>
+                                  <span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">color_objects</span> <span class="o">=</span> <span class="n">color_objects</span> <span class="o">+</span> <span class="p">(</span>
+                <span class="n">color_bg_mean</span> <span class="o">-</span>
+                <span class="n">color_objects_mean</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;recoloring_factor&#39;</span><span class="p">]</span>
+            <span class="n">color_objects</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">color_objects</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># agent out-of-view</span>
+            <span class="k">pass</span>
+
+        <span class="n">color</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mask</span><span class="p">)</span> <span class="o">*</span> <span class="n">color_bg</span> <span class="o">+</span> <span class="n">mask</span> <span class="o">*</span> <span class="n">color_objects</span>
+
+        <span class="k">return</span> <span class="n">color</span><span class="p">,</span> <span class="n">depth</span></div>
+
+<div class="viewcode-block" id="ViewSynthesis.update_object_node"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.ViewSynthesis.ViewSynthesis.update_object_node">[docs]</a>    <span class="k">def</span> <span class="nf">update_object_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">Mesh</span><span class="p">,</span>
+                           <span class="n">trans</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">quat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Update the virtual object in the scene.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of the virtual object.</span>
+<span class="sd">            mesh (pyrender.Mesh): Mesh of the virtual object.</span>
+<span class="sd">            trans (np.ndarray): Translation vector.</span>
+<span class="sd">            quat (np.ndarray): Quaternion vector.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_object_nodes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                                 <span class="n">mesh</span><span class="o">=</span><span class="n">mesh</span><span class="p">,</span>
+                                                 <span class="n">translation</span><span class="o">=</span><span class="n">trans</span><span class="p">,</span>
+                                                 <span class="n">rotation</span><span class="o">=</span><span class="n">quat</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ViewSynthesis.add_bg_mesh"><a class="viewcode-back" href="../../../../../api_documentation/entities/sensors.html#vista.entities.sensors.camera_utils.ViewSynthesis.ViewSynthesis.add_bg_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">add_bg_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">camera_param</span><span class="p">:</span> <span class="n">CameraParams</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Add background mesh to the scene based on camera projection and the</span>
+<span class="sd">        initial depth. The color of the mesh will be updated at every ``synthesize``</span>
+<span class="sd">        call and if not using ground-plane depth approximation, the geometry of</span>
+<span class="sd">        the mesh will be also updated.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            camera_param (CameraParams): Camera parameter of the virtual camera.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Projection and re-projection parameters</span>
+        <span class="n">K</span> <span class="o">=</span> <span class="n">camera_param</span><span class="o">.</span><span class="n">get_K</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Hacky way to handle unrectified image&#39;</span><span class="p">)</span>
+        <span class="n">cam_w</span> <span class="o">=</span> <span class="n">camera_param</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span>
+        <span class="n">cam_h</span> <span class="o">=</span> <span class="n">camera_param</span><span class="o">.</span><span class="n">get_height</span><span class="p">()</span>
+        <span class="n">K</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">cam_w</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="n">K</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">cam_h</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="n">K_inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+
+        <span class="c1"># Mesh coordinates, faces, and rays</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">camera_param</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">homo_coords</span><span class="p">,</span> <span class="n">mesh_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_homogeneous_image_coords</span><span class="p">(</span>
+            <span class="n">camera_param</span><span class="p">,</span> <span class="n">get_mesh</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_world_rays</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">K_inv</span><span class="p">,</span> <span class="n">homo_coords</span><span class="p">)</span>
+
+        <span class="c1"># Get depth for ground plane assumption</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;depth_mode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">DepthModes</span><span class="o">.</span><span class="n">FIXED_PLANE</span><span class="p">:</span>
+            <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">camera_param</span><span class="o">.</span><span class="n">get_ground_plane</span><span class="p">()[:</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">camera_param</span><span class="o">.</span><span class="n">get_ground_plane</span><span class="p">()[</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world_rays</span><span class="p">[</span><span class="n">name</span><span class="p">]))</span>
+            <span class="n">k</span><span class="p">[</span><span class="n">k</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span>
+                <span class="s1">&#39;zfar&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">10.</span>  <span class="c1"># should be smaller than actual zfar</span>
+            <span class="k">if</span> <span class="n">camera_param</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camera_param</span><span class="p">:</span>
+                <span class="c1"># NOTE: hacky way to make image from the main camera have fronter order</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="s1">&#39;Hacky way to make main camera image have fronter order&#39;</span><span class="p">)</span>
+                <span class="n">k</span> <span class="o">=</span> <span class="n">k</span> <span class="o">/</span> <span class="mf">1.1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_depth</span><span class="p">[</span><span class="n">camera_param</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
+
+        <span class="c1"># Add mesh to scene (fix node level translation and rotation)</span>
+        <span class="n">mesh</span> <span class="o">=</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">Mesh</span><span class="p">([</span>
+            <span class="n">pyrender</span><span class="o">.</span><span class="n">Primitive</span><span class="p">(</span>
+                <span class="n">positions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_world_rays</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+                <span class="n">indices</span><span class="o">=</span><span class="n">mesh_faces</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+                <span class="n">color_0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_world_rays</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">4</span><span class="p">)),</span>
+                <span class="n">mode</span><span class="o">=</span><span class="n">pyrender</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">GLTF</span><span class="o">.</span><span class="n">TRIANGLES</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bg_node</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pyrender</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;bg_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>  <span class="c1"># project camera view to 3D</span>
+            <span class="n">mesh</span><span class="o">=</span><span class="n">mesh</span><span class="p">,</span>
+            <span class="n">translation</span><span class="o">=</span><span class="n">camera_param</span><span class="o">.</span><span class="n">get_position</span><span class="p">()[:,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">rotation</span><span class="o">=</span><span class="n">camera_param</span><span class="o">.</span><span class="n">get_quaternion</span><span class="p">()[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scene</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bg_node</span><span class="p">[</span><span class="n">name</span><span class="p">])</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_homogeneous_image_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">camera_param</span><span class="p">,</span> <span class="n">get_mesh</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">cam_w</span> <span class="o">=</span> <span class="n">camera_param</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span>
+        <span class="n">cam_h</span> <span class="o">=</span> <span class="n">camera_param</span><span class="o">.</span><span class="n">get_height</span><span class="p">()</span>
+
+        <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">cam_w</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">cam_h</span><span class="p">))</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">xx</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">yy</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)),</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">get_mesh</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">coords</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">upper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+            <span class="n">lower</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+            <span class="n">mesh_tri</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># FIXME TODO: vectorize this double for-loop</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Homogeneous coordinate computation not vectorized&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cam_h</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cam_w</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+                    <span class="n">mesh_tri</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">ravel_multi_index</span><span class="p">((</span><span class="n">c</span> <span class="o">+</span> <span class="n">upper</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="p">(</span><span class="n">cam_h</span><span class="p">,</span> <span class="n">cam_w</span><span class="p">)))</span>
+                    <span class="n">mesh_tri</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">ravel_multi_index</span><span class="p">((</span><span class="n">c</span> <span class="o">+</span> <span class="n">lower</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="p">(</span><span class="n">cam_h</span><span class="p">,</span> <span class="n">cam_w</span><span class="p">)))</span>
+            <span class="n">mesh_tri</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">mesh_tri</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">coords</span><span class="p">,</span> <span class="n">mesh_tri</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bg_mesh_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Names of all background meshes in the scene. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bg_node</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">object_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">pyrender</span><span class="o">.</span><span class="n">Node</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Pyrender nodes of all virtual objects added to the scene. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_object_nodes</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Configuration of the view synthesizer. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

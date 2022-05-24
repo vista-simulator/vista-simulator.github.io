@@ -1,0 +1,283 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Data Format &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Advanced Usage" href="../advanced_usage/index.html" />
+    <link rel="prev" title="Basic Usage" href="basic_usage.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Getting Started</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_usage.html">Basic Usage</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Data Format</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sensor-data">Sensor Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#odometry-data">Odometry Data</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Getting Started</a> &raquo;</li>
+        
+      <li>Data Format</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/getting_started/data_format.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="data-format">
+<span id="getting-started-data-format"></span><h1>Data Format<a class="headerlink" href="#data-format" title="Permalink to this headline">¶</a></h1>
+<p>Vista simulation requires two sets of data: <strong>sensor data</strong> and <strong>odometry data</strong>. Sensor data
+contains a timestamp file and a sensor data file, and odometry data contains minimal information
+to step vehicle dynamics. Every data file has their corresponding ROS timestamp, which allows to be
+associated across each other for data-driven simulation.</p>
+<div class="section" id="sensor-data">
+<h2>Sensor Data<a class="headerlink" href="#sensor-data" title="Permalink to this headline">¶</a></h2>
+<p>The general concept of data-driven simulation in Vista is to synthesize locally around precollected
+sensor data. In order to achieve that, we need to assoicate current states of the simulator to some
+point in the dataset. We use ROS timestamp as an universal identifier across different modalities of
+data. Given a vehicle state associated with some ROS timestamp, we need to retrieve from the dataset
+a piece of sensor data (e.g., a RGB frame or a LiDAR sweep) for synthesis. Thus, sensor data contains
+two types of data with file name as sensor name specified in Vista,</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>A csv file that maps indices of the sensor (e.g., frame number for RGB camera or sweep number
+for LiDAR) to an universal ROS timestamp that can be shared across different sensors.</p></li>
+<li><p>A major sensor data file contains the actual sensor data. This file may have different format
+across different sensors, e.g., &lt;camera-namne&gt;.avi for RGB camera and &lt;lidar-name&gt;.h5 for LiDAR.</p></li>
+</ul>
+</div></blockquote>
+<p><a class="reference internal" href="../api_documentation/core.html#api-multi-sensor"><span class="std std-ref">MultiSensor</span></a> is a class that handles sensor data retrieval for all sensors.
+It handles the mapping between the universal (ROS) timestamp shared throughout the entire simulator
+and sensor-specific pointer to data stream of each sensor. Also note that the <code class="docutils literal notranslate"><span class="pre">master_sensor</span></code> in
+this class provide a reference timestamp for stepping vehicle dynamics.</p>
+</div>
+<div class="section" id="odometry-data">
+<h2>Odometry Data<a class="headerlink" href="#odometry-data" title="Permalink to this headline">¶</a></h2>
+<p>Vista depends on timestamped IMU and speed data to step vehicle dynamics. At a high level,
+we extract speed feedback and IMU data (or more specifically, yaw rate) and feed
+them into vehicle dynamics model, as shown in <a class="reference internal" href="../api_documentation/core.html#api-trace"><span class="std std-ref">Trace</span></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+
+<span class="k">def</span> <span class="nf">_get_states_func</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># Read from dataset`</span>
+    <span class="n">speed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trace_path</span><span class="p">,</span>
+        <span class="n">TopicNames</span><span class="o">.</span><span class="n">speed</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">),</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+    <span class="n">imu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trace_path</span><span class="p">,</span>
+        <span class="n">TopicNames</span><span class="o">.</span><span class="n">imu</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">),</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Obtain function representation of speed</span>
+    <span class="n">f_speed</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">speed</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">speed</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">fill_value</span><span class="o">=</span><span class="s1">&#39;extrapolate&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Obtain function representation of curvature</span>
+    <span class="n">timestamps</span> <span class="o">=</span> <span class="n">imu</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">yaw_rate</span> <span class="o">=</span> <span class="n">imu</span><span class="p">[:,</span> <span class="mi">6</span><span class="p">]</span>
+    <span class="n">curvature</span> <span class="o">=</span> <span class="n">yaw_rate</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">f_speed</span><span class="p">(</span><span class="n">timestamps</span><span class="p">),</span> <span class="mf">1e-10</span><span class="p">)</span>
+    <span class="n">good_curvature_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">curvature</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">3.</span>
+    <span class="n">f_curvature</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">timestamps</span><span class="p">[</span><span class="n">good_curvature_inds</span><span class="p">],</span>
+        <span class="n">curvature</span><span class="p">[</span><span class="n">good_curvature_inds</span><span class="p">],</span> <span class="n">fill_value</span><span class="o">=</span><span class="s1">&#39;extrapolate&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">f_speed</span><span class="p">,</span> <span class="n">f_curvature</span>
+</pre></div>
+</div>
+<p>Basically, the odometry data should contain minimal information to trace out human trajectories in
+the dataset. In our case, we are using <code class="docutils literal notranslate"><span class="pre">curvature</span></code> (equivalent information to steering command)
+and <code class="docutils literal notranslate"><span class="pre">speed</span></code>, which is required in stepping the vehicle dynamics (bicycle model). Note that we are
+using control command feedback instead of control command to eliminate the effect of imperfect low-
+level controller, tire slippage, and etc. Another thing to remark is that in some use cases, we have
+access to more accurate localization like differential GPS, which can provide better estimate of
+vehicle state. Overall, there are several choices that can be used as odometry data with different
+accessibility and accuracy.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../advanced_usage/index.html" class="btn btn-neutral float-right" title="Advanced Usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="basic_usage.html" class="btn btn-neutral float-left" title="Basic Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

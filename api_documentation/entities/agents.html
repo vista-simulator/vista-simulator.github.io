@@ -1,0 +1,785 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Agents &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Sensors" href="sensors.html" />
+    <link rel="prev" title="Entities" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../core.html">Core</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Entities</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#types-of-entities">Types of Entities</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Agents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sensors.html">Sensors</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../utils.html">Utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tasks.html">Tasks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">API Documentation</a> &raquo;</li>
+        
+          <li><a href="index.html">Entities</a> &raquo;</li>
+        
+      <li>Agents</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/api_documentation/entities/agents.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="agents">
+<span id="api-documentation-entities-agents"></span><h1>Agents<a class="headerlink" href="#agents" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="vista.entities.agents.Car.Car">
+<em class="property">class </em><code class="sig-prename descclassname">vista.entities.agents.Car.</code><code class="sig-name descname">Car</code><span class="sig-paren">(</span><em class="sig-param">world: &lt;module 'vista.core.World' from '/home/amini/projects/vista/vista/core/World.py'&gt;</em>, <em class="sig-param">car_config: Dict</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vista/entities/agents/Car.html#Car"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Car.Car" title="Permalink to this definition">¶</a></dt>
+<dd><p>The class of a car agent. This object lives in the <code class="xref py py-class docutils literal notranslate"><span class="pre">World</span></code> and is attached
+to a trace object that provides pointers to dataset for data-driven simulation and zero
+or one or more sensor objects that synthesize sensory measurement. The update of vehicle
+state is handled in this object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>world</strong> (<a class="reference internal" href="../core.html#vista.core.World.World" title="vista.core.World.World"><em>World</em></a>) – The world that this agent lives in.</p></li>
+<li><p><strong>car_config</strong> (<em>Dict</em>) – <p>Configuration of the car. An example (default) is,</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">DEFAULT_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+<span class="go">    &#39;length&#39;: 5.,</span>
+<span class="go">    &#39;width&#39;: 2.,</span>
+<span class="go">    &#39;wheel_base&#39;: 2.78,</span>
+<span class="go">    &#39;steering_ratio&#39;: 14.7,</span>
+<span class="go">    &#39;lookahead_road&#39;: False,</span>
+<span class="go">    &#39;road_buffer_size&#39;: 200,</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example Usage (always make sure reset is called first to initialize vehicle state
+or pointer to the dataset for data-driven simulation):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">car</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">spawn_agent</span><span class="p">(</span><span class="n">car_config</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span><span class="o">.</span><span class="n">spawn_camera</span><span class="p">(</span><span class="n">camera_config</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">world</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span><span class="o">.</span><span class="n">step_dynamics</span><span class="p">(</span><span class="n">action</span><span class="p">)</span> <span class="c1"># update vehicle states</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span><span class="o">.</span><span class="n">step_sensors</span><span class="p">()</span> <span class="c1"># do sensor capture</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">observation</span> <span class="o">=</span> <span class="n">car</span><span class="o">.</span><span class="n">observations</span> <span class="c1"># fetch sensory measurement</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span><span class="o">.</span><span class="n">step_dataset</span><span class="p">()</span> <span class="c1"># simply get next frame in the dataset without synthesis</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.spawn_camera">
+<code class="sig-name descname">spawn_camera</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="sensors.html#vista.entities.sensors.Camera.Camera" title="vista.entities.sensors.Camera.Camera">vista.entities.sensors.Camera.Camera</a><a class="reference internal" href="../../_modules/vista/entities/agents/Car.html#Car.spawn_camera"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Car.Car.spawn_camera" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spawn and attach a camera to this car.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>Dict</em>) – Configuration of camera and rendering. For
+more details, please check the doc of
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Camera</span></code> sensor.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a vista camera sensor object spawned.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="sensors.html#vista.entities.sensors.Camera.Camera" title="vista.entities.sensors.Camera.Camera">Camera</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.spawn_lidar">
+<code class="sig-name descname">spawn_lidar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="sensors.html#vista.entities.sensors.Lidar.Lidar" title="vista.entities.sensors.Lidar.Lidar">vista.entities.sensors.Lidar.Lidar</a><a class="reference internal" href="../../_modules/vista/entities/agents/Car.html#Car.spawn_lidar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Car.Car.spawn_lidar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spawn and attach a LiDAR to this car.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>Dict</em>) – Configuration of LiDAR. For more details,
+please check the doc of <code class="xref py py-class docutils literal notranslate"><span class="pre">Lidar</span></code> sensor.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a vista Lidar sensor object spawned.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="sensors.html#vista.entities.sensors.Lidar.Lidar" title="vista.entities.sensors.Lidar.Lidar">Lidar</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.spawn_event_camera">
+<code class="sig-name descname">spawn_event_camera</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n">Dict</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="sensors.html#vista.entities.sensors.EventCamera.EventCamera" title="vista.entities.sensors.EventCamera.EventCamera">vista.entities.sensors.EventCamera.EventCamera</a><a class="reference internal" href="../../_modules/vista/entities/agents/Car.html#Car.spawn_event_camera"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Car.Car.spawn_event_camera" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spawn and attach an event camera to this car.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> (<em>Dict</em>) – Configuration of event camera. For more details,
+please check the doc of <code class="xref py py-class docutils literal notranslate"><span class="pre">EventCamera</span></code> sensor.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a vista event camera sensor object spawned.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="sensors.html#vista.entities.sensors.EventCamera.EventCamera" title="vista.entities.sensors.EventCamera.EventCamera">EventCamera</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trace_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">segment_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">frame_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">initial_dynamics_fn</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Callable<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">step_sensors</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/vista/entities/agents/Car.html#Car.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Car.Car.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the car. This involves pointing to somewhere in the dataset for later-on
+data-driven simulation, initializing vehicle state, and resetting all sensors attached
+to this car. If <code class="docutils literal notranslate"><span class="pre">lookahead_road</span> <span class="pre">=</span> <span class="pre">True</span></code>, the road cache will also be reset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trace_index</strong> (<em>int</em>) – A pointer to which trace to be simulated on.</p></li>
+<li><p><strong>segment_index</strong> (<em>int</em>) – A pointer to which segment in a trace to be simulated on.</p></li>
+<li><p><strong>frame_index</strong> (<em>int</em>) – A pointer to which frame in a segment to be simulated on.</p></li>
+<li><p><strong>initial_dynamics_fn</strong> (<em>Callable</em>) – A function to initialize vehicle state. The
+function takes x, y, yaw, steering (tire angle), and speed as inputs. Default
+is set to <code class="docutils literal notranslate"><span class="pre">None</span></code>, which initialize vehicle with the same state as the dataset.</p></li>
+<li><p><strong>step_sensors</strong> (<em>bool</em>) – Whether to step sensor; default is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.step_dataset">
+<code class="sig-name descname">step_dataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">step_dynamics</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vista/entities/agents/Car.html#Car.step_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Car.Car.step_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Step through the dataset without rendering. This is basically
+fetching the next frame from the dataset. Normally, it is called
+when doing imitation learning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>step_dynamics</strong> (<em>bool</em>) – Whether to update vehicle state; default
+is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>NotImplementedError</strong> – if any attached sensor has no implemented
+    function for stepping through dataset.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.step_dynamics">
+<code class="sig-name descname">step_dynamics</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">action</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">dt</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0.03333333333333333</span></em>, <em class="sig-param"><span class="n">update_road</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>bool<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/vista/entities/agents/Car.html#Car.step_dynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Car.Car.step_dynamics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update vehicle state given control command based on vehicle dynamics
+and update timestamp, which is then used to update pointer to the dataset
+for data-driven simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>action</strong> (<em>np.ndarray</em>) – Control command (curvature and speed).</p></li>
+<li><p><strong>dt</strong> (<em>float</em>) – Elapsed time.</p></li>
+<li><p><strong>update_road</strong> (<em>bool</em>) – Whether to update road cache; default is
+set to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.step_sensors">
+<code class="sig-name descname">step_sensors</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/vista/entities/agents/Car.html#Car.step_sensors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Car.Car.step_sensors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update sensor measurement given current state of the vehicle.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.trace">
+<em class="property">property </em><code class="sig-name descname">trace</code><a class="headerlink" href="#vista.entities.agents.Car.Car.trace" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Trace</span></code> currently associated with the car.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.sensors">
+<em class="property">property </em><code class="sig-name descname">sensors</code><a class="headerlink" href="#vista.entities.agents.Car.Car.sensors" title="Permalink to this definition">¶</a></dt>
+<dd><p>All sensors attached to this car.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.relative_state">
+<em class="property">property </em><code class="sig-name descname">relative_state</code><a class="headerlink" href="#vista.entities.agents.Car.Car.relative_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Relative transform between <code class="docutils literal notranslate"><span class="pre">ego_dynamics</span></code> and <code class="docutils literal notranslate"><span class="pre">human_dynamics</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.ego_dynamics">
+<em class="property">property </em><code class="sig-name descname">ego_dynamics</code><a class="headerlink" href="#vista.entities.agents.Car.Car.ego_dynamics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current simulated vehicle state.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.human_dynamics">
+<em class="property">property </em><code class="sig-name descname">human_dynamics</code><a class="headerlink" href="#vista.entities.agents.Car.Car.human_dynamics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Vehicle state of the current pointer to the dataset (human trajectory).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.length">
+<em class="property">property </em><code class="sig-name descname">length</code><a class="headerlink" href="#vista.entities.agents.Car.Car.length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Car length.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.width">
+<em class="property">property </em><code class="sig-name descname">width</code><a class="headerlink" href="#vista.entities.agents.Car.Car.width" title="Permalink to this definition">¶</a></dt>
+<dd><p>Car width.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.wheel_base">
+<em class="property">property </em><code class="sig-name descname">wheel_base</code><a class="headerlink" href="#vista.entities.agents.Car.Car.wheel_base" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wheel base.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.steering_ratio">
+<em class="property">property </em><code class="sig-name descname">steering_ratio</code><a class="headerlink" href="#vista.entities.agents.Car.Car.steering_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Steering ratio.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.speed">
+<em class="property">property </em><code class="sig-name descname">speed</code><a class="headerlink" href="#vista.entities.agents.Car.Car.speed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Speed of simulated trajectory (this car) in current timestamp.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.curvature">
+<em class="property">property </em><code class="sig-name descname">curvature</code><a class="headerlink" href="#vista.entities.agents.Car.Car.curvature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Curvature of simulated trajectory (this car) in current timestamp.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.steering">
+<em class="property">property </em><code class="sig-name descname">steering</code><a class="headerlink" href="#vista.entities.agents.Car.Car.steering" title="Permalink to this definition">¶</a></dt>
+<dd><p>Steering angle of simulated trajectory (this car) in current timestamp.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.tire_angle">
+<em class="property">property </em><code class="sig-name descname">tire_angle</code><a class="headerlink" href="#vista.entities.agents.Car.Car.tire_angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tire angle of simulated trajectory (this car) in current timestamp.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.human_speed">
+<em class="property">property </em><code class="sig-name descname">human_speed</code><a class="headerlink" href="#vista.entities.agents.Car.Car.human_speed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Speed of human trajectory in current timestamp.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.human_curvature">
+<em class="property">property </em><code class="sig-name descname">human_curvature</code><a class="headerlink" href="#vista.entities.agents.Car.Car.human_curvature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Curvature of human trajectory in current timestamp.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.human_steering">
+<em class="property">property </em><code class="sig-name descname">human_steering</code><a class="headerlink" href="#vista.entities.agents.Car.Car.human_steering" title="Permalink to this definition">¶</a></dt>
+<dd><p>Steering angle of human trajectory in current timestamp.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.human_tire_angle">
+<em class="property">property </em><code class="sig-name descname">human_tire_angle</code><a class="headerlink" href="#vista.entities.agents.Car.Car.human_tire_angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tire angle of human trajectory in current timestamp.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.timestamp">
+<em class="property">property </em><code class="sig-name descname">timestamp</code><a class="headerlink" href="#vista.entities.agents.Car.Car.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current timestamp (normally ROS timestamp). This serves as a
+continuous pointer to the dataset as opposed to <code class="docutils literal notranslate"><span class="pre">trace_index</span></code>,
+<code class="docutils literal notranslate"><span class="pre">segment_index</span></code>, and <code class="docutils literal notranslate"><span class="pre">frame_index</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.frame_number">
+<em class="property">property </em><code class="sig-name descname">frame_number</code><a class="headerlink" href="#vista.entities.agents.Car.Car.frame_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current frame number. Note that this is different from <code class="docutils literal notranslate"><span class="pre">frame_index</span></code>
+as it is a different pointer based on how we define frame in the <code class="docutils literal notranslate"><span class="pre">master_sensor</span></code>
+instead of a pointer to the dataset. There is only one unique pointer to the dataset,
+which can be mapped to (potentially) different pointers to the frame number in
+different sensors.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.trace_index">
+<em class="property">property </em><code class="sig-name descname">trace_index</code><a class="headerlink" href="#vista.entities.agents.Car.Car.trace_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current pointer to the trace.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.segment_index">
+<em class="property">property </em><code class="sig-name descname">segment_index</code><a class="headerlink" href="#vista.entities.agents.Car.Car.segment_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current pointer to the segment in the current trace.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.frame_index">
+<em class="property">property </em><code class="sig-name descname">frame_index</code><a class="headerlink" href="#vista.entities.agents.Car.Car.frame_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current pointer to the frame in the current segment.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.observations">
+<em class="property">property </em><code class="sig-name descname">observations</code><a class="headerlink" href="#vista.entities.agents.Car.Car.observations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sensory measurement at current timestamp.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.done">
+<em class="property">property </em><code class="sig-name descname">done</code><a class="headerlink" href="#vista.entities.agents.Car.Car.done" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether exceeding the end of the trace currently associated with the car.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.road">
+<em class="property">property </em><code class="sig-name descname">road</code><a class="headerlink" href="#vista.entities.agents.Car.Car.road" title="Permalink to this definition">¶</a></dt>
+<dd><p>Road cache if <code class="docutils literal notranslate"><span class="pre">lookahead_road</span> <span class="pre">=</span> <span class="pre">True</span></code> otherwise <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.config">
+<em class="property">property </em><code class="sig-name descname">config</code><a class="headerlink" href="#vista.entities.agents.Car.Car.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configuration of this car.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.id">
+<em class="property">property </em><code class="sig-name descname">id</code><a class="headerlink" href="#vista.entities.agents.Car.Car.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>The identifier of this entity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Car.Car.parent">
+<em class="property">property </em><code class="sig-name descname">parent</code><a class="headerlink" href="#vista.entities.agents.Car.Car.parent" title="Permalink to this definition">¶</a></dt>
+<dd><p>The parent of this entity.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="vista.entities.agents.Dynamics.StateDynamics">
+<em class="property">class </em><code class="sig-prename descclassname">vista.entities.agents.Dynamics.</code><code class="sig-name descname">StateDynamics</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">y</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">yaw</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">steering</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">speed</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">steering_bound</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[- 0.75, 0.75]</span></em>, <em class="sig-param"><span class="n">speed_bound</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[0.0, 15.0]</span></em>, <em class="sig-param"><span class="n">wheel_base</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">2.8</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vista/entities/agents/Dynamics.html#StateDynamics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Dynamics.StateDynamics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple continuous kinematic (bicycle) model of a rear-wheel driven vehicle.
+Check out Eq.3 in <a class="reference external" href="https://www.autonomousrobots.nl/docs/17-schwartig-autonomy-icra.pdf">https://www.autonomousrobots.nl/docs/17-schwartig-autonomy-icra.pdf</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – Position of the car in x-axis.</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – Position of the car in y-axis.</p></li>
+<li><p><strong>yaw</strong> (<em>float</em>) – Heading/yaw of the car.</p></li>
+<li><p><strong>steering</strong> (<em>float</em>) – Steering angle of tires instead of steering wheel.</p></li>
+<li><p><strong>speed</strong> (<em>float</em>) – Forward speed.</p></li>
+<li><p><strong>steering_bound</strong> (<em>list</em>) – Upper and lower bound of steering angle.</p></li>
+<li><p><strong>speed_bound</strong> (<em>list</em>) – Upper and lower bound of speed.</p></li>
+<li><p><strong>wheel_base</strong> (<em>float</em>) – Wheel base.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="vista.entities.agents.Dynamics.StateDynamics.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">steering_velocity</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">acceleration</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">dt</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">max_steps</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">100</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../../_modules/vista/entities/agents/Dynamics.html#StateDynamics.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Dynamics.StateDynamics.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Step the vehicle state by solving ODE of the continuous kinematic (bicycle) model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>steering_velocity</strong> (<em>float</em>) – Steering velocity (of tire angle).</p></li>
+<li><p><strong>acceleration</strong> (<em>float</em>) – Acceleration.</p></li>
+<li><p><strong>dt</strong> (<em>float</em>) – Elapsed time.</p></li>
+<li><p><strong>max_steps</strong> (<em>int</em>) – Maximal step to run the ODE solver; default to 100.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The updated state (x, y, yaw, tire angle, speed).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Dynamics.StateDynamics.numpy">
+<code class="sig-name descname">numpy</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="../../_modules/vista/entities/agents/Dynamics.html#StateDynamics.numpy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Dynamics.StateDynamics.numpy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a numpy array of vehicle state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Vehicle state.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Dynamics.StateDynamics.copy">
+<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/vista/entities/agents/Dynamics.html#StateDynamics.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Dynamics.StateDynamics.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a copy.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Dynamics.StateDynamics.update">
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">y</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">yaw</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">steering</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">speed</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/vista/entities/agents/Dynamics.html#StateDynamics.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Dynamics.StateDynamics.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set state.
+:param x: Position of the car in x-axis.
+:type x: float
+:param y: Position of the car in y-axis.
+:type y: float
+:param yaw: Heading/yaw of the car.
+:type yaw: float
+:param steering: Steering angle of tires instead of steering wheel.
+:type steering: float
+:param speed: Forward speed.
+:type speed: float</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Dynamics.StateDynamics.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/vista/entities/agents/Dynamics.html#StateDynamics.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Dynamics.StateDynamics.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset all state to zeros.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Dynamics.StateDynamics.x">
+<em class="property">property </em><code class="sig-name descname">x</code><a class="headerlink" href="#vista.entities.agents.Dynamics.StateDynamics.x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Position of the car in x-axis.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Dynamics.StateDynamics.y">
+<em class="property">property </em><code class="sig-name descname">y</code><a class="headerlink" href="#vista.entities.agents.Dynamics.StateDynamics.y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Position of the car in y-axis.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Dynamics.StateDynamics.yaw">
+<em class="property">property </em><code class="sig-name descname">yaw</code><a class="headerlink" href="#vista.entities.agents.Dynamics.StateDynamics.yaw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Heading/yaw of the car.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Dynamics.StateDynamics.steering">
+<em class="property">property </em><code class="sig-name descname">steering</code><a class="headerlink" href="#vista.entities.agents.Dynamics.StateDynamics.steering" title="Permalink to this definition">¶</a></dt>
+<dd><p>Steering (tire) angle.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Dynamics.StateDynamics.steering_bound">
+<em class="property">property </em><code class="sig-name descname">steering_bound</code><a class="headerlink" href="#vista.entities.agents.Dynamics.StateDynamics.steering_bound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lower and upper bound of steering (tire) angle.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Dynamics.StateDynamics.speed">
+<em class="property">property </em><code class="sig-name descname">speed</code><a class="headerlink" href="#vista.entities.agents.Dynamics.StateDynamics.speed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Speed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.entities.agents.Dynamics.StateDynamics.speed_bound">
+<em class="property">property </em><code class="sig-name descname">speed_bound</code><a class="headerlink" href="#vista.entities.agents.Dynamics.StateDynamics.speed_bound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lower and upper bound of speed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.entities.agents.Dynamics.curvature2tireangle">
+<code class="sig-prename descclassname">vista.entities.agents.Dynamics.</code><code class="sig-name descname">curvature2tireangle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">curvature</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">wheel_base</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../../_modules/vista/entities/agents/Dynamics.html#curvature2tireangle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Dynamics.curvature2tireangle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert curvature to tire angle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>curvature</strong> (<em>float</em>) – Curvature.</p></li>
+<li><p><strong>wheel_base</strong> (<em>float</em>) – Wheel base.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tire angle.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.entities.agents.Dynamics.tireangle2curvature">
+<code class="sig-prename descclassname">vista.entities.agents.Dynamics.</code><code class="sig-name descname">tireangle2curvature</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tire_angle</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">wheel_base</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../../_modules/vista/entities/agents/Dynamics.html#tireangle2curvature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Dynamics.tireangle2curvature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert tire angel to curvature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tire_angle</strong> (<em>float</em>) – Tire angle.</p></li>
+<li><p><strong>wheel_base</strong> (<em>float</em>) – Wheel base.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Curvature.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.entities.agents.Dynamics.curvature2steering">
+<code class="sig-prename descclassname">vista.entities.agents.Dynamics.</code><code class="sig-name descname">curvature2steering</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">curvature</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">wheel_base</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">steering_ratio</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../../_modules/vista/entities/agents/Dynamics.html#curvature2steering"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Dynamics.curvature2steering" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert curvature to steering angle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>curvature</strong> (<em>float</em>) – Curvature.</p></li>
+<li><p><strong>wheel_base</strong> (<em>float</em>) – Wheel base.</p></li>
+<li><p><strong>steering_ratio</strong> (<em>float</em>) – Steering ratio.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Steering (wheel) angle.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.entities.agents.Dynamics.steering2curvature">
+<code class="sig-prename descclassname">vista.entities.agents.Dynamics.</code><code class="sig-name descname">steering2curvature</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">steering</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">wheel_base</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">steering_ratio</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="../../_modules/vista/entities/agents/Dynamics.html#steering2curvature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Dynamics.steering2curvature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert steering angle to curvature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>steering</strong> (<em>float</em>) – Steering (wheel) angle.</p></li>
+<li><p><strong>wheel_base</strong> (<em>float</em>) – Wheel base.</p></li>
+<li><p><strong>steering_ratio</strong> (<em>float</em>) – Steering ratio.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Curvature.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="vista.entities.agents.Dynamics.update_with_perfect_controller">
+<code class="sig-prename descclassname">vista.entities.agents.Dynamics.</code><code class="sig-name descname">update_with_perfect_controller</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">desired_state</span><span class="p">:</span> <span class="n">List<span class="p">[</span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">dt</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">dynamics</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#vista.entities.agents.Dynamics.StateDynamics" title="vista.entities.agents.Dynamics.StateDynamics">vista.entities.agents.Dynamics.StateDynamics</a></span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/vista/entities/agents/Dynamics.html#update_with_perfect_controller"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.entities.agents.Dynamics.update_with_perfect_controller" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update vehicle state assuming a perfect low-level controller. This
+basically simulate that the low-level controller can “instantaneously”
+achieve the desired state (e.g., steering (tire) angle and speed) with control
+command (steering velocity and accleration) in vehicle dynamics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>desired_state</strong> (<em>List</em><em>[</em><em>float</em><em>]</em>) – A list of desired vehicle state.</p></li>
+<li><p><strong>dt</strong> (<em>float</em>) – Elapsed time.</p></li>
+<li><p><strong>dynamics</strong> (<a class="reference internal" href="#vista.entities.agents.Dynamics.StateDynamics" title="vista.entities.agents.Dynamics.StateDynamics"><em>StateDynamics</em></a>) – Vehicle state.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="sensors.html" class="btn btn-neutral float-right" title="Sensors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Entities" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

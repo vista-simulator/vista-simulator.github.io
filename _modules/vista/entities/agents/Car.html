@@ -1,0 +1,790 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vista.entities.agents.Car &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vista.entities.agents.Car</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vista.entities.agents.Car</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">vista.entities.sensors.EventCamera</span> <span class="kn">import</span> <span class="n">EventCamera</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
+
+<span class="kn">from</span> <span class="nn">.Dynamics</span> <span class="kn">import</span> <span class="n">State</span><span class="p">,</span> <span class="n">StateDynamics</span><span class="p">,</span> <span class="n">curvature2steering</span><span class="p">,</span> <span class="n">curvature2tireangle</span><span class="p">,</span> \
+                      <span class="n">tireangle2curvature</span><span class="p">,</span> <span class="n">update_with_perfect_controller</span>
+<span class="kn">from</span> <span class="nn">..Entity</span> <span class="kn">import</span> <span class="n">Entity</span>
+
+<span class="kn">from</span> <span class="nn">..sensors</span> <span class="kn">import</span> <span class="n">BaseSensor</span><span class="p">,</span> <span class="n">Camera</span><span class="p">,</span> <span class="n">Lidar</span><span class="p">,</span> <span class="n">EventCamera</span>
+<span class="kn">from</span> <span class="nn">...core</span> <span class="kn">import</span> <span class="n">World</span><span class="p">,</span> <span class="n">Trace</span>
+<span class="kn">from</span> <span class="nn">...utils</span> <span class="kn">import</span> <span class="n">transform</span><span class="p">,</span> <span class="n">logging</span><span class="p">,</span> <span class="n">misc</span>
+
+
+<div class="viewcode-block" id="Car"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Car.Car">[docs]</a><span class="k">class</span> <span class="nc">Car</span><span class="p">(</span><span class="n">Entity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; The class of a car agent. This object lives in the :class:`World` and is attached</span>
+<span class="sd">    to a trace object that provides pointers to dataset for data-driven simulation and zero</span>
+<span class="sd">    or one or more sensor objects that synthesize sensory measurement. The update of vehicle</span>
+<span class="sd">    state is handled in this object.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        world (World): The world that this agent lives in.</span>
+<span class="sd">        car_config (Dict): Configuration of the car. An example (default) is,</span>
+
+<span class="sd">            &gt;&gt;&gt; DEFAULT_CONFIG = {</span>
+<span class="sd">                &#39;length&#39;: 5.,</span>
+<span class="sd">                &#39;width&#39;: 2.,</span>
+<span class="sd">                &#39;wheel_base&#39;: 2.78,</span>
+<span class="sd">                &#39;steering_ratio&#39;: 14.7,</span>
+<span class="sd">                &#39;lookahead_road&#39;: False,</span>
+<span class="sd">                &#39;road_buffer_size&#39;: 200,</span>
+<span class="sd">            }</span>
+
+<span class="sd">    Example Usage (always make sure reset is called first to initialize vehicle state</span>
+<span class="sd">    or pointer to the dataset for data-driven simulation)::</span>
+
+<span class="sd">        &gt;&gt;&gt; car = world.spawn_agent(car_config)</span>
+<span class="sd">        &gt;&gt;&gt; car.spawn_camera(camera_config)</span>
+<span class="sd">        &gt;&gt;&gt; world.reset()</span>
+<span class="sd">        &gt;&gt;&gt; car.step_dynamics(action) # update vehicle states</span>
+<span class="sd">        &gt;&gt;&gt; car.step_sensors() # do sensor capture</span>
+<span class="sd">        &gt;&gt;&gt; observation = car.observations # fetch sensory measurement</span>
+<span class="sd">        &gt;&gt;&gt; car.step_dataset() # simply get next frame in the dataset without synthesis</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DEFAULT_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;length&#39;</span><span class="p">:</span> <span class="mf">5.</span><span class="p">,</span>
+        <span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mf">2.</span><span class="p">,</span>
+        <span class="s1">&#39;wheel_base&#39;</span><span class="p">:</span> <span class="mf">2.78</span><span class="p">,</span>
+        <span class="s1">&#39;steering_ratio&#39;</span><span class="p">:</span> <span class="mf">14.7</span><span class="p">,</span>
+        <span class="s1">&#39;lookahead_road&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;road_buffer_size&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">world</span><span class="p">:</span> <span class="n">World</span><span class="p">,</span> <span class="n">car_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Car</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="c1"># Car configuration</span>
+        <span class="n">car_config</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">merge_dict</span><span class="p">(</span><span class="n">car_config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_CONFIG</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">car_config</span>
+
+        <span class="c1"># Pointer to the parent vista.World object where the agent lives</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">:</span> <span class="n">World</span> <span class="o">=</span> <span class="n">world</span>
+
+        <span class="c1"># The trace to be associated with, updated every reset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="p">:</span> <span class="n">Trace</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># A list of sensors attached to this agent (List[vista.Sensor]).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseSensor</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># State dynamics for tracking the virtual and human agent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_relative_state</span><span class="p">:</span> <span class="n">State</span> <span class="o">=</span> <span class="n">State</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ego_dynamics</span><span class="p">:</span> <span class="n">StateDynamics</span> <span class="o">=</span> <span class="n">StateDynamics</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_human_dynamics</span><span class="p">:</span> <span class="n">StateDynamics</span> <span class="o">=</span> <span class="n">StateDynamics</span><span class="p">()</span>
+
+        <span class="c1"># Properties of a car</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wheel_base</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;wheel_base&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_steering_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;steering_ratio&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_speed</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_curvature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_steering</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tire_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_human_speed</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_human_curvature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_human_steering</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_human_tire_angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timestamp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trace_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_segment_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_done</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Privileged information</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;lookahead_road&#39;</span><span class="p">]:</span>
+            <span class="n">road_buffer_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;road_buffer_size&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_road</span><span class="p">:</span> <span class="n">deque</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="n">road_buffer_size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="p">:</span> <span class="n">deque</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="n">road_buffer_size</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_road_dynamics</span><span class="p">:</span> <span class="n">StateDynamics</span> <span class="o">=</span> <span class="n">StateDynamics</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Car.spawn_camera"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Car.Car.spawn_camera">[docs]</a>    <span class="k">def</span> <span class="nf">spawn_camera</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Camera</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Spawn and attach a camera to this car.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config (Dict): Configuration of camera and rendering. For</span>
+<span class="sd">                           more details, please check the doc of</span>
+<span class="sd">                           :class:`Camera` sensor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Camera: a vista camera sensor object spawned.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Spawn a new camera </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> in car (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+        <span class="n">cam</span> <span class="o">=</span> <span class="n">Camera</span><span class="p">(</span><span class="n">attach_to</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cam</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cam</span></div>
+
+<div class="viewcode-block" id="Car.spawn_lidar"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Car.Car.spawn_lidar">[docs]</a>    <span class="k">def</span> <span class="nf">spawn_lidar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Lidar</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Spawn and attach a LiDAR to this car.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config (Dict): Configuration of LiDAR. For more details,</span>
+<span class="sd">                           please check the doc of :class:`Lidar` sensor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Lidar: a vista Lidar sensor object spawned.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Spawn a new lidar </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> in car (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+        <span class="n">lidar</span> <span class="o">=</span> <span class="n">Lidar</span><span class="p">(</span><span class="n">attach_to</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lidar</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">lidar</span></div>
+
+<div class="viewcode-block" id="Car.spawn_event_camera"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Car.Car.spawn_event_camera">[docs]</a>    <span class="k">def</span> <span class="nf">spawn_event_camera</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EventCamera</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Spawn and attach an event camera to this car.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config (Dict): Configuration of event camera. For more details,</span>
+<span class="sd">                           please check the doc of :class:`EventCamera` sensor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            EventCamera: a vista event camera sensor object spawned.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Spawn a new event camera </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> in car (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+        <span class="n">event_cam</span> <span class="o">=</span> <span class="n">EventCamera</span><span class="p">(</span><span class="n">attach_to</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sensors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event_cam</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">event_cam</span></div>
+
+<div class="viewcode-block" id="Car.reset"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Car.Car.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+              <span class="n">trace_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+              <span class="n">segment_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+              <span class="n">frame_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+              <span class="n">initial_dynamics_fn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+              <span class="n">step_sensors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Reset the car. This involves pointing to somewhere in the dataset for later-on</span>
+<span class="sd">        data-driven simulation, initializing vehicle state, and resetting all sensors attached</span>
+<span class="sd">        to this car. If ``lookahead_road = True``, the road cache will also be reset.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            trace_index (int): A pointer to which trace to be simulated on.</span>
+<span class="sd">            segment_index (int): A pointer to which segment in a trace to be simulated on.</span>
+<span class="sd">            frame_index (int): A pointer to which frame in a segment to be simulated on.</span>
+<span class="sd">            initial_dynamics_fn (Callable): A function to initialize vehicle state. The</span>
+<span class="sd">                function takes x, y, yaw, steering (tire angle), and speed as inputs. Default</span>
+<span class="sd">                is set to ``None``, which initialize vehicle with the same state as the dataset.</span>
+<span class="sd">            step_sensors (bool): Whether to step sensor; default is set to ``True``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Car (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">) reset&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Update pointers to dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">traces</span><span class="p">[</span><span class="n">trace_index</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">get_master_timestamp</span><span class="p">(</span>
+            <span class="n">segment_index</span><span class="p">,</span> <span class="n">frame_index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">get_master_frame_number</span><span class="p">(</span>
+            <span class="n">segment_index</span><span class="p">,</span> <span class="n">frame_index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trace_index</span> <span class="o">=</span> <span class="n">trace_index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_segment_index</span> <span class="o">=</span> <span class="n">segment_index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_index</span> <span class="o">=</span> <span class="n">frame_index</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_done</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Reset states and dynamics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_human_speed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">f_speed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_human_curvature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">f_curvature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_human_steering</span> <span class="o">=</span> <span class="n">curvature2steering</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">human_curvature</span><span class="p">,</span>
+                                                  <span class="bp">self</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">,</span>
+                                                  <span class="bp">self</span><span class="o">.</span><span class="n">steering_ratio</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_human_tire_angle</span> <span class="o">=</span> <span class="n">curvature2tireangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">human_curvature</span><span class="p">,</span>
+                                                     <span class="bp">self</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">human_dynamics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">human_tire_angle</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">human_speed</span><span class="p">)</span>
+
+        <span class="n">initial_dynamics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">human_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">initial_dynamics_fn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">initial_dynamics</span> <span class="o">=</span> <span class="n">initial_dynamics_fn</span><span class="p">(</span><span class="o">*</span><span class="n">initial_dynamics</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ego_dynamics</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="n">initial_dynamics</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_speed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">human_speed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_curvature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">human_curvature</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_steering</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">human_steering</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tire_angle</span> <span class="o">=</span> <span class="n">curvature2tireangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">curvature</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">)</span>
+
+        <span class="n">latlongyaw</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">compute_relative_latlongyaw</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ego_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">3</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">human_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">3</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_relative_state</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="n">latlongyaw</span><span class="p">)</span>
+
+        <span class="c1"># Reset for privileged information</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_road&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_road</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_road</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">human_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_road_dynamics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">human_dynamics</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_index</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_road</span><span class="p">()</span>
+
+        <span class="c1"># Reset sensors</span>
+        <span class="k">for</span> <span class="n">sensor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensors</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">sensor</span><span class="p">,</span>
+                    <span class="n">Camera</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">multi_sensor</span><span class="o">.</span><span class="n">main_camera</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">multi_sensor</span><span class="o">.</span><span class="n">set_main_sensor</span><span class="p">(</span><span class="s1">&#39;camera&#39;</span><span class="p">,</span> <span class="n">sensor</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">sensor</span><span class="p">,</span>
+                    <span class="n">Lidar</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">multi_sensor</span><span class="o">.</span><span class="n">main_lidar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">multi_sensor</span><span class="o">.</span><span class="n">set_main_sensor</span><span class="p">(</span><span class="s1">&#39;lidar&#39;</span><span class="p">,</span> <span class="n">sensor</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">sensor</span><span class="p">,</span> <span class="n">EventCamera</span>
+            <span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">multi_sensor</span><span class="o">.</span><span class="n">main_event_camera</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">multi_sensor</span><span class="o">.</span><span class="n">set_main_sensor</span><span class="p">(</span>
+                    <span class="s1">&#39;event_camera&#39;</span><span class="p">,</span> <span class="n">sensor</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="n">sensor</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+        <span class="c1"># Update observation</span>
+        <span class="k">if</span> <span class="n">step_sensors</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">step_sensors</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Car.step_dataset"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Car.Car.step_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">step_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step_dynamics</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Step through the dataset without rendering. This is basically</span>
+<span class="sd">        fetching the next frame from the dataset. Normally, it is called</span>
+<span class="sd">        when doing imitation learning.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            step_dynamics (bool): Whether to update vehicle state; default</span>
+<span class="sd">                is set to ``True``.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            NotImplementedError: if any attached sensor has no implemented</span>
+<span class="sd">                function for stepping through dataset.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Car (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">) step based on dataset&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Step by incrementing frame number</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span>
+        <span class="n">frame_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_index</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">exceed_end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">get_master_timestamp</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">segment_index</span><span class="p">,</span> <span class="n">frame_index</span><span class="p">,</span> <span class="n">check_end</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">exceed_end</span><span class="p">:</span>  <span class="c1"># trigger trace done terminatal condition</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_done</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Car (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">) exceed the end of trace&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_frame_index</span> <span class="o">=</span> <span class="n">frame_index</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_frame_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">get_master_frame_number</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">segment_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_index</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_human_speed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">f_speed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_human_curvature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">f_curvature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_human_steering</span> <span class="o">=</span> <span class="n">curvature2steering</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">human_curvature</span><span class="p">,</span>
+                                                      <span class="bp">self</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">,</span>
+                                                      <span class="bp">self</span><span class="o">.</span><span class="n">steering_ratio</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_human_tire_angle</span> <span class="o">=</span> <span class="n">curvature2tireangle</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">human_curvature</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_speed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_human_speed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_curvature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_human_curvature</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_steering</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_human_steering</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tire_angle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_human_tire_angle</span>
+
+            <span class="c1"># Step human dynamics if queried</span>
+            <span class="k">if</span> <span class="n">step_dynamics</span><span class="p">:</span>
+                <span class="n">current_state</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">curvature2tireangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">human_curvature</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">human_speed</span>
+                <span class="p">]</span>
+                <span class="n">update_with_perfect_controller</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span>
+                                               <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">-</span> <span class="n">ts</span><span class="p">,</span>
+                                               <span class="bp">self</span><span class="o">.</span><span class="n">_human_dynamics</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ego_dynamics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">human_dynamics</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="c1"># Get image frame</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">sensor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensors</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">sensor</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Camera</span><span class="p">,</span> <span class="n">Lidar</span><span class="p">,</span> <span class="n">EventCamera</span><span class="p">]:</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;Sensor </span><span class="si">{</span><span class="n">sensor</span><span class="si">}</span><span class="s1"> is not supported in step dataset&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span><span class="p">[</span><span class="n">sensor</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">sensor</span><span class="o">.</span><span class="n">capture</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Car.step_dynamics"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Car.Car.step_dynamics">[docs]</a>    <span class="k">def</span> <span class="nf">step_dynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                      <span class="n">action</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                      <span class="n">dt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">30.</span><span class="p">,</span>
+                      <span class="n">update_road</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Update vehicle state given control command based on vehicle dynamics</span>
+<span class="sd">        and update timestamp, which is then used to update pointer to the dataset</span>
+<span class="sd">        for data-driven simulation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            action (np.ndarray): Control command (curvature and speed).</span>
+<span class="sd">            dt (float): Elapsed time.</span>
+<span class="sd">            update_road (bool): Whether to update road cache; default is</span>
+<span class="sd">                set to ``True``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">done</span><span class="p">,</span> <span class="s1">&#39;Agent status is done. Please call reset first.&#39;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Car (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">) step dynamics&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Parse action</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">action</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">action</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span>
+        <span class="n">desired_curvature</span><span class="p">,</span> <span class="n">desired_speed</span> <span class="o">=</span> <span class="n">action</span>
+        <span class="n">desired_tire_angle</span> <span class="o">=</span> <span class="n">curvature2tireangle</span><span class="p">(</span><span class="n">desired_curvature</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">)</span>
+
+        <span class="c1"># Run low-level controller and step vehicle dynamics</span>
+        <span class="c1"># TODO: non-perfect low-level controller</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Using perfect low-level controller now&#39;</span><span class="p">)</span>
+        <span class="n">desired_state</span> <span class="o">=</span> <span class="p">[</span><span class="n">desired_tire_angle</span><span class="p">,</span> <span class="n">desired_speed</span><span class="p">]</span>
+        <span class="n">update_with_perfect_controller</span><span class="p">(</span><span class="n">desired_state</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ego_dynamics</span><span class="p">)</span>
+
+        <span class="c1"># Update based on vehicle dynamics feedback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tire_angle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_dynamics</span><span class="o">.</span><span class="n">steering</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_speed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ego_dynamics</span><span class="o">.</span><span class="n">speed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_curvature</span> <span class="o">=</span> <span class="n">tireangle2curvature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tire_angle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_steering</span> <span class="o">=</span> <span class="n">curvature2steering</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">curvature</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">,</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">steering_ratio</span><span class="p">)</span>
+
+        <span class="c1"># Update human (reference) dynamics for assoication with the trace / dataset</span>
+        <span class="n">human</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">human_dynamics</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">top2_closest</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">dist</span><span class="o">=</span><span class="n">deque</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">],</span> <span class="n">maxlen</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+                            <span class="n">dynamics</span><span class="o">=</span><span class="n">deque</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">maxlen</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+                            <span class="n">timestamp</span><span class="o">=</span><span class="n">deque</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">maxlen</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+                            <span class="n">index</span><span class="o">=</span><span class="n">deque</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">maxlen</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_index</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">get_master_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">segment_index</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">human</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">ego_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">2</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;</span> <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;dist&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;</span> <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;dist&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;dist&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+                    <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;dynamics&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">human</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+                    <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+                    <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">appendleft</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;dist&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">dist</span>
+                    <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;dynamics&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">human</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                    <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span>
+                    <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">next_index</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">dt</span><span class="p">))</span>
+            <span class="n">exceed_end</span><span class="p">,</span> <span class="n">next_ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">get_master_timestamp</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">segment_index</span><span class="p">,</span> <span class="n">next_index</span><span class="p">,</span> <span class="n">check_end</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">exceed_end</span><span class="p">:</span>  <span class="c1"># trigger trace done terminatal condition</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_done</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Car (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">) exceed the end of trace&#39;</span><span class="p">)</span>
+
+            <span class="n">current_state</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">curvature2tireangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">f_curvature</span><span class="p">(</span><span class="n">ts</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">f_speed</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="n">update_with_perfect_controller</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span> <span class="n">next_ts</span> <span class="o">-</span> <span class="n">ts</span><span class="p">,</span> <span class="n">human</span><span class="p">)</span>
+
+            <span class="n">index</span> <span class="o">=</span> <span class="n">next_index</span>
+            <span class="n">ts</span> <span class="o">=</span> <span class="n">next_ts</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_human_dynamics</span> <span class="o">=</span> <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;dynamics&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_index</span> <span class="o">=</span> <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_frame_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">get_master_frame_number</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">segment_index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame_index</span><span class="p">)</span>
+
+        <span class="c1"># Update timestamp based on where the car position is with respect to</span>
+        <span class="c1"># course distance of trace (may not be exactly the same as any of</span>
+        <span class="c1"># timestamps in the dataset)</span>
+        <span class="n">latlongyaw_closest</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">compute_relative_latlongyaw</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ego_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">3</span><span class="p">],</span>
+            <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;dynamics&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">latlongyaw_second_closest</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">compute_relative_latlongyaw</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ego_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">3</span><span class="p">],</span>
+            <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;dynamics&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">latlongyaw_second_closest</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="nb">abs</span><span class="p">(</span><span class="n">latlongyaw_closest</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">latlongyaw_second_closest</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timestamp</span> <span class="o">=</span> <span class="p">(</span><span class="n">ratio</span> <span class="o">*</span> <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
+                           <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">ratio</span><span class="p">)</span> <span class="o">*</span> <span class="n">top2_closest</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># Update human control based on current timestamp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_human_speed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">f_speed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_human_curvature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">f_curvature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_human_steering</span> <span class="o">=</span> <span class="n">curvature2steering</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">human_curvature</span><span class="p">,</span>
+                                                  <span class="bp">self</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">,</span>
+                                                  <span class="bp">self</span><span class="o">.</span><span class="n">steering_ratio</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_human_tire_angle</span> <span class="o">=</span> <span class="n">curvature2tireangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">human_curvature</span><span class="p">,</span>
+                                                     <span class="bp">self</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">)</span>
+
+        <span class="c1"># Update relative transformation between human and ego dynamics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_relative_state</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">*</span><span class="n">latlongyaw_closest</span><span class="p">)</span>
+
+        <span class="c1"># Update privileged information (in global coordinates)</span>
+        <span class="k">if</span> <span class="n">update_road</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_road&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_road</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Car.step_sensors"><a class="viewcode-back" href="../../../../api_documentation/entities/agents.html#vista.entities.agents.Car.Car.step_sensors">[docs]</a>    <span class="k">def</span> <span class="nf">step_sensors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Update sensor measurement given current state of the vehicle. &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Car (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">) step sensors&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">sensor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensors</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span><span class="p">[</span><span class="n">sensor</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">sensor</span><span class="o">.</span><span class="n">capture</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_update_road</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">exceed_end</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">get_timestamp</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_idx</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">get_master_timestamp</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">segment_index</span><span class="p">,</span> <span class="n">_idx</span><span class="p">,</span> <span class="n">check_end</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">frame_index</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_road</span><span class="o">.</span><span class="n">maxlen</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">exceed_end</span><span class="p">:</span>
+            <span class="n">exceed_end</span><span class="p">,</span> <span class="n">ts</span> <span class="o">=</span> <span class="n">get_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">exceed_end</span><span class="p">,</span> <span class="n">next_ts</span> <span class="o">=</span> <span class="n">get_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="n">state</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">curvature2tireangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">f_curvature</span><span class="p">(</span><span class="n">ts</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">f_speed</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="n">update_with_perfect_controller</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">next_ts</span> <span class="o">-</span> <span class="n">ts</span><span class="p">,</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">_road_dynamics</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_road</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_road_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Trace</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; The :class:`Trace` currently associated with the car. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sensors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">BaseSensor</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; All sensors attached to this car. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sensors</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">relative_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">State</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Relative transform between ``ego_dynamics`` and ``human_dynamics``. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_relative_state</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ego_dynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StateDynamics</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Current simulated vehicle state. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ego_dynamics</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">human_dynamics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StateDynamics</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Vehicle state of the current pointer to the dataset (human trajectory). &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_human_dynamics</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Car length. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Car width. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">wheel_base</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Wheel base. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wheel_base</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">steering_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Steering ratio. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steering_ratio</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">speed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Speed of simulated trajectory (this car) in current timestamp. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_speed</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">curvature</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Curvature of simulated trajectory (this car) in current timestamp. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_curvature</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">steering</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Steering angle of simulated trajectory (this car) in current timestamp. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steering</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tire_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Tire angle of simulated trajectory (this car) in current timestamp. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tire_angle</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">human_speed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Speed of human trajectory in current timestamp. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_human_speed</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">human_curvature</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Curvature of human trajectory in current timestamp. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_human_curvature</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">human_steering</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Steering angle of human trajectory in current timestamp. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_human_steering</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">human_tire_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Tire angle of human trajectory in current timestamp. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_human_tire_angle</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Current timestamp (normally ROS timestamp). This serves as a</span>
+<span class="sd">        continuous pointer to the dataset as opposed to ``trace_index``,</span>
+<span class="sd">        ``segment_index``, and ``frame_index``. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timestamp</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">frame_number</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Current frame number. Note that this is different from ``frame_index``</span>
+<span class="sd">        as it is a different pointer based on how we define frame in the ``master_sensor``</span>
+<span class="sd">        instead of a pointer to the dataset. There is only one unique pointer to the dataset,</span>
+<span class="sd">        which can be mapped to (potentially) different pointers to the frame number in</span>
+<span class="sd">        different sensors. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_number</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">trace_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Current pointer to the trace. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trace_index</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">segment_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Current pointer to the segment in the current trace. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_index</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">frame_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Current pointer to the frame in the current segment. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame_index</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">observations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Sensory measurement at current timestamp. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observations</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">done</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Whether exceeding the end of the trace currently associated with the car. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_done</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">road</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Road cache if ``lookahead_road = True`` otherwise ``None``. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_road</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_road&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Configuration of this car. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> (id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">)&gt; &#39;</span> <span class="o">+</span> \
+               <span class="sa">f</span><span class="s1">&#39;width: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="si">}</span><span class="s1"> &#39;</span> <span class="o">+</span> \
+               <span class="sa">f</span><span class="s1">&#39;length: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1"> &#39;</span> <span class="o">+</span> \
+               <span class="sa">f</span><span class="s1">&#39;wheel_base: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">wheel_base</span><span class="si">}</span><span class="s1"> &#39;</span> <span class="o">+</span> \
+               <span class="sa">f</span><span class="s1">&#39;steering_ratio: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">steering_ratio</span><span class="si">}</span><span class="s1"> &#39;</span> <span class="o">+</span> \
+               <span class="sa">f</span><span class="s1">&#39;speed: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">speed</span><span class="si">}</span><span class="s1"> &#39;</span> <span class="o">+</span> \
+               <span class="sa">f</span><span class="s1">&#39;curvature: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curvature</span><span class="si">}</span><span class="s1"> &#39;</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

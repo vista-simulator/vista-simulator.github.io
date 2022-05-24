@@ -1,0 +1,341 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vista.core.World &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vista.core.World</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vista.core.World</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.Trace</span> <span class="kn">import</span> <span class="n">Trace</span>
+<span class="kn">from</span> <span class="nn">..entities.agents</span> <span class="kn">import</span> <span class="n">Car</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">logging</span>
+
+
+<div class="viewcode-block" id="World"><a class="viewcode-back" href="../../../api_documentation/core.html#vista.core.World.World">[docs]</a><span class="k">class</span> <span class="nc">World</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; This class specifies the :class:`World` where all entities (i.e., agents and sensors) </span>
+<span class="sd">    in VISTA lives in. The is built upon one or multiple traces pre-collected from the real world. </span>
+<span class="sd">    Users can spawn agents (:class:`Car`) in the :class:`World`, where all agents will be visible </span>
+<span class="sd">    while rendering sensory measurement. At reset, the :class:`World` randomly sample an pointer</span>
+<span class="sd">    in the dataset (conceptually retrieving a frame within a trace) as the initial condition for</span>
+<span class="sd">    the simulation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        trace_paths (List(str)): A list of paths to traces</span>
+<span class="sd">        trace_config (Dict): Configuration of traces</span>
+
+<span class="sd">    Example usage::</span>
+
+<span class="sd">        &gt;&gt;&gt; world = vista.World(trace_paths, trace_config)</span>
+<span class="sd">        &gt;&gt;&gt; agent = world.spawn_agent(agent_config)</span>
+<span class="sd">        &gt;&gt;&gt; world.reset()</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">trace_paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">trace_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># A list of traces that define the world</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_traces</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Trace</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">Trace</span><span class="p">(</span><span class="n">trace_path</span><span class="p">,</span> <span class="n">trace_config</span><span class="p">)</span> <span class="k">for</span> <span class="n">trace_path</span> <span class="ow">in</span> <span class="n">trace_paths</span>
+        <span class="p">]</span>
+
+        <span class="c1"># A list of agents within this world. Agents start in a single</span>
+        <span class="c1"># trace but can be teleported between traces, since they are all in</span>
+        <span class="c1"># the same world.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_agents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Car</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Random seed; will also assign the same seed to traces</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="World.spawn_agent"><a class="viewcode-back" href="../../../api_documentation/core.html#vista.core.World.World.spawn_agent">[docs]</a>    <span class="k">def</span> <span class="nf">spawn_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Car</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Spawn an agent in this world.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            config (Dict): Configuration of the agent.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Car: The agent being spawned.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">agent</span> <span class="o">=</span> <span class="n">Car</span><span class="p">(</span><span class="n">world</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">car_config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Spawn an agent (</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_agents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">agent</span></div>
+
+<div class="viewcode-block" id="World.reset"><a class="viewcode-back" href="../../../api_documentation/core.html#vista.core.World.World.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">initial_dynamics_fn</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span>
+                                                 <span class="n">Callable</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Reset the world. This includes (1) sample a new anchor point from the real-world</span>
+<span class="sd">        dataset to be simulated from and (2) reset states for all agents.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            initial_dynamics_fn (Dict[str, Callable]):</span>
+<span class="sd">                A dict mapping agent names to a function that initialize agents poses.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;World reset&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Sample a new trace and a new location at the sampled trace</span>
+        <span class="n">new_trace_index</span><span class="p">,</span> <span class="n">new_segment_index</span><span class="p">,</span> <span class="n">new_frame_index</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">sample_new_location</span><span class="p">()</span>
+
+        <span class="c1"># Reset agents</span>
+        <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">agents</span><span class="p">:</span>
+            <span class="n">agent</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">new_trace_index</span><span class="p">,</span> <span class="n">new_segment_index</span><span class="p">,</span> <span class="n">new_frame_index</span><span class="p">,</span>
+                        <span class="n">initial_dynamics_fn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="World.sample_new_location"><a class="viewcode-back" href="../../../api_documentation/core.html#vista.core.World.World.sample_new_location">[docs]</a>    <span class="k">def</span> <span class="nf">sample_new_location</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; Sample a pointer to the dataset for simulation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Return a tuple (``int_a``, ``int_b``, ``int_c``), where ``int_a`` is trace index,</span>
+<span class="sd">            ``int_b`` is segment index, and ``int_c`` is frame index.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_trace_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_new_trace_index</span><span class="p">()</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">[</span><span class="n">new_trace_index</span><span class="p">]</span>
+
+        <span class="n">new_segment_index</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">find_segment_reset</span><span class="p">()</span>
+
+        <span class="c1"># note that this is the index of Trace.good_frames instead of element</span>
+        <span class="n">new_frame_index</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">find_frame_reset</span><span class="p">(</span><span class="n">new_segment_index</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_trace_index</span><span class="p">,</span> <span class="n">new_segment_index</span><span class="p">,</span> <span class="n">new_frame_index</span></div>
+
+<div class="viewcode-block" id="World.sample_new_trace_index"><a class="viewcode-back" href="../../../api_documentation/core.html#vista.core.World.World.sample_new_trace_index">[docs]</a>    <span class="k">def</span> <span class="nf">sample_new_trace_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Sample a new trace index based on number of frames in a trace.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: An index to specify which trace to be simulated from.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">trace_reset_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">trace</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">):</span>
+            <span class="n">trace_reset_probs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">num_of_frames</span>
+        <span class="n">trace_reset_probs</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">trace_reset_probs</span><span class="p">)</span>
+
+        <span class="n">new_trace_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">trace_reset_probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                           <span class="n">p</span><span class="o">=</span><span class="n">trace_reset_probs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new_trace_index</span></div>
+
+<div class="viewcode-block" id="World.set_seed"><a class="viewcode-back" href="../../../api_documentation/core.html#vista.core.World.World.set_seed">[docs]</a>    <span class="k">def</span> <span class="nf">set_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Set random seed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            seed (int): Random seed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+        <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">]</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">seed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Random seed for sampling pointer to the dataset during :meth:`reset`. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">traces</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Trace</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; All trace attached to the :class:`World`. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_traces</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">agents</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Car</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot; All agents that live in the :class:`World`. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agents</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">{}</span><span class="s1">&gt; &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span> <span class="o">+</span> \
+               <span class="s1">&#39;#traces: </span><span class="si">{}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">))</span> <span class="o">+</span> \
+               <span class="s1">&#39;#agents: </span><span class="si">{}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">agents</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

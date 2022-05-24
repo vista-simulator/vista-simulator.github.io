@@ -1,0 +1,381 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vista.tasks.lane_following &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vista.tasks.lane_following</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vista.tasks.lane_following</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">World</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">logging</span><span class="p">,</span> <span class="n">misc</span>
+
+
+<span class="k">def</span> <span class="nf">default_terminal_condition</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; An example definition of terminal condition. &quot;&quot;&quot;</span>
+
+    <span class="n">agent</span> <span class="o">=</span> <span class="p">[</span><span class="n">_a</span> <span class="k">for</span> <span class="n">_a</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">agents</span> <span class="k">if</span> <span class="n">_a</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">agent_id</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_check_out_of_lane</span><span class="p">():</span>
+        <span class="n">road_half_width</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">road_width</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">relative_state</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">road_half_width</span>
+
+    <span class="k">def</span> <span class="nf">_check_exceed_max_rot</span><span class="p">():</span>
+        <span class="n">maximal_rotation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">10.</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">relative_state</span><span class="o">.</span><span class="n">theta</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maximal_rotation</span>
+
+    <span class="n">out_of_lane</span> <span class="o">=</span> <span class="n">_check_out_of_lane</span><span class="p">()</span>
+    <span class="n">exceed_max_rot</span> <span class="o">=</span> <span class="n">_check_exceed_max_rot</span><span class="p">()</span>
+    <span class="n">done</span> <span class="o">=</span> <span class="n">out_of_lane</span> <span class="ow">or</span> <span class="n">exceed_max_rot</span> <span class="ow">or</span> <span class="n">agent</span><span class="o">.</span><span class="n">done</span>
+    <span class="n">other_info</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;done&#39;</span><span class="p">:</span> <span class="n">done</span><span class="p">,</span>
+        <span class="s1">&#39;out_of_lane&#39;</span><span class="p">:</span> <span class="n">out_of_lane</span><span class="p">,</span>
+        <span class="s1">&#39;exceed_max_rot&#39;</span><span class="p">:</span> <span class="n">exceed_max_rot</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">done</span><span class="p">,</span> <span class="n">other_info</span>
+
+
+<span class="k">def</span> <span class="nf">default_reward_fn</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">agent_id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; An example definition of reward function. &quot;&quot;&quot;</span>
+    <span class="n">reward</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;done&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span>  <span class="c1"># simply encourage survival</span>
+
+    <span class="k">return</span> <span class="n">reward</span><span class="p">,</span> <span class="p">{}</span>
+
+
+<div class="viewcode-block" id="LaneFollowing"><a class="viewcode-back" href="../../../api_documentation/tasks.html#vista.tasks.lane_following.LaneFollowing">[docs]</a><span class="k">class</span> <span class="nc">LaneFollowing</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; This class defines a simple lane following task in Vista. It basically</span>
+<span class="sd">    handles vehicle state update of the ego car, rendering of specified sensors,</span>
+<span class="sd">    and determing reward and terminal condition. The default terminal condition</span>
+<span class="sd">    is set to (1) being out of lane (2) exceed maximal roation (3) reaching the</span>
+<span class="sd">    end of the trace.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        trace_paths (List[str]): A list of trace paths.</span>
+<span class="sd">        trace_config (Dict): Configuration of the trace.</span>
+<span class="sd">        car_configs (List[Dict]): Configuration of ``every`` cars.</span>
+<span class="sd">        sensors_configs (List[Dict]): Configuration of sensors on ``every`` cars.</span>
+<span class="sd">        task_config (Dict): Configuration of the task, which specifies reward function</span>
+<span class="sd">                            and terminal condition. For more details, please check the</span>
+<span class="sd">                            source code.</span>
+<span class="sd">        logging_level (str): Logging level (``DEBUG``, ``INFO``, ``WARNING``,</span>
+<span class="sd">                             ``ERROR``, ``CRITICAL``); default set to ``WARNING``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DEFAULT_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;reward_fn&#39;</span><span class="p">:</span> <span class="n">default_reward_fn</span><span class="p">,</span>
+        <span class="s1">&#39;terminal_condition&#39;</span><span class="p">:</span> <span class="n">default_terminal_condition</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">trace_paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                 <span class="n">trace_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+                 <span class="n">car_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span>
+                 <span class="n">sensors_configs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[],</span>
+                 <span class="n">task_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(),</span>
+                 <span class="n">logging_level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;WARNING&#39;</span><span class="p">):</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">logging</span><span class="p">,</span> <span class="n">logging_level</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">merge_dict</span><span class="p">(</span><span class="n">task_config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_CONFIG</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="p">:</span> <span class="n">World</span> <span class="o">=</span> <span class="n">World</span><span class="p">(</span><span class="n">trace_paths</span><span class="p">,</span> <span class="n">trace_config</span><span class="p">)</span>
+        <span class="n">agent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="o">.</span><span class="n">spawn_agent</span><span class="p">(</span><span class="n">car_config</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sensor_config</span> <span class="ow">in</span> <span class="n">sensors_configs</span><span class="p">:</span>
+            <span class="n">sensor_type</span> <span class="o">=</span> <span class="n">sensor_config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sensor_type</span> <span class="o">==</span> <span class="s1">&#39;camera&#39;</span><span class="p">:</span>
+                <span class="n">agent</span><span class="o">.</span><span class="n">spawn_camera</span><span class="p">(</span><span class="n">sensor_config</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">sensor_type</span> <span class="o">==</span> <span class="s1">&#39;event_camera&#39;</span><span class="p">:</span>
+                <span class="n">agent</span><span class="o">.</span><span class="n">spawn_event_camera</span><span class="p">(</span><span class="n">sensor_config</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">sensor_type</span> <span class="o">==</span> <span class="s1">&#39;lidar&#39;</span><span class="p">:</span>
+                <span class="n">agent</span><span class="o">.</span><span class="n">spawn_lidar</span><span class="p">(</span><span class="n">sensor_config</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;Unrecognized sensor type </span><span class="si">{</span><span class="n">sensor_type</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prev_xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="p">))</span>
+
+<div class="viewcode-block" id="LaneFollowing.reset"><a class="viewcode-back" href="../../../api_documentation/tasks.html#vista.tasks.lane_following.LaneFollowing.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reset the environment. This basically reset the :class:`World` object</span>
+<span class="sd">        in Vista, which reset all (the only) agent in the world.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict: A dictionary with keys as agent IDs and values as observation</span>
+<span class="sd">            for each agent, which is also a dictionary with keys as sensor IDs</span>
+<span class="sd">            and values as sensory measurements.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="n">agent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="o">.</span><span class="n">agents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">observations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_append_agent_id</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">observations</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prev_xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="p">))</span>
+        <span class="k">return</span> <span class="n">observations</span></div>
+
+<div class="viewcode-block" id="LaneFollowing.step"><a class="viewcode-back" href="../../../api_documentation/tasks.html#vista.tasks.lane_following.LaneFollowing.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">30.</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Step the environment. This involves updating agent&#39;s state based on</span>
+<span class="sd">        the given actions and determining reward and termination.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            actions (Dict[str, np.ndarray]):</span>
+<span class="sd">                A dictionary with keys as agent IDs and values as actions</span>
+<span class="sd">                to be executed to interact with the environment and other</span>
+<span class="sd">                agents.</span>
+<span class="sd">            dt (float): Elapsed time in second; default set to 1/30.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Return a tuple (``dict_a``, ``dict_b``, ``dict_c``, ``dict_d``),</span>
+<span class="sd">            where ``dict_a`` is the observation, ``dict_b`` is the reward,</span>
+<span class="sd">            ``dict_c`` is whether the episode terminates, ``dict_d`` is additional</span>
+<span class="sd">            informations for every agents; keys of every dictionary are agent IDs.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Step agent and get observation</span>
+        <span class="n">agent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="o">.</span><span class="n">agents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">action</span><span class="p">[</span><span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">agent</span><span class="o">.</span><span class="n">human_speed</span><span class="p">])</span>
+        <span class="n">agent</span><span class="o">.</span><span class="n">step_dynamics</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">)</span>
+        <span class="n">agent</span><span class="o">.</span><span class="n">step_sensors</span><span class="p">()</span>
+        <span class="n">observations</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">observations</span>
+
+        <span class="c1"># Define terminal condition</span>
+        <span class="n">done</span><span class="p">,</span> <span class="n">info_from_terminal_condition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;terminal_condition&#39;</span><span class="p">](</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+        <span class="c1"># Define reward</span>
+        <span class="n">reward</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;reward_fn&#39;</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                                             <span class="o">**</span><span class="n">info_from_terminal_condition</span><span class="p">)</span>
+
+        <span class="c1"># Get info</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">fetch_agent_info</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span>
+        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;out_of_lane&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info_from_terminal_condition</span><span class="p">[</span><span class="s1">&#39;out_of_lane&#39;</span><span class="p">]</span>
+        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;exceed_rot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info_from_terminal_condition</span><span class="p">[</span><span class="s1">&#39;exceed_rot&#39;</span><span class="p">]</span>
+
+        <span class="n">current_xy</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">ego_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">current_xy</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_xy</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prev_xy</span> <span class="o">=</span> <span class="n">current_xy</span>
+        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_distance</span>
+
+        <span class="c1"># Pack output</span>
+        <span class="n">observations</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_append_agent_id</span><span class="p">,</span> <span class="p">[</span><span class="n">observations</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">observations</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span></div>
+
+<div class="viewcode-block" id="LaneFollowing.set_seed"><a class="viewcode-back" href="../../../api_documentation/tasks.html#vista.tasks.lane_following.LaneFollowing.set_seed">[docs]</a>    <span class="k">def</span> <span class="nf">set_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Set random seed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            seed (int): Random seed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">world</span><span class="o">.</span><span class="n">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_append_agent_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">agent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="o">.</span><span class="n">agents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="n">data</span><span class="p">}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Configuration of this task. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">world</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">World</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; :class:`World` of this task. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">seed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Random seed for the task and the associated :class:`World`. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

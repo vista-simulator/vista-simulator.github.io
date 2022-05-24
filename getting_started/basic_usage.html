@@ -1,0 +1,382 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Basic Usage &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Data Format" href="data_format.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Getting Started</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Basic Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#simple-controller-with-simulator-state">Simple Controller With Simulator State</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synthesizing-sensory-measurement">Synthesizing Sensory Measurement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#adding-virtual-cars">Adding Virtual Cars</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="data_format.html">Data Format</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Getting Started</a> &raquo;</li>
+        
+      <li>Basic Usage</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/getting_started/basic_usage.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="basic-usage">
+<span id="getting-started-basic-usage"></span><h1>Basic Usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="simple-controller-with-simulator-state">
+<h2>Simple Controller With Simulator State<a class="headerlink" href="#simple-controller-with-simulator-state" title="Permalink to this headline">¶</a></h2>
+<p>We first start with simulating car motion only without synthesizing
+sensory measurement as an example of accessing vehicle state for control.
+We start with defining a world in Vista, adding a car, and attaching display
+to the world for visualization.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">vista</span>
+
+<span class="n">world</span> <span class="o">=</span> <span class="n">vista</span><span class="o">.</span><span class="n">World</span><span class="p">(</span><span class="n">trace_path</span><span class="p">,</span>
+                    <span class="n">trace_config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;road_width&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">})</span>
+<span class="n">car</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">spawn_agent</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;length&#39;</span><span class="p">:</span> <span class="mf">5.</span><span class="p">,</span>
+                                <span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mf">2.</span><span class="p">,</span>
+                                <span class="s1">&#39;wheel_base&#39;</span><span class="p">:</span> <span class="mf">2.78</span><span class="p">,</span>
+                                <span class="s1">&#39;steering_ratio&#39;</span><span class="p">:</span> <span class="mf">14.7</span><span class="p">,</span>
+                                <span class="s1">&#39;lookahead_road&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+<span class="n">display</span> <span class="o">=</span> <span class="n">vista</span><span class="o">.</span><span class="n">Display</span><span class="p">(</span><span class="n">world</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>There are more parameters that can be set in <code class="docutils literal notranslate"><span class="pre">trace_config</span></code> and <code class="docutils literal notranslate"><span class="pre">car_config</span></code>,
+which can be seen in the <a class="reference internal" href="../api_documentation/core.html"><span class="doc">API documentation</span></a>. Note
+that <code class="docutils literal notranslate"><span class="pre">lookahead_road</span> <span class="pre">=</span> <span class="pre">True</span></code> make <code class="docutils literal notranslate"><span class="pre">car</span></code> to keep a cache of the position of road
+within a certain distance centered at the car.</p>
+<p>Then we reset the environment and control the car to move in the simulator.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">world</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="n">display</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+<span class="k">while</span> <span class="ow">not</span> <span class="n">car</span><span class="o">.</span><span class="n">done</span><span class="p">:</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="n">state_space_controller</span><span class="p">(</span><span class="n">car</span><span class="p">)</span>
+    <span class="n">car</span><span class="o">.</span><span class="n">step_dynamics</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+    <span class="n">vis_img</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">state_space_controller</span></code> function defines a controller that takes simulator
+states as input and produce an action for the agent. In the following, we show several
+examples of how we can control the car to do lane stable with the access to Simulator
+states. The simplest controller is simply following how human drives in the dataset.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">follow_human_trajectory</span><span class="p">(</span><span class="n">agent</span><span class="p">):</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="n">agent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">f_curvature</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">timestamp</span><span class="p">),</span>
+        <span class="n">agent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">f_speed</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
+    <span class="p">])</span>
+    <span class="k">return</span> <span class="n">action</span>
+</pre></div>
+</div>
+<p>We can also implement a simple pure pursuit controller for steering command (curvature).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">vista.utils</span> <span class="kn">import</span> <span class="n">transform</span>
+<span class="kn">from</span> <span class="nn">vista.entities.agents.Dynamics</span> <span class="kn">import</span> <span class="n">tireangle2curvature</span>
+
+<span class="k">def</span> <span class="nf">pure_pursuit_controller</span><span class="p">(</span><span class="n">agent</span><span class="p">):</span>
+    <span class="c1"># hyperparameters</span>
+    <span class="n">lookahead_dist</span> <span class="o">=</span> <span class="mf">5.</span>
+    <span class="n">Kp</span> <span class="o">=</span> <span class="mf">3.</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">30.</span>
+
+    <span class="c1"># get road in ego-car coordinates</span>
+    <span class="n">ego_pose</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">ego_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">road_in_ego</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="n">transform</span><span class="o">.</span><span class="n">compute_relative_latlongyaw</span><span class="p">(</span><span class="n">_v</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="n">ego_pose</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_v</span> <span class="ow">in</span> <span class="n">agent</span><span class="o">.</span><span class="n">road</span>
+    <span class="p">])</span>
+
+    <span class="c1"># find (lookahead) target</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">road_in_ego</span><span class="p">[:,:</span><span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">dist</span><span class="p">[</span><span class="n">road_in_ego</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">9999.</span> <span class="c1"># drop road in the back</span>
+    <span class="n">tgt_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dist</span> <span class="o">-</span> <span class="n">lookahead_dist</span><span class="p">))</span>
+    <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dyaw</span> <span class="o">=</span> <span class="n">road_in_ego</span><span class="p">[</span><span class="n">tgt_idx</span><span class="p">]</span>
+
+    <span class="c1"># simply follow human trajectory for speed</span>
+    <span class="n">speed</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">human_speed</span>
+
+    <span class="c1"># compute curvature</span>
+    <span class="n">arc_len</span> <span class="o">=</span> <span class="n">speed</span> <span class="o">*</span> <span class="n">dt</span>
+    <span class="n">curvature</span> <span class="o">=</span> <span class="p">(</span><span class="n">Kp</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="o">-</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span><span class="p">)</span> <span class="o">/</span> <span class="n">arc_len</span>
+    <span class="n">curvature_bound</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">tireangle2curvature</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span> <span class="n">agent</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_v</span> <span class="ow">in</span> <span class="n">agent</span><span class="o">.</span><span class="n">ego_dynamics</span><span class="o">.</span><span class="n">steering_bound</span><span class="p">]</span>
+    <span class="n">curvature</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">curvature</span><span class="p">,</span> <span class="o">*</span><span class="n">curvature_bound</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">curvature</span><span class="p">,</span> <span class="n">speed</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Note that we should replace <code class="docutils literal notranslate"><span class="pre">state_space_controller</span></code> with either of the above
+controller (or other custom controller) and you will see a car doing lane following
+on the road in the dataset.</p>
+</div>
+<div class="section" id="synthesizing-sensory-measurement">
+<h2>Synthesizing Sensory Measurement<a class="headerlink" href="#synthesizing-sensory-measurement" title="Permalink to this headline">¶</a></h2>
+<p>Then, we show how to attach sensors to a car and synthesize sensory
+measurement at every timestmap. Currently, RGB camera, LiDAR, and event
+camera are supported. Following the setup above, we simply spawn sensors
+on the <code class="docutils literal notranslate"><span class="pre">car</span></code> object.</p>
+<p>Spawning a RGB camera.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">camera_config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;camera_front&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;rig_path&#39;</span><span class="p">:</span> <span class="s1">&#39;./RIG.xml&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">320</span><span class="p">)}</span>
+<span class="n">camera</span> <span class="o">=</span> <span class="n">car</span><span class="o">.</span><span class="n">spawn_camera</span><span class="p">(</span><span class="n">camera_config</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Spawning a LiDAR.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lidar_config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;lidar_3d&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;yaw_res&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                <span class="s1">&#39;pitch_res&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                <span class="s1">&#39;yaw_fov&#39;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mf">180.</span><span class="p">,</span> <span class="mf">180.</span><span class="p">)}</span>
+<span class="n">lidar</span> <span class="o">=</span> <span class="n">car</span><span class="o">.</span><span class="n">spawn_lidar</span><span class="p">(</span><span class="n">lidar_config</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Spawning an event-based camera.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">event_camera_config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;event_camera_front&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;rig_path&#39;</span><span class="p">:</span> <span class="s1">&#39;./RIG.xml&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;original_size&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">480</span><span class="p">,</span> <span class="mi">640</span><span class="p">),</span>
+                       <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">240</span><span class="p">,</span> <span class="mi">320</span><span class="p">),</span>
+                       <span class="s1">&#39;optical_flow_root&#39;</span><span class="p">:</span> <span class="s1">&#39;../data_prep/Super-SloMo&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;checkpoint&#39;</span><span class="p">:</span> <span class="s1">&#39;../data_prep/Super-SloMo/ckpt/SuperSloMo.ckpt&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;positive_threshold&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                       <span class="s1">&#39;sigma_positive_threshold&#39;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span>
+                       <span class="s1">&#39;negative_threshold&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span>
+                       <span class="s1">&#39;sigma_negative_threshold&#39;</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">,</span>
+                       <span class="s1">&#39;base_camera_name&#39;</span><span class="p">:</span> <span class="s1">&#39;camera_front&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;base_size&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">600</span><span class="p">,</span> <span class="mi">960</span><span class="p">)}</span>
+<span class="n">event_camera</span> <span class="o">=</span> <span class="n">car</span><span class="o">.</span><span class="n">spawn_event_camera</span><span class="p">(</span><span class="n">event_camera_config</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Remember to check if all paths are valid, e.g., <code class="docutils literal notranslate"><span class="pre">rig_path</span></code>, <code class="docutils literal notranslate"><span class="pre">optical_flow_root</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">checkpoint</span></code>. We can then start the simulation.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">world</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="n">display</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+<span class="k">while</span> <span class="ow">not</span> <span class="n">car</span><span class="o">.</span><span class="n">done</span><span class="p">:</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="n">state_space_controller</span><span class="p">(</span><span class="n">car</span><span class="p">)</span>
+    <span class="n">car</span><span class="o">.</span><span class="n">step_dynamics</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+    <span class="n">car</span><span class="o">.</span><span class="n">step_sensors</span><span class="p">()</span>
+
+    <span class="n">sensor_data</span> <span class="o">=</span> <span class="n">car</span><span class="o">.</span><span class="n">observations</span>
+
+    <span class="n">vis_img</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">sensor_data</span></code> is a dictionary with keys as names of sensors and values as the synthesized
+sensor data.</p>
+</div>
+<div class="section" id="adding-virtual-cars">
+<h2>Adding Virtual Cars<a class="headerlink" href="#adding-virtual-cars" title="Permalink to this headline">¶</a></h2>
+<p>We can also add more cars (or potentially other objects) to the simulation, where
+each car can have different set of sensors. Note that currently only RGB camera
+supports rendering for virtual objects in the scene.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">world</span> <span class="o">=</span> <span class="n">vista</span><span class="o">.</span><span class="n">World</span><span class="p">(</span><span class="n">trace_path</span><span class="p">)</span>
+<span class="n">car1</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">spawn_agent</span><span class="p">()</span>
+<span class="n">car1</span><span class="o">.</span><span class="n">spawn_camera</span><span class="p">()</span>
+
+<span class="n">car2</span> <span class="o">=</span> <span class="n">world</span><span class="o">.</span><span class="n">spawn_agent</span><span class="p">()</span>
+<span class="n">car2</span><span class="o">.</span><span class="n">spawn_lidar</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>It spawns two cars, one with RGB camera and the other with LiDAR. Note that since only
+RGB camera supports rendering of virtual object for now, <code class="docutils literal notranslate"><span class="pre">car2</span></code> cannot see <code class="docutils literal notranslate"><span class="pre">car1</span></code>
+with its LiDAR measurement. Note that there are still two major functions to be implemented
+to make it a reasonable simulation, including initialization of virtual objects and collision
+check/dynamics across objects. For more details, check <code class="docutils literal notranslate"><span class="pre">vista/task/multi_agent_base.py</span></code>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="data_format.html" class="btn btn-neutral float-right" title="Data Format" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

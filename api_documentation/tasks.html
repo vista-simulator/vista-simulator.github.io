@@ -1,0 +1,430 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tasks &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="FAQ" href="../faq/index.html" />
+    <link rel="prev" title="Utils" href="utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="core.html">Core</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entities/index.html">Entities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">Utils</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tasks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">API Documentation</a> &raquo;</li>
+        
+      <li>Tasks</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api_documentation/tasks.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="tasks">
+<span id="api-documentation-tasks"></span><h1>Tasks<a class="headerlink" href="#tasks" title="Permalink to this headline">¶</a></h1>
+<p>This module demonstrates how to build environments of various tasks with Vista.
+We follow roughly OpenAI gym interface for reinforcement learning setting here (with
+member functions of the environments like <code class="docutils literal notranslate"><span class="pre">reset</span></code>, <code class="docutils literal notranslate"><span class="pre">step</span></code> and return values like
+<code class="docutils literal notranslate"><span class="pre">observation</span></code>, <code class="docutils literal notranslate"><span class="pre">reward</span></code>, <code class="docutils literal notranslate"><span class="pre">done</span></code>, <code class="docutils literal notranslate"><span class="pre">info</span></code>).</p>
+<span class="target" id="api-lane-following"></span><dl class="py class">
+<dt id="vista.tasks.lane_following.LaneFollowing">
+<em class="property">class </em><code class="sig-prename descclassname">vista.tasks.lane_following.</code><code class="sig-name descname">LaneFollowing</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trace_paths</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">trace_config</span><span class="p">:</span> <span class="n">Dict</span></em>, <em class="sig-param"><span class="n">car_config</span><span class="p">:</span> <span class="n">Dict</span></em>, <em class="sig-param"><span class="n">sensors_configs</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span>Dict<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">task_config</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">logging_level</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'WARNING'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vista/tasks/lane_following.html#LaneFollowing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.tasks.lane_following.LaneFollowing" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class defines a simple lane following task in Vista. It basically
+handles vehicle state update of the ego car, rendering of specified sensors,
+and determing reward and terminal condition. The default terminal condition
+is set to (1) being out of lane (2) exceed maximal roation (3) reaching the
+end of the trace.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trace_paths</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – A list of trace paths.</p></li>
+<li><p><strong>trace_config</strong> (<em>Dict</em>) – Configuration of the trace.</p></li>
+<li><p><strong>car_configs</strong> (<em>List</em><em>[</em><em>Dict</em><em>]</em>) – Configuration of <code class="docutils literal notranslate"><span class="pre">every</span></code> cars.</p></li>
+<li><p><strong>sensors_configs</strong> (<em>List</em><em>[</em><em>Dict</em><em>]</em>) – Configuration of sensors on <code class="docutils literal notranslate"><span class="pre">every</span></code> cars.</p></li>
+<li><p><strong>task_config</strong> (<em>Dict</em>) – Configuration of the task, which specifies reward function
+and terminal condition. For more details, please check the
+source code.</p></li>
+<li><p><strong>logging_level</strong> (<em>str</em>) – Logging level (<code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>, <code class="docutils literal notranslate"><span class="pre">INFO</span></code>, <code class="docutils literal notranslate"><span class="pre">WARNING</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ERROR</span></code>, <code class="docutils literal notranslate"><span class="pre">CRITICAL</span></code>); default set to <code class="docutils literal notranslate"><span class="pre">WARNING</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="vista.tasks.lane_following.LaneFollowing.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vista/tasks/lane_following.html#LaneFollowing.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.tasks.lane_following.LaneFollowing.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the environment. This basically reset the <code class="xref py py-class docutils literal notranslate"><span class="pre">World</span></code> object
+in Vista, which reset all (the only) agent in the world.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A dictionary with keys as agent IDs and values as observation
+for each agent, which is also a dictionary with keys as sensor IDs
+and values as sensory measurements.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.tasks.lane_following.LaneFollowing.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">action</span></em>, <em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">0.03333333333333333</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vista/tasks/lane_following.html#LaneFollowing.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.tasks.lane_following.LaneFollowing.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Step the environment. This involves updating agent’s state based on
+the given actions and determining reward and termination.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>actions</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>np.ndarray</em><em>]</em>) – A dictionary with keys as agent IDs and values as actions
+to be executed to interact with the environment and other
+agents.</p></li>
+<li><p><strong>dt</strong> (<em>float</em>) – Elapsed time in second; default set to 1/30.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return a tuple (<code class="docutils literal notranslate"><span class="pre">dict_a</span></code>, <code class="docutils literal notranslate"><span class="pre">dict_b</span></code>, <code class="docutils literal notranslate"><span class="pre">dict_c</span></code>, <code class="docutils literal notranslate"><span class="pre">dict_d</span></code>),
+where <code class="docutils literal notranslate"><span class="pre">dict_a</span></code> is the observation, <code class="docutils literal notranslate"><span class="pre">dict_b</span></code> is the reward,
+<code class="docutils literal notranslate"><span class="pre">dict_c</span></code> is whether the episode terminates, <code class="docutils literal notranslate"><span class="pre">dict_d</span></code> is additional
+informations for every agents; keys of every dictionary are agent IDs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.tasks.lane_following.LaneFollowing.set_seed">
+<code class="sig-name descname">set_seed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">seed</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/vista/tasks/lane_following.html#LaneFollowing.set_seed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.tasks.lane_following.LaneFollowing.set_seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set random seed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>seed</strong> (<em>int</em>) – Random seed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.tasks.lane_following.LaneFollowing.config">
+<em class="property">property </em><code class="sig-name descname">config</code><a class="headerlink" href="#vista.tasks.lane_following.LaneFollowing.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configuration of this task.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.tasks.lane_following.LaneFollowing.world">
+<em class="property">property </em><code class="sig-name descname">world</code><a class="headerlink" href="#vista.tasks.lane_following.LaneFollowing.world" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">World</span></code> of this task.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.tasks.lane_following.LaneFollowing.seed">
+<em class="property">property </em><code class="sig-name descname">seed</code><a class="headerlink" href="#vista.tasks.lane_following.LaneFollowing.seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random seed for the task and the associated <code class="xref py py-class docutils literal notranslate"><span class="pre">World</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="api-multi-agent-base"></span><dl class="py class">
+<dt id="vista.tasks.multi_agent_base.MultiAgentBase">
+<em class="property">class </em><code class="sig-prename descclassname">vista.tasks.multi_agent_base.</code><code class="sig-name descname">MultiAgentBase</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trace_paths</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">trace_config</span><span class="p">:</span> <span class="n">Dict</span></em>, <em class="sig-param"><span class="n">car_configs</span><span class="p">:</span> <span class="n">List<span class="p">[</span>Dict<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">sensors_configs</span><span class="p">:</span> <span class="n">List<span class="p">[</span>List<span class="p">[</span>Dict<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">task_config</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Dict<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">logging_level</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'WARNING'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vista/tasks/multi_agent_base.html#MultiAgentBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.tasks.multi_agent_base.MultiAgentBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class builds a simple environment with multiple cars in the scene, which
+involves randomly initializing ado cars in the front of the ego car, checking collision
+between cars, handling meshes for all virtual agents, and determining terminal condition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trace_paths</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – A list of trace paths.</p></li>
+<li><p><strong>trace_config</strong> (<em>Dict</em>) – Configuration of the trace.</p></li>
+<li><p><strong>car_configs</strong> (<em>List</em><em>[</em><em>Dict</em><em>]</em>) – Configuration of <code class="docutils literal notranslate"><span class="pre">every</span></code> cars.</p></li>
+<li><p><strong>sensors_configs</strong> (<em>List</em><em>[</em><em>Dict</em><em>]</em>) – Configuration of sensors on <code class="docutils literal notranslate"><span class="pre">every</span></code> cars.</p></li>
+<li><p><strong>task_config</strong> (<em>Dict</em>) – <p>Configuration of the task. An example (default) is,</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">DEFAULT_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+<span class="go">        &#39;n_agents&#39;: 1,</span>
+<span class="go">        &#39;mesh_dir&#39;: None,</span>
+<span class="go">        &#39;overlap_threshold&#39;: 0.05,</span>
+<span class="go">        &#39;max_resample_tries&#39;: 10,</span>
+<span class="go">        &#39;init_dist_range&#39;: [5., 10.],</span>
+<span class="go">        &#39;init_lat_noise_range&#39;: [-1., 1.],</span>
+<span class="go">        &#39;init_yaw_noise_range&#39;: [-0.0, 0.0],</span>
+<span class="go">        &#39;reward_fn&#39;: default_reward_fn,</span>
+<span class="go">        &#39;terminal_condition&#39;: default_terminal_condition</span>
+<span class="go">    }</span>
+</pre></div>
+</div>
+<p>Note that both <code class="docutils literal notranslate"><span class="pre">reward_fn</span></code> and <code class="docutils literal notranslate"><span class="pre">terminal_condition</span></code> have function signature
+as <code class="docutils literal notranslate"><span class="pre">f(task,</span> <span class="pre">agent_id,</span> <span class="pre">**kwargs)</span> <span class="pre">-&gt;</span> <span class="pre">(value,</span> <span class="pre">dict)</span></code>. For more details, please check
+the source code.</p>
+</p></li>
+<li><p><strong>logging_level</strong> (<em>str</em>) – Logging level (<code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>, <code class="docutils literal notranslate"><span class="pre">INFO</span></code>, <code class="docutils literal notranslate"><span class="pre">WARNING</span></code>,
+<code class="docutils literal notranslate"><span class="pre">ERROR</span></code>, <code class="docutils literal notranslate"><span class="pre">CRITICAL</span></code>); default set to <code class="docutils literal notranslate"><span class="pre">WARNING</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="vista.tasks.multi_agent_base.MultiAgentBase.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Dict<a class="reference internal" href="../_modules/vista/tasks/multi_agent_base.html#MultiAgentBase.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.tasks.multi_agent_base.MultiAgentBase.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the environment. This involves regular world reset, randomly
+initializing ado agent in the front of the ego agent, and resetting
+the mesh library for all virtual agents.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A dictionary with keys as agent IDs and values as observation
+for each agent, which is also a dictionary with keys as sensor IDs
+and values as sensory measurements.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.tasks.multi_agent_base.MultiAgentBase.step">
+<code class="sig-name descname">step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">actions</span></em>, <em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">0.03333333333333333</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/vista/tasks/multi_agent_base.html#MultiAgentBase.step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.tasks.multi_agent_base.MultiAgentBase.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Step the environment. This includes updating agents’ states, synthesizing
+agents’ observations, checking terminal conditions, and computing rewards.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>actions</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>np.ndarray</em><em>]</em>) – A dictionary with keys as agent IDs and values as actions
+to be executed to interact with the environment and other
+agents.</p></li>
+<li><p><strong>dt</strong> (<em>float</em>) – Elapsed time in second; default set to 1/30.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Return a tuple (<code class="docutils literal notranslate"><span class="pre">dict_a</span></code>, <code class="docutils literal notranslate"><span class="pre">dict_b</span></code>, <code class="docutils literal notranslate"><span class="pre">dict_c</span></code>, <code class="docutils literal notranslate"><span class="pre">dict_d</span></code>),
+where <code class="docutils literal notranslate"><span class="pre">dict_a</span></code> is the observation, <code class="docutils literal notranslate"><span class="pre">dict_b</span></code> is the reward,
+<code class="docutils literal notranslate"><span class="pre">dict_c</span></code> is whether the episode terminates, <code class="docutils literal notranslate"><span class="pre">dict_d</span></code> is additional
+informations for every agents; keys of every dictionary are agent IDs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.tasks.multi_agent_base.MultiAgentBase.set_seed">
+<code class="sig-name descname">set_seed</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">seed</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../_modules/vista/tasks/multi_agent_base.html#MultiAgentBase.set_seed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vista.tasks.multi_agent_base.MultiAgentBase.set_seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set random seed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>seed</strong> (<em>int</em>) – Random seed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.tasks.multi_agent_base.MultiAgentBase.config">
+<em class="property">property </em><code class="sig-name descname">config</code><a class="headerlink" href="#vista.tasks.multi_agent_base.MultiAgentBase.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configuration of this task.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.tasks.multi_agent_base.MultiAgentBase.ego_agent">
+<em class="property">property </em><code class="sig-name descname">ego_agent</code><a class="headerlink" href="#vista.tasks.multi_agent_base.MultiAgentBase.ego_agent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ego agent.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.tasks.multi_agent_base.MultiAgentBase.world">
+<em class="property">property </em><code class="sig-name descname">world</code><a class="headerlink" href="#vista.tasks.multi_agent_base.MultiAgentBase.world" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">World</span></code> of this task.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="vista.tasks.multi_agent_base.MultiAgentBase.seed">
+<em class="property">property </em><code class="sig-name descname">seed</code><a class="headerlink" href="#vista.tasks.multi_agent_base.MultiAgentBase.seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Random seed for the task and the associated <code class="xref py py-class docutils literal notranslate"><span class="pre">World</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../faq/index.html" class="btn btn-neutral float-right" title="FAQ" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="utils.html" class="btn btn-neutral float-left" title="Utils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

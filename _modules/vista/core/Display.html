@@ -1,0 +1,774 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>vista.core.Display &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../advanced_usage/index.html">Advanced Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>vista.core.Display</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for vista.core.Display</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Event</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">cm</span><span class="p">,</span> <span class="n">colors</span><span class="p">,</span> <span class="n">patches</span>
+
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">LineString</span>
+<span class="kn">from</span> <span class="nn">descartes</span> <span class="kn">import</span> <span class="n">PolygonPatch</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">World</span>
+<span class="kn">from</span> <span class="nn">..entities.agents.Dynamics</span> <span class="kn">import</span> <span class="n">StateDynamics</span><span class="p">,</span> <span class="n">update_with_perfect_controller</span><span class="p">,</span> \
+                                       <span class="n">curvature2tireangle</span>
+<span class="kn">from</span> <span class="nn">..entities.agents</span> <span class="kn">import</span> <span class="n">Car</span>
+<span class="kn">from</span> <span class="nn">..entities.sensors</span> <span class="kn">import</span> <span class="n">Camera</span><span class="p">,</span> <span class="n">EventCamera</span><span class="p">,</span> <span class="n">Lidar</span>
+<span class="kn">from</span> <span class="nn">..entities.sensors.camera_utils</span> <span class="kn">import</span> <span class="n">CameraParams</span>
+<span class="kn">from</span> <span class="nn">..entities.sensors.lidar_utils</span> <span class="kn">import</span> <span class="n">Pointcloud</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">logging</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">misc</span>
+
+
+<div class="viewcode-block" id="Display"><a class="viewcode-back" href="../../../api_documentation/core.html#vista.core.Display.Display">[docs]</a><span class="k">class</span> <span class="nc">Display</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; This is a visualizer of VISTA simulator. It renders an image that contains visualization</span>
+<span class="sd">    of all sensors from all agents and a top-down view that depicts road and all cars in the scene</span>
+<span class="sd">    within a predefined range based on the state of the simulator (:class:`World`).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        world (vista.core.World): World to be visualized.</span>
+<span class="sd">        fps (int): Frame per second.</span>
+<span class="sd">        display_config (Dict): Configuration for the display (visualization).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        AssertionError: Grid spec is inconsistent with maximal number of sensors across agents.</span>
+
+<span class="sd">    Example usage::</span>
+
+<span class="sd">        &gt;&gt;&gt; display_config = {</span>
+<span class="sd">            &#39;road_buffer_size&#39;: 200,</span>
+<span class="sd">            &#39;birdseye_map_size&#39;: (30, 20), # size of bev map in vertical and horizontal directions</span>
+<span class="sd">            &#39;gs_bev_w&#39;: 2, # grid spec width for the birdseye view block</span>
+<span class="sd">            &#39;gs_agent_w&#39;: 4, # grid spec width for an agent&#39;s block</span>
+<span class="sd">            &#39;gs_h&#39;: 6, # grid spec height</span>
+<span class="sd">            &#39;gui_scale&#39;: 1.0, # a global scale that determines the size of the figure</span>
+<span class="sd">            &#39;vis_full_frame&#39;: False, # if Display should not crop/resize camera for visualization purposes</span>
+<span class="sd">        }</span>
+<span class="sd">        &gt;&gt;&gt; display = Display(world, )</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DEFAULT_DISPLAY_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;road_buffer_size&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s1">&#39;birdseye_map_size&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+        <span class="s1">&#39;gs_bev_w&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s1">&#39;gs_agent_w&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s1">&#39;gs_h&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+        <span class="s1">&#39;gui_scale&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s1">&#39;vis_full_frame&#39;</span><span class="p">:</span> <span class="kc">False</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">world</span><span class="p">:</span> <span class="n">World</span><span class="p">,</span>
+                 <span class="n">fps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+                 <span class="n">display_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()):</span>
+        <span class="c1"># Get arguments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="p">:</span> <span class="n">World</span> <span class="o">=</span> <span class="n">world</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">fps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">merge_dict</span><span class="p">(</span><span class="n">display_config</span><span class="p">,</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_DISPLAY_CONFIG</span><span class="p">)</span>
+
+        <span class="c1"># Initialize data for plotting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_road</span><span class="p">:</span> <span class="n">deque</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span>
+            <span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;road_buffer_size&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="p">:</span> <span class="n">deque</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span>
+            <span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;road_buffer_size&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_road_dynamics</span><span class="p">:</span> <span class="n">StateDynamics</span> <span class="o">=</span> <span class="n">StateDynamics</span><span class="p">()</span>
+
+        <span class="c1"># Get agents with sensors (to be visualized)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_agents_with_sensors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Car</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="o">.</span><span class="n">agents</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">sensors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">is_camera</span> <span class="o">=</span> <span class="p">[</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span> <span class="n">Camera</span><span class="p">)</span> <span class="k">for</span> <span class="n">_v</span> <span class="ow">in</span> <span class="n">agent</span><span class="o">.</span><span class="n">sensors</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">is_camera</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_agents_with_sensors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">agent</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">is_camera</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">sensors</span><span class="p">):</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="s1">&#39;Cannot visualize sensor other than Camera&#39;</span><span class="p">)</span>
+        <span class="n">n_agents_with_sensors</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_agents_with_sensors</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n_agents_with_sensors</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">max_n_sensors</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+                <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">_v</span><span class="o">.</span><span class="n">sensors</span><span class="p">)</span> <span class="k">for</span> <span class="n">_v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agents_with_sensors</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">max_n_sensors</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># Specify colors for agents and road</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;Set1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">colors</span><span class="p">)</span>
+        <span class="n">rgba2rgb</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">rgba</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+            <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">rgba</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span> <span class="o">*</span> <span class="n">rgba</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">rgba</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mf">0.6</span><span class="p">])</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">colors</span><span class="p">]</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">rgba2rgb</span><span class="p">,</span> <span class="n">colors</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_agent_colors</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">colors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_road_color</span><span class="p">:</span> <span class="n">Tuple</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;Dark2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">colors</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Initialize figure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_artists</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">gui_scale</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;gui_scale&#39;</span><span class="p">]</span>
+        <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mf">6.4</span> <span class="o">*</span> <span class="n">gui_scale</span> <span class="o">*</span> <span class="n">n_agents_with_sensors</span> <span class="o">+</span> <span class="mf">3.2</span> <span class="o">*</span> <span class="n">gui_scale</span><span class="p">,</span>
+                   <span class="mf">3.2</span> <span class="o">*</span> <span class="n">gui_scale</span> <span class="o">*</span> <span class="n">max_n_sensors</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>  <span class="c1"># use black background</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">add_gridspec</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;gs_h&#39;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;gs_agent_w&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_agents_with_sensors</span> <span class="o">+</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;gs_bev_w&#39;</span><span class="p">])</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;gs_h&#39;</span><span class="p">]</span> <span class="o">%</span> <span class="n">max_n_sensors</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> \
+            <span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Height of grid (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s2">&quot;gs_h&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">) can not be exactly &#39;</span> <span class="o">+</span> \
+            <span class="sa">f</span><span class="s1">&#39;divided by max number of sensors (</span><span class="si">{</span><span class="n">max_n_sensors</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+        <span class="n">gs_agent_h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;gs_h&#39;</span><span class="p">]</span> <span class="o">//</span> <span class="n">max_n_sensors</span>
+
+        <span class="c1"># Initialize birds eye view</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="s1">&#39;bev&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gs</span><span class="p">[:,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;gs_bev_w&#39;</span><span class="p">]:])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="s1">&#39;bev&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="s1">&#39;bev&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="s1">&#39;bev&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="s1">&#39;bev&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Top-down View&#39;</span><span class="p">,</span>
+                                    <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+                                    <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                                    <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="s1">&#39;bev&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;birdseye_map_size&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;birdseye_map_size&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="s1">&#39;bev&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;birdseye_map_size&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;birdseye_map_size&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span>
+
+        <span class="c1"># Initialize plot for sensory measurement</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s1">&#39;Does not handle preprocessed (cropped/resized) observation&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">agent</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_agents_with_sensors</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">sensor</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">sensors</span><span class="p">):</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">sensor</span><span class="p">,</span> <span class="n">Camera</span><span class="p">)</span>
+                        <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sensor</span><span class="p">,</span> <span class="n">EventCamera</span><span class="p">)):</span>
+                    <span class="n">param</span> <span class="o">=</span> <span class="n">sensor</span><span class="o">.</span><span class="n">camera_param</span>
+                    <span class="n">img_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">get_height</span><span class="p">(),</span> <span class="n">param</span><span class="o">.</span><span class="n">get_width</span><span class="p">(),</span> <span class="mi">3</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sensor</span><span class="p">,</span> <span class="n">Lidar</span><span class="p">):</span>
+                    <span class="n">x_dim</span><span class="p">,</span> <span class="n">y_dim</span> <span class="o">=</span> <span class="n">sensor</span><span class="o">.</span><span class="n">view_synthesis</span><span class="o">.</span><span class="n">_dims</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+                    <span class="c1"># Cut width in half and stack on-top</span>
+                    <span class="n">img_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_dim</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">x_dim</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unrecognized sensor type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">sensor</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="n">gs_ij</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gs</span><span class="p">[</span><span class="n">gs_agent_h</span> <span class="o">*</span> <span class="n">j</span><span class="p">:</span><span class="n">gs_agent_h</span> <span class="o">*</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;gs_agent_w&#39;</span><span class="p">]</span> <span class="o">*</span>
+                                 <span class="n">i</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;gs_agent_w&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+                <span class="n">ax_name</span> <span class="o">=</span> <span class="s1">&#39;a</span><span class="si">{}</span><span class="s1">s</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="n">ax_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs_ij</span><span class="p">,</span>
+                                                            <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="n">ax_name</span><span class="p">]</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="n">ax_name</span><span class="p">]</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="n">ax_name</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Init&#39;</span><span class="p">,</span>
+                                              <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+                                              <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                                              <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+
+                <span class="n">placeholder</span> <span class="o">=</span> <span class="n">fit_img_to_ax</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="n">ax_name</span><span class="p">],</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">img_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_artists</span><span class="p">[</span><span class="s1">&#39;im:</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">ax_name</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="n">ax_name</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">placeholder</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Display.reset"><a class="viewcode-back" href="../../../api_documentation/core.html#vista.core.Display.Display.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Reset the visualizer. This should be called every time after</span>
+<span class="sd">        :class:`World` reset. It basically reset the cache of road data</span>
+<span class="sd">        used in the top-down view visualization.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Reset road deque</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_road</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_road</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">human_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">3</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_road_dynamics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">human_dynamics</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">frame_index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Display.render"><a class="viewcode-back" href="../../../api_documentation/core.html#vista.core.Display.Display.render">[docs]</a>    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Render an image that visualizes the simulator. This includes visualization</span>
+<span class="sd">        of all sensors of every agent and a top-down view that depicts the road and all</span>
+<span class="sd">        cars in the scene within a certain range. Note that it render visualization based</span>
+<span class="sd">        on the current status of the world and should be called every time when there is</span>
+<span class="sd">        any update to the simulator.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: An image of visualization for the simulator.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Update road (in global coordinate)</span>
+        <span class="n">exceed_end</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">frame_index</span> <span class="o">+</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s1">&#39;road_buffer_size&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">exceed_end</span><span class="p">:</span>
+            <span class="n">exceed_end</span><span class="p">,</span> <span class="n">ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">exceed_end</span><span class="p">,</span> <span class="n">next_ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_timestamp</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_road_frame_idcs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="n">state</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">curvature2tireangle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">f_curvature</span><span class="p">(</span><span class="n">ts</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">wheel_base</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">f_speed</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="n">update_with_perfect_controller</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">next_ts</span> <span class="o">-</span> <span class="n">ts</span><span class="p">,</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">_road_dynamics</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_road</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_road_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">3</span><span class="p">])</span>
+
+        <span class="c1"># Update road in birds eye view (in reference agent&#39;s coordinate)</span>
+        <span class="n">ref_pose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">human_dynamics</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Computation of road in reference frame not vectorized&#39;</span><span class="p">)</span>
+        <span class="n">road_in_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="n">transform</span><span class="o">.</span><span class="n">compute_relative_latlongyaw</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span> <span class="n">ref_pose</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">_v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_road</span>
+        <span class="p">])</span>
+        <span class="n">road_half_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">road_width</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="n">patch</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="n">road_in_ref</span><span class="p">)</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">road_half_width</span><span class="p">)</span>
+        <span class="n">patch</span> <span class="o">=</span> <span class="n">PolygonPatch</span><span class="p">(</span><span class="n">patch</span><span class="p">,</span>
+                             <span class="n">fc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_road_color</span><span class="p">,</span>
+                             <span class="n">ec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_road_color</span><span class="p">,</span>
+                             <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_patch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="s1">&#39;bev&#39;</span><span class="p">],</span> <span class="s1">&#39;patch:road&#39;</span><span class="p">,</span> <span class="n">patch</span><span class="p">)</span>
+
+        <span class="c1"># Update agent in birds eye view</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">agent</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="o">.</span><span class="n">agents</span><span class="p">):</span>
+            <span class="n">poly</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">agent2poly</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">human_dynamics</span><span class="p">)</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agent_colors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">patch</span> <span class="o">=</span> <span class="n">PolygonPatch</span><span class="p">(</span><span class="n">poly</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_patch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="s1">&#39;bev&#39;</span><span class="p">],</span> <span class="s1">&#39;patch:agent_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                               <span class="n">patch</span><span class="p">)</span>
+
+        <span class="c1"># Update sensory measurements</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">agent</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_agents_with_sensors</span><span class="p">):</span>
+            <span class="n">cameras</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">_v</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">_v</span>
+                <span class="k">for</span> <span class="n">_v</span> <span class="ow">in</span> <span class="n">agent</span><span class="o">.</span><span class="n">sensors</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span> <span class="n">Camera</span><span class="p">)</span>
+            <span class="p">}</span>
+            <span class="n">event_cameras</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">_v</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">_v</span>
+                <span class="k">for</span> <span class="n">_v</span> <span class="ow">in</span> <span class="n">agent</span><span class="o">.</span><span class="n">sensors</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span> <span class="n">EventCamera</span><span class="p">)</span>
+            <span class="p">}</span>
+            <span class="n">lidars</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">_v</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">_v</span>
+                <span class="k">for</span> <span class="n">_v</span> <span class="ow">in</span> <span class="n">agent</span><span class="o">.</span><span class="n">sensors</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_v</span><span class="p">,</span> <span class="n">Lidar</span><span class="p">)</span>
+            <span class="p">}</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="p">(</span><span class="n">obs_name</span><span class="p">,</span> <span class="n">obs</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="n">ax_name</span> <span class="o">=</span> <span class="s1">&#39;a</span><span class="si">{}</span><span class="s1">s</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">obs_name</span> <span class="ow">in</span> <span class="n">cameras</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">obs</span> <span class="o">=</span> <span class="n">plot_roi</span><span class="p">(</span><span class="n">obs</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                                   <span class="n">cameras</span><span class="p">[</span><span class="n">obs_name</span><span class="p">]</span><span class="o">.</span><span class="n">camera_param</span><span class="o">.</span><span class="n">get_roi</span><span class="p">())</span>
+                    <span class="n">sensor</span> <span class="o">=</span> <span class="n">cameras</span><span class="p">[</span><span class="n">obs_name</span><span class="p">]</span>
+                    <span class="n">noodle</span> <span class="o">=</span> <span class="n">curvature2noodle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">curvature</span><span class="p">,</span>
+                                              <span class="n">sensor</span><span class="o">.</span><span class="n">camera_param</span><span class="p">,</span>
+                                              <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;camera&#39;</span><span class="p">)</span>
+                    <span class="n">obs</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">polylines</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="p">[</span><span class="n">noodle</span><span class="p">],</span> <span class="kc">False</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config</span><span class="p">[</span><span class="s2">&quot;vis_full_frame&quot;</span><span class="p">]:</span>
+                        <span class="c1"># Black out the sides for visualization</span>
+                        <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="n">h_</span><span class="p">,</span> <span class="n">w_</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.65</span> <span class="o">*</span> <span class="n">h</span><span class="p">,</span> <span class="mf">0.65</span> <span class="o">*</span> <span class="n">w</span><span class="p">)</span>
+                        <span class="n">hs</span><span class="p">,</span> <span class="n">ws</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="n">h</span> <span class="o">-</span> <span class="n">h_</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">int</span><span class="p">((</span><span class="n">w</span> <span class="o">-</span> <span class="n">w_</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
+                        <span class="n">obs</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="n">hs</span><span class="p">:</span><span class="o">-</span><span class="n">hs</span><span class="p">,</span> <span class="n">ws</span><span class="p">:</span><span class="o">-</span><span class="n">ws</span><span class="p">],</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
+
+                    <span class="n">obs_render</span> <span class="o">=</span> <span class="n">fit_img_to_ax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="n">ax_name</span><span class="p">],</span>
+                                               <span class="n">obs</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+                <span class="k">elif</span> <span class="n">obs_name</span> <span class="ow">in</span> <span class="n">event_cameras</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">event_cam_param</span> <span class="o">=</span> <span class="n">event_cameras</span><span class="p">[</span><span class="n">obs_name</span><span class="p">]</span><span class="o">.</span><span class="n">camera_param</span>
+                    <span class="n">frame_obs</span> <span class="o">=</span> <span class="n">events2frame</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">event_cam_param</span><span class="o">.</span><span class="n">get_height</span><span class="p">(),</span>
+                                             <span class="n">event_cam_param</span><span class="o">.</span><span class="n">get_width</span><span class="p">())</span>
+                    <span class="n">sensor</span> <span class="o">=</span> <span class="n">event_cameras</span><span class="p">[</span><span class="n">obs_name</span><span class="p">]</span>
+                    <span class="n">frame_obs</span> <span class="o">=</span> <span class="n">plot_roi</span><span class="p">(</span><span class="n">frame_obs</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+                                         <span class="n">sensor</span><span class="o">.</span><span class="n">camera_param</span><span class="o">.</span><span class="n">get_roi</span><span class="p">())</span>
+                    <span class="n">noodle</span> <span class="o">=</span> <span class="n">curvature2noodle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">curvature</span><span class="p">,</span>
+                                              <span class="n">sensor</span><span class="o">.</span><span class="n">camera_param</span><span class="p">,</span>
+                                              <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;camera&#39;</span><span class="p">)</span>
+                    <span class="n">frame_obs</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">polylines</span><span class="p">(</span><span class="n">frame_obs</span><span class="p">,</span> <span class="p">[</span><span class="n">noodle</span><span class="p">],</span> <span class="kc">False</span><span class="p">,</span>
+                                              <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="n">obs_render</span> <span class="o">=</span> <span class="n">fit_img_to_ax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="n">ax_name</span><span class="p">],</span>
+                                               <span class="n">frame_obs</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+                <span class="k">elif</span> <span class="n">obs_name</span> <span class="ow">in</span> <span class="n">lidars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">Pointcloud</span><span class="p">):</span>
+                        <span class="n">obs_render</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="n">ax_name</span><span class="p">]</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+                        <span class="n">obs</span> <span class="o">=</span> <span class="n">obs</span><span class="p">[::</span><span class="mi">10</span><span class="p">]</span>  <span class="c1"># sub-sample the pointcloud for vis</span>
+
+                        <span class="n">ax</span><span class="p">,</span> <span class="n">scat</span> <span class="o">=</span> <span class="n">plot_pointcloud</span><span class="p">(</span>
+                            <span class="n">obs</span><span class="p">,</span>
+                            <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                            <span class="n">color_by</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span>
+                            <span class="n">max_dist</span><span class="o">=</span><span class="mf">20.</span><span class="p">,</span>
+                            <span class="n">car_dims</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">width</span><span class="p">),</span>
+                            <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;nipy_spectral&quot;</span><span class="p">)</span>
+
+                        <span class="c1"># Plot the noodle</span>
+                        <span class="n">noodle</span> <span class="o">=</span> <span class="n">curvature2noodle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">curvature</span><span class="p">,</span>
+                                                  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lidar&#39;</span><span class="p">)</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">noodle</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">noodle</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;-r&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+                    <span class="k">else</span><span class="p">:</span>  <span class="c1"># dense image</span>
+                        <span class="n">obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="o">-</span><span class="n">obs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># shift</span>
+                        <span class="n">obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                                             <span class="mi">0</span><span class="p">)</span>  <span class="c1"># stack</span>
+                        <span class="n">obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">obs</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>  <span class="c1"># norm</span>
+                        <span class="n">obs</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">applyColorMap</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLORMAP_JET</span><span class="p">)</span>  <span class="c1"># color</span>
+                        <span class="n">obs_render</span> <span class="o">=</span> <span class="n">fit_img_to_ax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">,</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="n">ax_name</span><span class="p">],</span> <span class="n">obs</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unrecognized observation </span><span class="si">{</span><span class="n">obs_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">agent</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">obs_name</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_axes</span><span class="p">[</span><span class="n">ax_name</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span>
+                                              <span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+                                              <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                                              <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">obs_render</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_artists</span><span class="p">[</span><span class="s1">&#39;im:</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ax_name</span><span class="p">)]</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">obs_render</span><span class="p">)</span>
+
+        <span class="c1"># Convert to image</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">fig2img</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fig</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">img</span></div>
+
+    <span class="k">def</span> <span class="nf">_update_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                      <span class="n">patch</span><span class="p">:</span> <span class="n">PolygonPatch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_artists</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_artists</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_artists</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">patch</span>
+
+    <span class="k">def</span> <span class="nf">_get_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">get_master_timestamp</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ref_agent</span><span class="o">.</span><span class="n">segment_index</span><span class="p">,</span> <span class="n">frame_index</span><span class="p">,</span> <span class="n">check_end</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ref_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Car</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Agent as a reference to compute poses of objects (e.g., cars, road)</span>
+<span class="sd">            in visualization. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="o">.</span><span class="n">agents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<span class="k">def</span> <span class="nf">curvature2noodle</span><span class="p">(</span><span class="n">curvature</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                     <span class="n">camera_param</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CameraParams</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">mode</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;camera&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Construct a curly line (noodle) based on the curvature for visualizing</span>
+<span class="sd">    steering control command.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        curvature (float): Curvature (steering angle control command).</span>
+<span class="sd">        camera_param (vista.entities.sensors.camera_utils.CameraParams): Camera parameters; used if</span>
+<span class="sd">        mode is set to camera.</span>
+<span class="sd">        mode (str): Sensor type for the visualization.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: A curly line that visualizes the given curvature.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        NotImplementedError: Unrecognized mode to draw the noodle.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lookaheads</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>  <span class="c1"># meters</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;camera&#39;</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">camera_param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="n">K</span> <span class="o">=</span> <span class="n">camera_param</span><span class="o">.</span><span class="n">get_K</span><span class="p">()</span>
+        <span class="n">normal</span> <span class="o">=</span> <span class="n">camera_param</span><span class="o">.</span><span class="n">get_ground_plane</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">normal</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">camera_param</span><span class="o">.</span><span class="n">get_ground_plane</span><span class="p">()[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="n">normal</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">radius</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">curvature</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+
+        <span class="n">z_vals</span> <span class="o">=</span> <span class="n">lookaheads</span>
+        <span class="n">y_vals</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">C</span> <span class="o">*</span> <span class="n">z_vals</span><span class="p">)</span> <span class="o">/</span> <span class="n">B</span>
+        <span class="n">x_sq_r</span> <span class="o">=</span> <span class="n">radius</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">z_vals</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="p">(</span><span class="n">y_vals</span> <span class="o">-</span> <span class="n">d</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">x_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x_sq_r</span><span class="p">[</span><span class="n">x_sq_r</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">radius</span><span class="p">)</span>
+        <span class="n">y_vals</span> <span class="o">=</span> <span class="n">y_vals</span><span class="p">[</span><span class="n">x_sq_r</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">z_vals</span> <span class="o">=</span> <span class="n">z_vals</span><span class="p">[</span><span class="n">x_sq_r</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">radius</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x_vals</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="n">world_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">y_vals</span><span class="p">,</span> <span class="n">z_vals</span><span class="p">))</span>
+
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">camera_param</span><span class="o">.</span><span class="n">get_yaw</span><span class="p">()</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                      <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)]])</span>
+        <span class="n">tf_world_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">world_coords</span><span class="p">)</span>
+        <span class="n">img_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">tf_world_coords</span><span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">img_coords</span><span class="p">,</span> <span class="n">img_coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1e-10</span><span class="p">)</span>
+
+        <span class="n">valid_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">norm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span>
+                                 <span class="n">norm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">camera_param</span><span class="o">.</span><span class="n">get_width</span><span class="p">())</span>
+        <span class="n">valid_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">valid_inds</span><span class="p">,</span> <span class="n">norm</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">valid_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">valid_inds</span><span class="p">,</span>
+                                 <span class="n">norm</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">camera_param</span><span class="o">.</span><span class="n">get_height</span><span class="p">())</span>
+
+        <span class="n">noodle</span> <span class="o">=</span> <span class="n">norm</span><span class="p">[:</span><span class="mi">2</span><span class="p">,</span> <span class="n">valid_inds</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;lidar&#39;</span><span class="p">:</span>
+        <span class="n">turning_r</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">curvature</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>
+        <span class="n">shifts</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">turning_r</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">lookaheads</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">turning_r</span><span class="p">))</span>
+        <span class="n">shifts</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">turning_r</span><span class="p">)</span> <span class="o">*</span> <span class="n">shifts</span>
+        <span class="n">noodle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">lookaheads</span><span class="p">,</span> <span class="n">shifts</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s1">&#39;Unrecognized mode </span><span class="si">{}</span><span class="s1"> in drawing noodle&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mode</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">noodle</span>
+
+
+<span class="k">def</span> <span class="nf">plot_roi</span><span class="p">(</span><span class="n">img</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+             <span class="n">roi</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+             <span class="n">color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+             <span class="n">thickness</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Plot a bounding box that shows ROI on an image.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        img (np.ndarray): An image to be plotted.</span>
+<span class="sd">        roi (List[int]): Region of interest.</span>
+<span class="sd">        color (List[int]): Color of the bounding box.</span>
+<span class="sd">        thickness (int): Thickness of the bounding box.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: An image with the ROI bounding box.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">j2</span><span class="p">)</span> <span class="o">=</span> <span class="n">roi</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">rectangle</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">(</span><span class="n">j1</span><span class="p">,</span> <span class="n">i1</span><span class="p">),</span> <span class="p">(</span><span class="n">j2</span><span class="p">,</span> <span class="n">i2</span><span class="p">),</span> <span class="n">color</span><span class="p">,</span> <span class="n">thickness</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">img</span>
+
+
+<span class="k">def</span> <span class="nf">events2frame</span><span class="p">(</span><span class="n">events</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                 <span class="n">cam_h</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">cam_w</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">positive_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">],</span>
+                 <span class="n">negative_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">212</span><span class="p">,</span> <span class="mi">188</span><span class="p">,</span> <span class="mi">114</span><span class="p">],</span>
+                 <span class="n">mode</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Convert event data to frame representation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        events (List[np.ndarray]): A list with entries as a collection of positive and</span>
+<span class="sd">                                   negative events.</span>
+<span class="sd">        cam_h (int): Height of the frame representation.</span>
+<span class="sd">        cam_w (int): Width of the frame representation.</span>
+<span class="sd">        positive_color (List): Color of positive events.</span>
+<span class="sd">        negative_color (List): Color of negative events.</span>
+<span class="sd">        mode (int): Mode for colorization.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Frame representation of event data.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">cam_h</span><span class="p">,</span> <span class="n">cam_w</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">color</span><span class="p">,</span> <span class="n">p_events</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">positive_color</span><span class="p">,</span> <span class="n">negative_color</span><span class="p">],</span> <span class="n">events</span><span class="p">):</span>
+            <span class="n">uv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">p_events</span><span class="p">)[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">frame</span><span class="p">[</span><span class="n">uv</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">uv</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">color</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">frame_acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">cam_h</span><span class="p">,</span> <span class="n">cam_w</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">polarity</span><span class="p">,</span> <span class="n">p_events</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">events</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">sub_p_events</span> <span class="ow">in</span> <span class="n">p_events</span><span class="p">:</span>
+                <span class="n">uv</span> <span class="o">=</span> <span class="n">sub_p_events</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">frame_acc</span><span class="p">[</span><span class="n">uv</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">uv</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">polarity</span>
+
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">cam_h</span><span class="p">,</span> <span class="n">cam_w</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="n">frame</span><span class="p">[</span><span class="n">frame_acc</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">positive_color</span>
+        <span class="n">frame</span><span class="p">[</span><span class="n">frame_acc</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">negative_color</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">frame_abs_acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">cam_h</span><span class="p">,</span> <span class="n">cam_w</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">cam_h</span><span class="p">,</span> <span class="n">cam_w</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">polarity</span><span class="p">,</span> <span class="n">p_events</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">events</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">sub_p_events</span> <span class="ow">in</span> <span class="n">p_events</span><span class="p">:</span>
+                <span class="n">uv</span> <span class="o">=</span> <span class="n">sub_p_events</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">add_c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="n">positive_color</span> <span class="k">if</span> <span class="n">polarity</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">negative_color</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span>
+                                                                        <span class="o">...</span><span class="p">]</span>
+                <span class="n">cnt</span> <span class="o">=</span> <span class="n">frame_abs_acc</span><span class="p">[</span><span class="n">uv</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">uv</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]][:,</span> <span class="kc">None</span><span class="p">]</span>
+                <span class="n">frame</span><span class="p">[</span><span class="n">uv</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">uv</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">uv</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">uv</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">*</span> <span class="n">cnt</span> <span class="o">+</span>
+                                             <span class="n">add_c</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">cnt</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">frame_abs_acc</span><span class="p">[</span><span class="n">uv</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">uv</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">cnt</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Unknown mode </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mode</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">frame</span>
+
+
+<span class="k">def</span> <span class="nf">plot_pointcloud</span><span class="p">(</span><span class="n">pcd</span><span class="p">,</span>
+                    <span class="n">color_by</span><span class="o">=</span><span class="s2">&quot;z&quot;</span><span class="p">,</span>
+                    <span class="n">max_dist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;nipy_spectral&quot;</span><span class="p">,</span>
+                    <span class="n">car_dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">scat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">s</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Convert pointcloud to an image for visualization. &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">max_dist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pcd</span> <span class="o">=</span> <span class="n">pcd</span><span class="p">[</span><span class="n">pcd</span><span class="o">.</span><span class="n">dist</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">max_dist</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">))]</span>
+
+    <span class="k">if</span> <span class="n">color_by</span> <span class="o">==</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">pcd</span><span class="o">.</span><span class="n">z</span>
+        <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.5</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">color_by</span> <span class="o">==</span> <span class="s2">&quot;intensity&quot;</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">pcd</span><span class="o">.</span><span class="n">intensity</span><span class="p">)</span>
+        <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.7</span><span class="p">,</span> <span class="mf">4.3</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unsupported color </span><span class="si">{</span><span class="n">color_by</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Plot points</span>
+    <span class="k">if</span> <span class="n">scat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">scat</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">pcd</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                          <span class="n">pcd</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+                          <span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span>
+                          <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span>
+                          <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span>
+                          <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
+                          <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">scat</span><span class="o">.</span><span class="n">set_offsets</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">pcd</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">pcd</span><span class="o">.</span><span class="n">y</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">scat</span><span class="o">.</span><span class="n">set_clim</span><span class="p">(</span><span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">)</span>
+        <span class="n">scat</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="p">,</span> <span class="n">cmap</span><span class="p">)(</span><span class="n">scat</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">c</span><span class="p">)))</span>
+
+    <span class="c1"># Plot car</span>
+    <span class="k">if</span> <span class="n">car_dims</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">l_car</span><span class="p">,</span> <span class="n">w_car</span> <span class="o">=</span> <span class="n">car_dims</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span>
+            <span class="n">patches</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">(</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">l_car</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">w_car</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="n">l_car</span><span class="p">,</span>
+                <span class="n">w_car</span><span class="p">,</span>
+                <span class="n">fill</span><span class="o">=</span><span class="kc">True</span>  <span class="c1"># remove background</span>
+            <span class="p">))</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="n">max_dist</span><span class="p">,</span> <span class="n">max_dist</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="n">max_dist</span><span class="p">,</span> <span class="n">max_dist</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">scat</span>
+
+
+<span class="k">def</span> <span class="nf">fig2img</span><span class="p">(</span><span class="n">fig</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Convert a matplotlib figure to a numpy array. &quot;&quot;&quot;</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="n">buf</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">buffer_rgba</span><span class="p">()</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">buf</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">img</span>
+
+
+<span class="k">def</span> <span class="nf">fit_img_to_ax</span><span class="p">(</span><span class="n">fig</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span>
+                  <span class="n">img</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Fit an image to an axis in a matplotlib figure. &quot;&quot;&quot;</span>
+    <span class="n">bbox</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_window_extent</span><span class="p">()</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">dpi_scale_trans</span><span class="o">.</span><span class="n">inverted</span><span class="p">())</span>
+    <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">bbox</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">bbox</span><span class="o">.</span><span class="n">height</span>
+    <span class="n">img_h</span><span class="p">,</span> <span class="n">img_w</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">new_img_w</span> <span class="o">=</span> <span class="n">img_h</span> <span class="o">*</span> <span class="n">w</span> <span class="o">/</span> <span class="n">h</span>
+    <span class="n">new_img_h</span> <span class="o">=</span> <span class="n">img_w</span> <span class="o">*</span> <span class="n">h</span> <span class="o">/</span> <span class="n">w</span>
+    <span class="n">d_img_w</span> <span class="o">=</span> <span class="n">new_img_w</span> <span class="o">-</span> <span class="n">img_w</span>
+    <span class="n">d_img_h</span> <span class="o">=</span> <span class="n">new_img_h</span> <span class="o">-</span> <span class="n">img_h</span>
+    <span class="k">if</span> <span class="n">d_img_h</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">pad_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">d_img_h</span> <span class="o">//</span> <span class="mi">2</span><span class="p">),</span> <span class="n">img_w</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="n">new_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">pad_img</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">pad_img</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">d_img_w</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">pad_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">img_h</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">d_img_w</span> <span class="o">//</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="n">new_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">pad_img</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">pad_img</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Something weird happened.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">new_img</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,274 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Imitation Learning &mdash; VISTA Simulator  documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Guided Policy Learning" href="guided_policy_learning.html" />
+    <link rel="prev" title="Advanced Usage" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> VISTA Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction/index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Advanced Usage</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Imitation Learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guided_policy_learning.html">Guided Policy Learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reinforcement_learning.html">Reinforcement Learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing_with_augmented_reality.html">Testing With Augmented Reality</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../interface_to_public_dataset/index.html">Interface To Public Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_documentation/index.html">API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/index.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../acknowledgement/index.html">Acknowledgement</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">VISTA Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Advanced Usage</a> &raquo;</li>
+        
+      <li>Imitation Learning</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/advanced_usage/imitation_learning.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="imitation-learning">
+<span id="advanced-usage-imitation-learning"></span><h1>Imitation Learning<a class="headerlink" href="#imitation-learning" title="Permalink to this headline">¶</a></h1>
+<p>Here we show an example of using Vista to learn a neural-network-based policy with the most basic
+variant of imitation learning (i.e., behavior cloning). Since sensor data synthesis is not required
+in imitation learning, we show how to extract passive dataset upon which the data-driven simulation
+is built with Vista’s interface. The high-level idea is to construct a world containing an ego-agent
+in Vista and run the agent with human control command in the passive dataset without doing sensor
+data synthesis to avoid redundant computation.</p>
+<p>First, we initialize Vista world with an agent attached with a sensor (we use RGB camera here for
+illustration). Note that it’s often useful to implement an additional sampler since balanced training
+data distribution is often of great significance for supervised learning.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">_world</span> <span class="o">=</span> <span class="n">vista</span><span class="o">.</span><span class="n">World</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace_paths</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace_config</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_agent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="o">.</span><span class="n">spawn_agent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">car_config</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_camera</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agent</span><span class="o">.</span><span class="n">spawn_camera</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">camera_config</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span> <span class="o">=</span> <span class="n">RejectionSampler</span><span class="p">()</span> <span class="c1"># data sampler</span>
+</pre></div>
+</div>
+<p>Then, we can implement a data generator that runs indefinitely to produce a training dataset.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Data generator from simulation</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">_snippet_i</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="c1"># reset simulator</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agent</span><span class="o">.</span><span class="n">done</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_snippet_i</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">snippet_size</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_world</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_snippet_i</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># step simulator</span>
+    <span class="n">sensor_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camera</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agent</span><span class="o">.</span><span class="n">observations</span><span class="p">[</span><span class="n">sensor_name</span><span class="p">]</span> <span class="c1"># associate action t with observation t-1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_agent</span><span class="o">.</span><span class="n">step_dataset</span><span class="p">(</span><span class="n">step_dynamics</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># rejection sampling</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_agent</span><span class="o">.</span><span class="n">human_curvature</span>
+    <span class="n">sampling_prob</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span><span class="o">.</span><span class="n">get_sampling_probability</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">sampling_prob</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_snippet_i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">continue</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span><span class="o">.</span><span class="n">add_to_history</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+    <span class="c1"># preprocess and produce data-label pairs</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">transform_rgb</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camera</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">)</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_agent</span><span class="o">.</span><span class="n">human_curvature</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_snippet_i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">yield</span> <span class="p">{</span><span class="s1">&#39;camera&#39;</span><span class="p">:</span> <span class="n">img</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="n">label</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>The implementation is straightforward. After resetting the simulator (the pointer to the passive
+dataset is randomly initialized), we step through the dataset to get the next frame by calling
+<code class="docutils literal notranslate"><span class="pre">agent.step_dataset</span></code>, followed by a rejection sampling to balance the steering control command
+(<code class="docutils literal notranslate"><span class="pre">human_curvature</span></code>). Finally, preprocess sensor data and construct data-label pairs for training.
+Remark that we usally set a maximal snippet size to make sure that each snippet, a series of data
+from the start (a reset) to the termination (another reset), won’t last indefinitely and training
+data can have sufficient diversity. Also, the data stream (<code class="docutils literal notranslate"><span class="pre">yield</span> <span class="pre">{'camera':</span> <span class="pre">img,</span> <span class="pre">'target':</span> <span class="pre">label}</span></code>
+) is connected to a buffer with shuffling to ensure i.i.d. data distribution that is required for
+stochastic gradient descent. For more details, please check <code class="docutils literal notranslate"><span class="pre">examples/advanced_usage/il_rgb_dataset.py</span></code>.</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="guided_policy_learning.html" class="btn btn-neutral float-right" title="Guided Policy Learning" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Advanced Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, VISTA
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
